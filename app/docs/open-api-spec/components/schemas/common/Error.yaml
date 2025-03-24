@@ -1,0 +1,38 @@
+type: object
+properties:
+  error:
+    type: object
+    nullable: false
+    properties:
+      code:
+        type: integer
+        nullable: false
+        description: HTTP response code
+      status:
+        type: string
+        nullable: false
+        enum:
+          [
+            BAD_REQUEST,
+            ALREADY_EXISTS,
+            INTERNAL,
+            INVALID_ARGUMENT,
+            PRECONDITION_FAILED,
+            NOT_FOUND,
+          ]
+        description: Result of the API error that provides insight into what type of error occurred
+      description:
+        type: string
+        nullable: false
+        description: Human readable description of what occurred that triggered the error
+      errorId:
+        type: string
+        nullable: false
+        description: Unique identifier of the error. Used for tracking
+    required:
+      - code
+      - status
+      - description
+      - errorId
+required:
+  - error

@@ -1,0 +1,15 @@
+type: object
+additionalProperties: false
+properties:
+  specificData:
+    $ref: '../../_index.yaml#/schemas/UserSpecificData'
+example:
+  specificData:
+    firstName: Alice
+    lastName: Bob
+    nickname: AB123
+    password: "$2a$10$supersecurepasswordhashed"
+    email: alice@bob.com
+    country: UK
+required:
+  - specificData

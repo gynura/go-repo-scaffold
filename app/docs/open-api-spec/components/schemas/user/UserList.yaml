@@ -1,0 +1,11 @@
+allOf:
+  - type: object
+    properties:
+      items:
+        type: array
+        description: collection of users
+        items:
+          $ref: '../../_index.yaml#/schemas/DescribeUser'
+    required:
+      - items
+  - $ref: '../../_index.yaml#/schemas/Pagination'

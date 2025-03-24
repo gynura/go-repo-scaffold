@@ -1,0 +1,8 @@
+name: limit
+required: false
+in: query
+description: Number of items to return when listing a resource
+schema:
+  type: integer
+  default: 100
+  example: 20

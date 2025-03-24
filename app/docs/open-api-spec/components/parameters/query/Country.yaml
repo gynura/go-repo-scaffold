@@ -1,0 +1,7 @@
+name: country
+required: false
+in: query
+description: Country of the resource
+schema:
+  type: string
+example: UK

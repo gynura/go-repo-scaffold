@@ -1,0 +1,20 @@
+type: object
+additionalProperties: false
+description: Pagination details for the query result
+properties:
+  limit:
+    type: integer
+    description: The number of items per page in the collection
+    example: 10
+  offset:
+    type: integer
+    description: The starting point (index) of the collection
+    example: 0
+  hasMoreItems:
+    type: boolean
+    description: Indicates if there are additional pages of data available
+    example: true
+required:
+  - limit
+  - offset
+  - hasMoreItems

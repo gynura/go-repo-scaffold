@@ -1,0 +1,8 @@
+name: offset
+required: false
+in: query
+description: Number of resources to skip before starting to return results.
+schema:
+  type: integer
+  default: 0
+  example: 2

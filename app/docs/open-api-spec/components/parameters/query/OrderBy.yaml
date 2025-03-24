@@ -1,0 +1,14 @@
+name: orderBy
+required: false
+in: query
+description: |
+  Specifies the sorting field for the results. The available options are:
+  * `createdAt` – Sort by the resource's creation date.
+  * `lastUpdate` – Sort by the resource's last update date.
+  
+  Defaults to `createdAt`.
+schema:
+  type: string
+  enum: [ createdAt, lastUpdate ]
+  default: createdAt
+  example: lastUpdate

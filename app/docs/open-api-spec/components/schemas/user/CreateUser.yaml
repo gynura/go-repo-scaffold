@@ -1,0 +1,20 @@
+type: object
+additionalProperties: false
+properties:
+  metaInformation:
+    id:
+      $ref: '../../_index.yaml#/schemas/Id'
+  specificData:
+      $ref: '../../_index.yaml#/schemas/UserSpecificData'
+example:
+  metaInformation:
+    id: "12345abcde67890"
+  specificData:
+    firstName: Alice
+    lastName: Bob
+    nickname: AB123
+    password: "$2a$10$supersecurepasswordhashed"
+    email: alice@bob.com
+    country: UK
+required:
+  - specificData

@@ -1,0 +1,11 @@
+description: Resource was not found.
+content:
+  application/json:
+    schema:
+      $ref: '../_index.yaml#/schemas/Error'
+    example:
+      error:
+        code: 404
+        status: NOT_FOUND
+        description: User not found
+        errorId: 32652c72f6f2

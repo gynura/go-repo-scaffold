@@ -1,0 +1,11 @@
+description: The request contains invalid input parameters.
+content:
+  application/json:
+    schema:
+      $ref: '../_index.yaml#/schemas/Error'
+    example:
+      error:
+        code: 400
+        status: INVALID_ARGUMENT
+        description: Invalid email format
+        errorId: 32652c72f6f2

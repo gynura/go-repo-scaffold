@@ -1,0 +1,41 @@
+allOf:
+  type: object
+  nullable: false
+  additionalProperties: false
+  properties:
+    firstName:
+      type: string
+      nullable: false
+      maxLength: 256
+      description: First name of the user
+    lastName:
+      type: string
+      nullable: false
+      maxLength: 256
+      description: Last name of the user
+    nickname:
+      type: string
+      nullable: false
+      maxLength: 64
+      description: Nickname of the user
+    password:
+      type: string
+      nullable: false
+      description: Hashed password of the user
+    email:
+      type: string
+      nullable: false
+      format: email
+      description: Email address of the user
+    country:
+      type: string
+      nullable: false
+      maxLength: 2
+      description: Country of the user
+  required:
+    - firstName
+    - lastName
+    - nickname
+    - password
+    - email
+    - country

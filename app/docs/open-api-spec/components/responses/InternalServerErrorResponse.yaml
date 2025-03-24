@@ -1,0 +1,11 @@
+description: Internal server error.
+content:
+  application/json:
+    schema:
+      $ref: '../_index.yaml#/schemas/Error'
+    example:
+      error:
+        code: 500
+        status: INTERNAL
+        description: Internal server error. Please contact support.
+        errorId: 32652c72f6f2

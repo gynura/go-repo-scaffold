@@ -1,0 +1,439 @@
+openapi: 3.0.0
+info:
+  title: user microservice API spec
+  description: user microservice API spec
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: Local
+tags:
+  - name: User
+    description: user resources management functionalities
+paths:
+  /:
+    post:
+      operationId: user.users.create
+      tags:
+        - User
+      summary: Creates a user
+      description: Creates a new user
+      requestBody:
+        description: User resource to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: Created user resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescribeUser'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    get:
+      operationId: user.users.list
+      tags:
+        - User
+      summary: Lists users
+      description: Lists all the users
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/OrderDirection'
+        - $ref: '#/components/parameters/Country'
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  '/{userId}':
+    get:
+      operationId: user.users.describe
+      tags:
+        - User
+      summary: Describes a user
+      description: Describes the specified user in the path
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User resource details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescribeUser'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    put:
+      operationId: user.users.edit
+      tags:
+        - User
+      summary: Updates a signer administrator
+      description: Updates the specified signer administrator user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        description: Information to update the signer administrator user. Missing or empty fields will delete that information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: Administrator user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescribeUser'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    delete:
+      operationId: user.users.remove
+      tags:
+        - User
+      summary: Removes a user resource
+      description: Deletes the specified user in the path
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Deleted user resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescribeUser'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+components:
+  schemas:
+    CreateUser:
+      type: object
+      additionalProperties: false
+      properties:
+        metaInformation:
+          id:
+            $ref: '#/components/schemas/Id'
+        specificData:
+          $ref: '#/components/schemas/UserSpecificData'
+      example:
+        metaInformation:
+          id: 12345abcde67890
+        specificData:
+          firstName: Alice
+          lastName: Bob
+          nickname: AB123
+          password: $2a$10$supersecurepasswordhashed
+          email: alice@bob.com
+          country: UK
+      required:
+        - specificData
+    UserList:
+      allOf:
+        - type: object
+          properties:
+            items:
+              type: array
+              description: collection of users
+              items:
+                $ref: '#/components/schemas/DescribeUser'
+          required:
+            - items
+        - $ref: '#/components/schemas/Pagination'
+    DescribeUser:
+      type: object
+      additionalProperties: false
+      properties:
+        metaInformation:
+          $ref: '#/components/schemas/MetaInformation'
+        specificData:
+          $ref: '#/components/schemas/UserSpecificData'
+      example:
+        metaInformation:
+          id: 12345abcde67890
+          createdAt: '2024-07-15T07:25:55.32Z'
+          updatedAt: '2024-07-15T07:25:55.32Z'
+        specificData:
+          firstName: Alice
+          lastName: Bob
+          nickname: AB123
+          password: $2a$10$supersecurepasswordhashed
+          email: alice@bob.com
+          country: UK
+      required:
+        - meta
+        - spec
+    UpdateUser:
+      type: object
+      additionalProperties: false
+      properties:
+        specificData:
+          $ref: '#/components/schemas/UserSpecificData'
+      example:
+        specificData:
+          firstName: Alice
+          lastName: Bob
+          nickname: AB123
+          password: $2a$10$supersecurepasswordhashed
+          email: alice@bob.com
+          country: UK
+      required:
+        - specificData
+    UserSpecificData:
+      allOf:
+        type: object
+        nullable: false
+        additionalProperties: false
+        properties:
+          firstName:
+            type: string
+            nullable: false
+            maxLength: 256
+            description: First name of the user
+          lastName:
+            type: string
+            nullable: false
+            maxLength: 256
+            description: Last name of the user
+          nickname:
+            type: string
+            nullable: false
+            maxLength: 64
+            description: Nickname of the user
+          password:
+            type: string
+            nullable: false
+            description: Hashed password of the user
+          email:
+            type: string
+            nullable: false
+            format: email
+            description: Email address of the user
+          country:
+            type: string
+            nullable: false
+            maxLength: 2
+            description: Country of the user
+        required:
+          - firstName
+          - lastName
+          - nickname
+          - password
+          - email
+          - country
+    Pagination:
+      type: object
+      additionalProperties: false
+      description: Pagination details for the query result
+      properties:
+        limit:
+          type: integer
+          description: The number of items per page in the collection
+          example: 10
+        offset:
+          type: integer
+          description: The starting point (index) of the collection
+          example: 0
+        hasMoreItems:
+          type: boolean
+          description: Indicates if there are additional pages of data available
+          example: true
+      required:
+        - limit
+        - offset
+        - hasMoreItems
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          nullable: false
+          properties:
+            code:
+              type: integer
+              nullable: false
+              description: HTTP response code
+            status:
+              type: string
+              nullable: false
+              enum:
+                - BAD_REQUEST
+                - ALREADY_EXISTS
+                - INTERNAL
+                - INVALID_ARGUMENT
+                - PRECONDITION_FAILED
+                - NOT_FOUND
+              description: Result of the API error that provides insight into what type of error occurred
+            description:
+              type: string
+              nullable: false
+              description: Human readable description of what occurred that triggered the error
+            errorId:
+              type: string
+              nullable: false
+              description: Unique identifier of the error. Used for tracking
+          required:
+            - code
+            - status
+            - description
+            - errorId
+      required:
+        - error
+    MetaInformation:
+      type: object
+      nullable: false
+      description: |
+        Metainformation that is shared across all the app's resources
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        createdAt:
+          type: string
+          format: date-time
+          nullable: false
+          description: Timestamp when the user was created
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: false
+          description: Timestamp when the user was last updated
+      required:
+        - id
+        - createdAt
+        - updatedAt
+    Id:
+      allOf:
+        type: string
+        maxLength: 64
+        nullable: false
+        description: |
+          Unique identifier of the resource inside the app. If not informed when creating a resource, 
+          the app will create a UUID
+  responses:
+    BadRequestResponse:
+      description: The request contains invalid input parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 400
+              status: INVALID_ARGUMENT
+              description: Invalid email format
+              errorId: 32652c72f6f2
+    InternalServerErrorResponse:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 500
+              status: INTERNAL
+              description: Internal server error. Please contact support.
+              errorId: 32652c72f6f2
+    NotFoundResponse:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 404
+              status: NOT_FOUND
+              description: User not found
+              errorId: 32652c72f6f2
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      description: Identifier of the user resource
+      required: true
+      schema:
+        type: string
+      example: 26ef0140-c436-4838-a271-32652c72f6f2
+    Country:
+      name: country
+      required: false
+      in: query
+      description: Country of the resource
+      schema:
+        type: string
+      example: UK
+    Limit:
+      name: limit
+      required: false
+      in: query
+      description: Number of items to return when listing a resource
+      schema:
+        type: integer
+        default: 100
+        example: 20
+    Offset:
+      name: offset
+      required: false
+      in: query
+      description: Number of resources to skip before starting to return results.
+      schema:
+        type: integer
+        default: 0
+        example: 2
+    OrderBy:
+      name: orderBy
+      required: false
+      in: query
+      description: |
+        Specifies the sorting field for the results. The available options are:
+        * `createdAt` – Sort by the resource's creation date.
+        * `lastUpdate` – Sort by the resource's last update date.
+
+        Defaults to `createdAt`.
+      schema:
+        type: string
+        enum:
+          - createdAt
+          - lastUpdate
+        default: createdAt
+        example: lastUpdate
+    OrderDirection:
+      name: orderDirection
+      in: query
+      required: false
+      description: |
+        Defines the order direction of the listed resources:
+        * `asc` - Ascending order.
+        * `desc` - Descending order.
+
+        Defaults to `desc`.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+        example: desc

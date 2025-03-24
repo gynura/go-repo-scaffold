@@ -1,0 +1,47 @@
+post:
+  operationId: user.users.create
+  tags:
+    - User
+  summary: Creates a user
+  description: Creates a new user
+  requestBody:
+    description: User resource to create
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/_index.yaml#/schemas/CreateUser'
+  responses:
+    '201':
+      description: Created user resource
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/_index.yaml#/schemas/DescribeUser'
+    '400':
+      $ref: '../../components/_index.yaml#/responses/BadRequestResponse'
+    '500':
+      $ref: '../../components/_index.yaml#/responses/InternalServerErrorResponse'
+
+get:
+  operationId: user.users.list
+  tags:
+    - User
+  summary: Lists users
+  description: Lists all the users
+  parameters:
+    - $ref: '../../components/_index.yaml#/parameters/Limit'
+    - $ref: '../../components/_index.yaml#/parameters/Offset'
+    - $ref: '../../components/_index.yaml#/parameters/OrderBy'
+    - $ref: '../../components/_index.yaml#/parameters/OrderDirection'
+    - $ref: '../../components/_index.yaml#/parameters/Country'
+  responses:
+    '200':
+      description: List of users
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/_index.yaml#/schemas/UserList'
+    '400':
+      $ref: '../../components/_index.yaml#/responses/BadRequestResponse'
+    '500':
+      $ref: '../../components/_index.yaml#/responses/InternalServerErrorResponse'

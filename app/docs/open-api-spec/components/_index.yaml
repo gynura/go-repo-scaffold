@@ -1,0 +1,47 @@
+schemas:
+## User
+  CreateUser:
+    $ref: ./schemas/user/CreateUser.yaml
+  UserList:
+    $ref: ./schemas/user/UserList.yaml
+  DescribeUser:
+    $ref: ./schemas/user/DescribeUser.yaml
+  UpdateUser:
+    $ref: ./schemas/user/UpdateUser.yaml
+  UserSpecificData:
+    $ref: ./schemas/user/UserSpecificData.yaml
+
+## Common
+  Pagination:
+    $ref: ./schemas/common/Pagination.yaml
+  Error:
+    $ref: ./schemas/common/Error.yaml
+  MetaInformation:
+    $ref: ./schemas/common/MetaInformation.yaml
+  Id:
+    $ref: ./schemas/common/Id.yaml
+
+responses:
+  BadRequestResponse:
+    $ref: ./responses/BadRequestResponse.yaml
+  InternalServerErrorResponse:
+    $ref: ./responses/InternalServerErrorResponse.yaml
+  NotFoundResponse:
+    $ref: ./responses/NotFoundResponse.yaml
+
+parameters:
+## Path
+  UserId:
+    $ref: ./parameters/path/UserId.yaml
+
+## Query
+  Country:
+    $ref: ./parameters/query/Country.yaml
+  Limit:
+    $ref: ./parameters/query/Limit.yaml
+  Offset:
+    $ref: ./parameters/query/Offset.yaml
+  OrderBy:
+    $ref: ./parameters/query/OrderBy.yaml
+  OrderDirection:
+    $ref: ./parameters/query/OrderDirection.yaml

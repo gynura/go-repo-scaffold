@@ -1,0 +1,7 @@
+name: userId
+in: path
+description: Identifier of the user resource
+required: true
+schema:
+  type: string
+example: 26ef0140-c436-4838-a271-32652c72f6f2

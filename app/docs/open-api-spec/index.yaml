@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info:
+  title: user microservice API spec
+  description: user microservice API spec
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local
+tags:
+  - name: User
+    description: user resources management functionalities
+
+paths:
+  $ref: ./paths/_index.yaml
+components:
+  $ref: ./components/_index.yaml
