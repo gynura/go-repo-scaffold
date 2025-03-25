@@ -83,19 +83,19 @@ paths:
       operationId: user.users.edit
       tags:
         - User
-      summary: Updates a signer administrator
-      description: Updates the specified signer administrator user
+      summary: Updates a user
+      description: Updates the specified user in the path
       parameters:
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        description: Information to update the signer administrator user. Missing or empty fields will delete that information
+        description: Information to update the user. Missing fields delete the already stored information.
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateUser'
       responses:
         '200':
-          description: Administrator user details
+          description: User information
           content:
             application/json:
               schema:
@@ -133,14 +133,17 @@ components:
       type: object
       additionalProperties: false
       properties:
-        metaInformation:
-          id:
-            $ref: '#/components/schemas/Id'
+        id:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: |
+            Unique identifier of the resource inside the app. If not informed when creating a resource, 
+            the app will create a UUID
         specificData:
           $ref: '#/components/schemas/UserSpecificData'
       example:
-        metaInformation:
-          id: 12345abcde67890
+        id: 12345abcde67890
         specificData:
           firstName: Alice
           lastName: Bob
@@ -183,8 +186,8 @@ components:
           email: alice@bob.com
           country: UK
       required:
-        - meta
-        - spec
+        - metaInformation
+        - specificData
     UpdateUser:
       type: object
       additionalProperties: false
@@ -202,47 +205,46 @@ components:
       required:
         - specificData
     UserSpecificData:
-      allOf:
-        type: object
-        nullable: false
-        additionalProperties: false
-        properties:
-          firstName:
-            type: string
-            nullable: false
-            maxLength: 256
-            description: First name of the user
-          lastName:
-            type: string
-            nullable: false
-            maxLength: 256
-            description: Last name of the user
-          nickname:
-            type: string
-            nullable: false
-            maxLength: 64
-            description: Nickname of the user
-          password:
-            type: string
-            nullable: false
-            description: Hashed password of the user
-          email:
-            type: string
-            nullable: false
-            format: email
-            description: Email address of the user
-          country:
-            type: string
-            nullable: false
-            maxLength: 2
-            description: Country of the user
-        required:
-          - firstName
-          - lastName
-          - nickname
-          - password
-          - email
-          - country
+      type: object
+      nullable: false
+      additionalProperties: false
+      properties:
+        firstName:
+          type: string
+          nullable: false
+          maxLength: 256
+          description: First name of the user
+        lastName:
+          type: string
+          nullable: false
+          maxLength: 256
+          description: Last name of the user
+        nickname:
+          type: string
+          nullable: false
+          maxLength: 64
+          description: Nickname of the user
+        password:
+          type: string
+          nullable: false
+          description: Hashed password of the user
+        email:
+          type: string
+          nullable: false
+          format: email
+          description: Email address of the user
+        country:
+          type: string
+          nullable: false
+          maxLength: 2
+          description: Country of the user
+      required:
+        - firstName
+        - lastName
+        - nickname
+        - password
+        - email
+        - country
     Pagination:
       type: object
       additionalProperties: false
@@ -308,7 +310,10 @@ components:
         Metainformation that is shared across all the app's resources
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          type: string
+          maxLength: 64
+          nullable: false
+          description: 'Unique identifier of the resource inside the app. If not informed when creating a resource, the app will create a UUID'
         createdAt:
           type: string
           format: date-time
@@ -323,14 +328,6 @@ components:
         - id
         - createdAt
         - updatedAt
-    Id:
-      allOf:
-        type: string
-        maxLength: 64
-        nullable: false
-        description: |
-          Unique identifier of the resource inside the app. If not informed when creating a resource, 
-          the app will create a UUID
   responses:
     BadRequestResponse:
       description: The request contains invalid input parameters.

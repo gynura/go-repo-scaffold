@@ -4,7 +4,10 @@ description: |
   Metainformation that is shared across all the app's resources
 properties:
   id:
-    $ref: '../../_index.yaml#/schemas/Id'
+    type: string
+    maxLength: 64
+    nullable: false
+    description: Unique identifier of the resource inside the app. If not informed when creating a resource, the app will create a UUID
   createdAt:
     type: string
     format: date-time

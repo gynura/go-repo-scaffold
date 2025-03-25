@@ -18,8 +18,6 @@ schemas:
     $ref: ./schemas/common/Error.yaml
   MetaInformation:
     $ref: ./schemas/common/MetaInformation.yaml
-  Id:
-    $ref: ./schemas/common/Id.yaml
 
 responses:
   BadRequestResponse:

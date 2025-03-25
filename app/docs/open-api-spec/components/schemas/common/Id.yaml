@@ -1,7 +1,0 @@
-allOf:
-    type: string
-    maxLength: 64
-    nullable: false
-    description: |
-      Unique identifier of the resource inside the app. If not informed when creating a resource, 
-      the app will create a UUID

@@ -1,14 +1,17 @@
 type: object
 additionalProperties: false
 properties:
-  metaInformation:
-    id:
-      $ref: '../../_index.yaml#/schemas/Id'
+  id:
+    type: string
+    maxLength: 64
+    nullable: true
+    description: |
+      Unique identifier of the resource inside the app. If not informed when creating a resource, 
+      the app will create a UUID
   specificData:
       $ref: '../../_index.yaml#/schemas/UserSpecificData'
 example:
-  metaInformation:
-    id: "12345abcde67890"
+  id: "12345abcde67890"
   specificData:
     firstName: Alice
     lastName: Bob

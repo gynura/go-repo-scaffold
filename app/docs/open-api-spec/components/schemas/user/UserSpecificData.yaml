@@ -1,4 +1,3 @@
-allOf:
   type: object
   nullable: false
   additionalProperties: false

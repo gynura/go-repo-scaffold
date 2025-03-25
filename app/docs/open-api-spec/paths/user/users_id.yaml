@@ -24,19 +24,19 @@ put:
   operationId: user.users.edit
   tags:
     - User
-  summary: Updates a signer administrator
-  description: Updates the specified signer administrator user
+  summary: Updates a user
+  description: Updates the specified user in the path
   parameters:
     - $ref: '../../components/_index.yaml#/parameters/UserId'
   requestBody:
-    description: Information to update the signer administrator user. Missing or empty fields will delete that information
+    description: Information to update the user. Missing fields delete the already stored information.
     content:
       application/json:
         schema:
           $ref: '../../components/_index.yaml#/schemas/UpdateUser'
   responses:
     '200':
-      description: Administrator user details
+      description: User information
       content:
         application/json:
           schema:

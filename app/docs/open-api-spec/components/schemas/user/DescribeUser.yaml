@@ -18,5 +18,5 @@ example:
     email: alice@bob.com
     country: UK
 required:
-  - meta
-  - spec
+  - metaInformation
+  - specificData
