@@ -19,36 +19,38 @@ const (
 
 // UserServiceError represents an internal structured error type
 type UserServiceError struct {
-	category   ErrCategory // type of the error
-	message    string      // its human-readable message
-	wrappedErr error       // wrapped error, can be nil
-	errorID    string      // traceable error identifier
+	category    ErrCategory // type of the error
+	internalMsg string      // internal error message
+	exposedMsg  string      // its human-readable message, the one that the API will typically expose
+	innerErr    error       // wrapped error, can be nil
+	errorID     string      // traceable error identifier
+	// TODO: extend with a catalogueID that could be exposed as part of the doc
 }
 
 // Error implements the error interface.
 func (e UserServiceError) Error() string {
-	if e.wrappedErr != nil {
-		return fmt.Sprintf("[%s] (%s) %s: %v", e.category, e.errorID, e.message, e.wrappedErr)
+	if e.innerErr != nil {
+		return fmt.Sprintf("[%s] (%s) %s: %v", e.category, e.errorID, e.exposedMsg, e.innerErr)
 	}
-	return fmt.Sprintf("[%s] (%s) %s", e.category, e.errorID, e.message)
+	return fmt.Sprintf("[%s] (%s) %s", e.category, e.errorID, e.exposedMsg)
 }
 
 // Unwrap allows unwrapping the inner error using errors.Is() and errors.As().
 func (e UserServiceError) Unwrap() error {
-	return e.wrappedErr
+	return e.innerErr
 }
 
-// Wrap defines a DSL to wrap another error within the user service error
-func (e UserServiceError) Wrap(originalErr error) UserServiceError {
+// FromError defines a DSL to wrap another error within the user service error
+func (e UserServiceError) FromError(originalErr error) UserServiceError {
 	userServiceError := e
-	userServiceError.wrappedErr = originalErr
+	userServiceError.innerErr = originalErr
 	return userServiceError
 }
 
-// WithMessage defines a DSL to add a formatted message to a user service error
+// WithMessage defines a DSL to add a formatted message that will be exposed to a user service error
 func (e UserServiceError) WithMessage(format string, args ...interface{}) UserServiceError {
 	userServiceError := e
-	userServiceError.message = fmt.Sprintf(format, args...)
+	userServiceError.exposedMsg = fmt.Sprintf(format, args...)
 	return userServiceError
 }
 
@@ -56,12 +58,12 @@ func (e UserServiceError) Category() ErrCategory {
 	return e.category
 }
 
-func (e UserServiceError) Message() string {
-	return e.message
+func (e UserServiceError) ExposedMessage() string {
+	return e.exposedMsg
 }
 
-func (e UserServiceError) WrappedError() error {
-	return e.wrappedErr
+func (e UserServiceError) InnerError() error {
+	return e.innerErr
 }
 
 func (e UserServiceError) ErrorID() string {
@@ -85,30 +87,34 @@ func AsUserServiceError(err error) (*UserServiceError, bool) {
 
 // Constructors for all supported types of UserServiceErrors. This way we enforce a sort of DSL.
 
-func NewInternalError() *UserServiceError {
+func NewInternalError(format string, args ...interface{}) *UserServiceError {
 	return &UserServiceError{
-		category: Internal,
-		errorID:  uuid.New().String(),
+		category:    Internal,
+		errorID:     uuid.New().String(),
+		internalMsg: fmt.Sprintf(format, args...),
 	}
 }
 
-func NewNotFoundError() *UserServiceError {
+func NewNotFoundError(format string, args ...interface{}) *UserServiceError {
 	return &UserServiceError{
-		category: NotFound,
-		errorID:  uuid.New().String(),
+		category:    NotFound,
+		errorID:     uuid.New().String(),
+		internalMsg: fmt.Sprintf(format, args...),
 	}
 }
 
-func NewAlreadyExistsError() *UserServiceError {
+func NewAlreadyExistsError(format string, args ...interface{}) *UserServiceError {
 	return &UserServiceError{
-		category: AlreadyExists,
-		errorID:  uuid.New().String(),
+		category:    AlreadyExists,
+		errorID:     uuid.New().String(),
+		internalMsg: fmt.Sprintf(format, args...),
 	}
 }
 
-func NewInvalidArgumentError() *UserServiceError {
+func NewInvalidArgumentError(format string, args ...interface{}) *UserServiceError {
 	return &UserServiceError{
-		category: InvalidArgument,
-		errorID:  uuid.New().String(),
+		category:    InvalidArgument,
+		errorID:     uuid.New().String(),
+		internalMsg: fmt.Sprintf(format, args...),
 	}
 }

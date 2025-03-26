@@ -1,0 +1,87 @@
+<mapping id="users-microservice.user">
+    <statement id="insert">
+        INSERT INTO sv_users (
+        id,
+        first_name,
+        last_name,
+        nickname,
+        password,
+        email,
+        created_at,
+        updated_at,
+        country
+        ) VALUES (
+        :id,
+        :first_name,
+        :last_name,
+        :nickname,
+        :password,
+        :email,
+        :created_at,
+        :updated_at,
+        :country
+        )
+    </statement>
+    <statement id="list">
+        SELECT
+        id,
+        password,
+        nickname,
+        last_name,
+        first_name,
+        created_at,
+        updated_at,
+        country,
+        email
+        FROM
+        sv_users
+        WHERE
+        {{ if .FilterGroup }}
+        {{ range $counter, $filter := .FilterGroup.Filters }}
+        AND {{$filter.ToSQLStmt}}
+        {{end}}
+        {{ end }}
+        {{ if .Order }}
+        ORDER BY {{ .Order.By }} {{ if eq .Order.Direction "asc" }}ASC{{ else }}DESC{{end}}
+        {{ if .Pagination}}
+        LIMIT {{.Pagination.Limit}} OFFSET {{.Pagination.Offset}}
+        {{ end }}
+        {{ end }}
+    </statement>
+    <statement id="getById">
+        SELECT
+        id,
+        password,
+        nickname,
+        last_name,
+        first_name,
+        created_at,
+        updated_at,
+        country,
+        email
+        FROM
+        sv_users
+        WHERE
+        id=:id
+    </statement>
+    <statement id="update">
+        UPDATE
+        sv_users
+        SET
+        last_name=:last_name,
+        first_name=:first_name,
+        country=:country,
+        nickname=:nickname,
+        password=:password,
+        updated_at=:updated_at
+        email=:email
+        WHERE
+        id=:id
+    </statement>
+    <statement id="delete">
+        DELETE FROM
+        sv_users
+        WHERE
+        id=:id
+    </statement>
+</mapping>

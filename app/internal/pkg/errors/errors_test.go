@@ -10,9 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAppError_Error(t *testing.T) {
+func TestUserServiceError_Error(t *testing.T) {
 	err := errors.New("wrapped error")
-	appErr := userserviceerrors.NewInternalError().WithMessage("Something went wrong").Wrap(err)
+	appErr := userserviceerrors.NewInternalError("foo").
+		FromError(err).
+		WithMessage("Something went wrong")
 
 	expectedPrefix := fmt.Sprintf("[%s] (%s)", userserviceerrors.Internal, appErr.ErrorID())
 	assert.Contains(t, appErr.Error(), expectedPrefix)
@@ -20,35 +22,35 @@ func TestAppError_Error(t *testing.T) {
 	assert.Contains(t, appErr.Error(), "wrapped error")
 }
 
-func TestAppError_Unwrap(t *testing.T) {
+func TestUserServiceError_Unwrap(t *testing.T) {
 	originalErr := errors.New("original error")
-	appErr := userserviceerrors.NewNotFoundError().Wrap(originalErr)
+	appErr := userserviceerrors.NewNotFoundError("foo").FromError(originalErr)
 
 	assert.Equal(t, originalErr, appErr.Unwrap())
 }
 
-func TestAppError_Wrap(t *testing.T) {
+func TestUserServiceError_Wrap(t *testing.T) {
 	originalErr := errors.New("database connection failed")
-	appErr := userserviceerrors.NewInternalError().Wrap(originalErr)
+	appErr := userserviceerrors.NewInternalError("foo").FromError(originalErr)
 
 	assert.Equal(t, originalErr, appErr.Unwrap())
 	assert.Contains(t, appErr.Error(), "database connection failed")
 }
 
-func TestAppError_Message(t *testing.T) {
-	appErr := userserviceerrors.NewInvalidArgumentError().WithMessage("Field %s is required", "username")
+func TestUserServiceError_Message(t *testing.T) {
+	appErr := userserviceerrors.NewInvalidArgumentError("foo").WithMessage("Field %s is required", "username")
 
 	assert.Contains(t, appErr.Error(), "Field username is required")
 }
 
-func TestIsAppError(t *testing.T) {
-	appErr := userserviceerrors.NewAlreadyExistsError()
+func TestIsUserServiceError(t *testing.T) {
+	appErr := userserviceerrors.NewAlreadyExistsError("foo")
 	assert.True(t, userserviceerrors.IsUserServiceError(appErr))
 	assert.False(t, userserviceerrors.IsUserServiceError(errors.New("some random error")))
 }
 
-func TestAsAppError(t *testing.T) {
-	appErr := userserviceerrors.NewNotFoundError()
+func TestAsUserServiceError(t *testing.T) {
+	appErr := userserviceerrors.NewNotFoundError("foo")
 	genericErr := errors.New("some error")
 
 	extractedErr, ok := userserviceerrors.AsUserServiceError(appErr)
@@ -60,11 +62,11 @@ func TestAsAppError(t *testing.T) {
 	assert.Nil(t, extractedErr)
 }
 
-func TestNewErrorFactories(t *testing.T) {
-	internalErr := userserviceerrors.NewInternalError()
-	notFoundErr := userserviceerrors.NewNotFoundError()
-	alreadyExistsErr := userserviceerrors.NewAlreadyExistsError()
-	invalidArgErr := userserviceerrors.NewInvalidArgumentError()
+func TestUserServiceError_ErrorCategoriesConstructors(t *testing.T) {
+	internalErr := userserviceerrors.NewInternalError("foo")
+	notFoundErr := userserviceerrors.NewNotFoundError("foo")
+	alreadyExistsErr := userserviceerrors.NewAlreadyExistsError("foo")
+	invalidArgErr := userserviceerrors.NewInvalidArgumentError("foo")
 
 	assert.Equal(t, userserviceerrors.Internal, internalErr.Category())
 	assert.Equal(t, userserviceerrors.NotFound, notFoundErr.Category())
@@ -77,8 +79,8 @@ func TestNewErrorFactories(t *testing.T) {
 	assert.NotEmpty(t, invalidArgErr.ErrorID())
 }
 
-func TestAppError_ErrorID(t *testing.T) {
-	appErr := userserviceerrors.NewInternalError()
+func TestUserServiceError_ErrorID(t *testing.T) {
+	appErr := userserviceerrors.NewInternalError("foo")
 	parsedUUID, err := uuid.Parse(appErr.ErrorID())
 
 	assert.NoError(t, err)
