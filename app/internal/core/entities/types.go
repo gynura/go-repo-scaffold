@@ -17,8 +17,8 @@ const (
 	OrderByCreatedAt OrderBy = "createdAt"
 )
 
-// ID defines the standard format for unique identifiers
-type ID struct {
+// ResourceID defines the standard format for unique identifiers for resources
+type ResourceID struct {
 	ID string `json:"id"`
 }
 
@@ -29,7 +29,7 @@ type Timestamps struct {
 
 // MetaInformation defines the meta information of all app's resources
 type MetaInformation struct {
-	ID         `json:",inline"`
+	ResourceID `json:",inline"`
 	Timestamps `json:",inline"`
 }
 

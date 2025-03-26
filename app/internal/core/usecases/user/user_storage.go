@@ -1,12 +1,15 @@
 package user
 
-import "userservice/internal/core/entities"
+import (
+	"userservice/internal/core/entities"
+	"userservice/internal/pkg/persistence"
+)
 
 // Storage defines the port to retrieve User data from the plugged storage
 type Storage interface {
-	Add(id entities.ID) (*User, error)
-	Get(id entities.ID) (*User, error)
-	Remove(id entities.ID) error
+	Add(id entities.ResourceID) (*User, error)
+	Get(id entities.ResourceID) (*User, error)
+	Remove(id entities.ResourceID) error
 	List(filters UserFilters) (*UsersList, error)
 }
 
