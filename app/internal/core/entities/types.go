@@ -23,8 +23,8 @@ type ResourceID struct {
 }
 
 type Timestamps struct {
-	CreatedAt time.UserServiceTime `json:"createdAt"` // date time of when the resource was created
-	UpdatedAt time.UserServiceTime `json:"updatedAt"` // date time of when the resource was last edited using the app
+	CreatedAt time.ServiceTime `json:"createdAt"` // date time of when the resource was created
+	UpdatedAt time.ServiceTime `json:"updatedAt"` // date time of when the resource was last edited using the app
 }
 
 // MetaInformation defines the meta information of all app's resources

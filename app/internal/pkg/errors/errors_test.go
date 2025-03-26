@@ -53,11 +53,11 @@ func TestAsUserServiceError(t *testing.T) {
 	appErr := userserviceerrors.NewNotFoundError("foo")
 	genericErr := errors.New("some error")
 
-	extractedErr, ok := userserviceerrors.AsUserServiceError(appErr)
+	extractedErr, ok := userserviceerrors.AsServiceError(appErr)
 	assert.True(t, ok)
 	assert.Equal(t, appErr, extractedErr)
 
-	extractedErr, ok = userserviceerrors.AsUserServiceError(genericErr)
+	extractedErr, ok = userserviceerrors.AsServiceError(genericErr)
 	assert.False(t, ok)
 	assert.Nil(t, extractedErr)
 }
