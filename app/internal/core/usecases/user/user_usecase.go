@@ -79,13 +79,16 @@ func (d DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (
 	}
 	err = user.SetPassword(input.Password)
 	if err != nil {
+		// TODO: log errors
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
 	}
 
 	storedUser, err := d.storage.Add(ctx, user)
 	if err != nil {
+		// TODO: log errors
 		return nil, errors.NewInternalError("failed to store user").FromError(err)
 	}
+	// TODO: publish a CreatedUser event here
 
 	return &CreateUserOutput{
 		User: *storedUser,
