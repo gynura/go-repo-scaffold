@@ -1,15 +1,16 @@
 package user
 
 import (
+	"context"
 	"userservice/internal/core/entities"
 	"userservice/internal/pkg/persistence"
 )
 
 // Storage defines the port to retrieve User data from the plugged storage
 type Storage interface {
-	Add(id entities.ResourceID) (*User, error)
-	Get(id entities.ResourceID) (*User, error)
-	Remove(id entities.ResourceID) error
+	Add(ctx context.Context, data User) (*User, error)
+	Get(ctx context.Context, id entities.ResourceID) (*User, error)
+	Remove(ctx context.Context, id entities.ResourceID) error
 	List(filters UserFilters) (*UsersList, error)
 }
 

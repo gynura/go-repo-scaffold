@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"golang.org/x/crypto/bcrypt"
 	"userservice/internal/core/entities"
 )
@@ -24,13 +23,14 @@ type SpecificData struct {
 	FirstName string
 	LastName  string
 	Email     string   `valid:"email"`
-	password  password // private field to prevent direct assignment
+	password  password // private field to prevent direct assignment from outside the package
 	Country   string
 	Nickname  string
 }
 
 // SetPassword encapsulates the password assignment so it is not possible to set a password that is not hashed
-func (u *User) SetPassword(ctx context.Context, rawPassword string) error {
+// from outside this package where the User resource logic ends up becoming more diffuse
+func (u *User) SetPassword(rawPassword string) error {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -47,13 +47,13 @@ type UsersList struct {
 
 // CreateUserInput represents the required input data to create a new User.
 type CreateUserInput struct {
-	entities.ResourceID
-	FirstName string
-	LastName  string
-	Email     string `valid:"email"`
-	Password  string
-	Country   string
-	Nickname  string
+	entities.ResourceID `valid:"optional"`
+	FirstName           string `valid:"required"`
+	LastName            string `valid:"required"`
+	Email               string `valid:"required,email"`
+	Password            string `valid:"required"`
+	Country             string `valid:"required"`
+	Nickname            string `valid:"required"`
 }
 
 // CreateUserOutput represents the response structure after successfully creating a User.
@@ -63,7 +63,7 @@ type CreateUserOutput struct {
 
 // GetUserInput represents the input parameters to fetch a specific User by ID.
 type GetUserInput struct {
-	entities.ResourceID
+	entities.ResourceID `valid:"required"`
 }
 
 // GetUserOutput represents the response structure containing the requested User data.
@@ -73,13 +73,13 @@ type GetUserOutput struct {
 
 // EditUserInput represents the input parameters required to update an existing User.
 type EditUserInput struct {
-	entities.ResourceID
-	FirstName string
-	LastName  string
-	Email     string `valid:"email"`
-	Password  string
-	Country   string
-	Nickname  string
+	entities.ResourceID `valid:"required"`
+	FirstName           string `valid:"required"`
+	LastName            string `valid:"required"`
+	Email               string `valid:"required,email"`
+	Password            string `valid:"required"`
+	Country             string `valid:"required"`
+	Nickname            string `valid:"required"`
 }
 
 // EditUserOutput represents the response structure after updating a User.
@@ -89,7 +89,7 @@ type EditUserOutput struct {
 
 // DeleteUserInput represents the input parameters required to delete a User.
 type DeleteUserInput struct {
-	entities.ResourceID
+	entities.ResourceID `valid:"required"`
 }
 
 // DeleteUserOutput represents the response structure after deleting a User.
@@ -99,11 +99,10 @@ type DeleteUserOutput struct {
 
 // ListUsersInput represents the input parameters to retrieve a paginated list of Users.
 type ListUsersInput struct {
-	entities.ResourceID
-	PageLimit      int `valid:"natural"`
-	PageOffset     int `valid:"natural"`
-	OrderBy        string
-	OrderDirection string
+	PageLimit      int    `valid:"optional,natural"`
+	PageOffset     int    `valid:"optional,natural"`
+	OrderBy        string `valid:"optional"`
+	OrderDirection string `valid:"optional"`
 }
 
 // ListUsersOutput represents the response structure containing a paginated list of Users.

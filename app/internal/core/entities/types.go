@@ -1,7 +1,7 @@
 // Package entities defines custom data types ready to be used across the app
 package entities
 
-import "time"
+import "userservice/internal/pkg/commons/time"
 
 // OrderBy defines the resource's attribute used to order when listing
 type OrderBy string
@@ -23,8 +23,8 @@ type ResourceID struct {
 }
 
 type Timestamps struct {
-	CreatedAt time.Time `json:"createdAt"` // date time of when the resource was created
-	UpdatedAt time.Time `json:"updatedAt"` // date time of when the resource was last edited using the app
+	CreatedAt time.UserServiceTime `json:"createdAt"` // date time of when the resource was created
+	UpdatedAt time.UserServiceTime `json:"updatedAt"` // date time of when the resource was last edited using the app
 }
 
 // MetaInformation defines the meta information of all app's resources
