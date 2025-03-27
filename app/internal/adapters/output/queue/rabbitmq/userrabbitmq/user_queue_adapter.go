@@ -15,12 +15,17 @@ type UserQueueAdapter struct {
 
 // ProvideUserQueueAdapterOptions defines the options to configure a UserUserQueueAdapter
 type ProvideUserQueueAdapterOptions struct {
-	Publisher rabbitmq.Publisher
+	Publisher *rabbitmq.Publisher
 }
 
 // ProvideUserQueueAdapter creates a UserUserQueueAdapter with the given options
 func ProvideUserQueueAdapter(options ProvideUserQueueAdapterOptions) (*UserQueueAdapter, error) {
-	return &UserQueueAdapter{}, nil
+	if options.Publisher != nil {
+		return nil, errors.NewInternalError("no publisher provided")
+	}
+	return &UserQueueAdapter{
+		publisher: *options.Publisher,
+	}, nil
 }
 
 var _ user.Queue = new(UserQueueAdapter)

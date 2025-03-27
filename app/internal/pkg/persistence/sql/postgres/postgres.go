@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx/reflectx"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	_ "github.com/jackc/pgx/v5/stdlib" // register postgresql driver
+	_ "github.com/jackc/pgx/v5/stdlib" // register userstorage driver
 	"github.com/jmoiron/sqlx"
 
 	sqlfw "userservice/internal/pkg/persistence/sql"

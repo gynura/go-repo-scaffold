@@ -1,4 +1,4 @@
-package userdb
+package userstorageinfra
 
 import (
 	"userservice/internal/pkg/persistence"

@@ -9,8 +9,8 @@ import (
 
 // Storage defines the port to retrieve User data from the plugged storage
 type Storage interface {
-	Add(ctx context.Context, data User) (*User, *errors.ServiceError)
-	Get(ctx context.Context, id entities.ResourceID) (*User, *errors.ServiceError)
+	Add(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError)
+	Get(ctx context.Context, id entities.ResourceID) (*entities.User, *errors.ServiceError)
 	Remove(ctx context.Context, id entities.ResourceID) *errors.ServiceError
 	List(filters StorageFilters) (*UsersList, *errors.ServiceError)
 }
@@ -22,7 +22,7 @@ type StorageFilters interface {
 	// OrderByUpdatedAt orders Users in storage by the date when it was last updated
 	OrderByUpdatedAt(direction persistence.OrderDirection) StorageFilters
 	// FilterByCountry filters Users by their country
-	FilterByCountry(userID string) StorageFilters
+	FilterByCountry(country string) StorageFilters
 	// Paged limits the maximum amount of items to limit parameter and starts the list where the offset parameter defines
 	Paged(limit int, offset int) StorageFilters
 }

@@ -69,7 +69,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	}
 
 	now := time.Now()
-	user := User{
+	user := entities.User{
 		MetaInformation: entities.MetaInformation{
 			ResourceID: entities.ResourceID{
 				ID: input.ID,
@@ -79,7 +79,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 				UpdatedAt: now,
 			},
 		},
-		SpecificData: SpecificData{
+		UserSpecificData: entities.UserSpecificData{
 			FirstName: input.FirstName,
 			LastName:  input.LastName,
 			Email:     input.Email,

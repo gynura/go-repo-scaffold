@@ -29,8 +29,8 @@ type Timestamps struct {
 
 // MetaInformation defines the meta information of all app's resources
 type MetaInformation struct {
-	ResourceID `json:",inline"`
-	Timestamps `json:",inline"`
+	ResourceID `json:",inline" valid:"required"`
+	Timestamps `json:",inline" valid:"required"`
 }
 
 // Pagination defines the pagination of all app's resources lists

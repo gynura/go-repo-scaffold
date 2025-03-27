@@ -1,4 +1,4 @@
-<mapping id="users-microservice.user">
+<mapping id="service.user">
     <statement id="insert">
         INSERT INTO sv_users (
         id,
@@ -83,5 +83,8 @@
         sv_users
         WHERE
         id=:id
+    </statement>
+    <statement id="exists">
+        SELECT 1 AS exists_result where EXISTS(SELECT 1 FROM sv_users WHERE id=:id)
     </statement>
 </mapping>
