@@ -3,7 +3,7 @@ package rabbitmq
 
 import (
 	"encoding/json"
-	"userservice/internal/core/entities"
+	"userservice/internal/core/events"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -23,7 +23,7 @@ func NewPublisher(conn *amqp.Connection) (*Publisher, error) {
 	return &Publisher{channel: ch}, nil
 }
 
-func (r *Publisher) Publish(event entities.ServiceEvent) error {
+func (r *Publisher) Publish(event events.ServiceEvent) error {
 	body, err := json.Marshal(event.Payload())
 	if err != nil {
 		return err

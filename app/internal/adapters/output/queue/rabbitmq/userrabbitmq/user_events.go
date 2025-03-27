@@ -2,23 +2,24 @@ package userrabbitmq
 
 import (
 	"userservice/internal/core/entities"
+	"userservice/internal/core/events"
 )
 
 const (
 	createdUserEventType = "user.created"
-	updatedUserEventType = "user.updated"
+	editedUserEventType  = "user.edited"
 	removedUserEventType = "user.removed"
 )
 
 // userEvent defines the base to create User resource related events
 type userEvent struct {
-	eventType entities.EventType
+	eventType events.EventType
 	userID    entities.ResourceID
 }
 
-var _ entities.ServiceEvent = new(userEvent)
+var _ events.ServiceEvent = new(userEvent)
 
-func (event userEvent) EventType() entities.EventType {
+func (event userEvent) EventType() events.EventType {
 	return event.eventType
 }
 

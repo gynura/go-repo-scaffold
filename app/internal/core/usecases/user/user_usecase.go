@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"userservice/internal/core/entities"
 	"userservice/internal/pkg/commons/time"
 	"userservice/internal/pkg/errors"
@@ -27,11 +29,14 @@ type UseCase interface {
 // DefaultUseCase defines the default implementation of the user.UseCase interface
 type DefaultUseCase struct {
 	storage Storage
+	logger  *slog.Logger
+	queue   Queue
 }
 
 // ProvideUseCaseOptions defines the options to configure a UserUseCase implementation
 type ProvideUseCaseOptions struct {
 	Storage Storage
+	Queue   Queue
 }
 
 // ProvideUseCase creates a UserUseCase with the given options.
@@ -39,14 +44,19 @@ func ProvideUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")
 	}
+	if options.Queue == nil {
+		return nil, errors.NewInvalidArgumentError("no queue provided")
+	}
 	return &DefaultUseCase{
 		storage: options.Storage,
+		queue:   options.Queue,
+		logger:  slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}, nil
 }
 
 var _ UseCase = new(DefaultUseCase)
 
-func (d DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error) {
+func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
 		return nil, errors.NewInvalidArgumentError("invalid input to create user").FromError(err).
@@ -83,34 +93,43 @@ func (d DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
 	}
 
-	storedUser, err := d.storage.Add(ctx, user)
-	if err != nil {
-		// TODO: log errors
+	storedUser, addErr := useCase.storage.Add(ctx, user)
+	if addErr != nil {
+		// TODO: better this error log
+		useCase.logger.Error(addErr.Error())
+		if addErr.IsAlreadyExistsError() {
+			return nil, errors.NewAlreadyExistsError("user %s already exists", user.ID).FromError(err).
+				WithMessage("user %s already exists", user.ID)
+		}
 		return nil, errors.NewInternalError("failed to store user").FromError(err)
 	}
-	// TODO: publish a CreatedUser event here
+
+	err = useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
+	if err != nil {
+		return nil, err
+	}
 
 	return &CreateUserOutput{
 		User: *storedUser,
 	}, nil
 }
 
-func (d DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, error) {
+func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (d DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, error) {
+func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (d DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, error) {
+func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (d DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, error) {
+func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, error) {
 	//TODO implement me
 	panic("implement me")
 }

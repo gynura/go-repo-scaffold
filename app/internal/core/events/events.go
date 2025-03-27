@@ -1,4 +1,7 @@
-package entities
+// Package events defines the structure and behavior of this service's events
+// It provides a standardized interface for event handling and enforces a controlled
+// catalogue of event types to maintain consistency
+package events
 
 // ServiceEvent defines how all events from this service should behave
 type ServiceEvent interface {

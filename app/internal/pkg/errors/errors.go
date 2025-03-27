@@ -17,6 +17,13 @@ const (
 	AlreadyExists   ErrCategory = "ALREADY_EXISTS"
 )
 
+// String defines a way to retrieve the string value of an error category.
+// Right now it might not look useful but if we end upt converting error categories to enums or whatever
+// we will have an entry point here to define their string values
+func (category ErrCategory) String() string {
+	return string(category)
+}
+
 // ServiceError represents an internal structured error type
 type ServiceError struct {
 	category    ErrCategory // type of the error
@@ -24,7 +31,7 @@ type ServiceError struct {
 	exposedMsg  string      // its human-readable message, the one that the API will typically expose
 	innerErr    error       // wrapped error, can be nil
 	errorID     string      // traceable error identifier
-	// TODO: extend with a catalogueID that could be exposed as part of the doc
+	// TODO: extend with a catalogueID that could be exposed as part of the service's doc
 }
 
 // Error implements the error interface.
@@ -41,17 +48,17 @@ func (e ServiceError) Unwrap() error {
 }
 
 // FromError defines a DSL to wrap another error within the user service error
-func (e ServiceError) FromError(originalErr error) ServiceError {
+func (e ServiceError) FromError(originalErr error) *ServiceError {
 	userServiceError := e
 	userServiceError.innerErr = originalErr
-	return userServiceError
+	return &userServiceError
 }
 
 // WithMessage defines a DSL to add a formatted message that will be exposed to a user service error
-func (e ServiceError) WithMessage(format string, args ...interface{}) ServiceError {
+func (e ServiceError) WithMessage(format string, args ...interface{}) *ServiceError {
 	userServiceError := e
 	userServiceError.exposedMsg = fmt.Sprintf(format, args...)
-	return userServiceError
+	return &userServiceError
 }
 
 func (e ServiceError) Category() ErrCategory {
@@ -117,4 +124,20 @@ func NewInvalidArgumentError(format string, args ...interface{}) *ServiceError {
 		errorID:     uuid.New().String(),
 		internalMsg: fmt.Sprintf(format, args...),
 	}
+}
+
+func (e ServiceError) IsInvalidArgumentError() bool {
+	return e.category == InvalidArgument
+}
+
+func (e ServiceError) IsNotFoundError() bool {
+	return e.category == NotFound
+}
+
+func (e ServiceError) IsAlreadyExistsError() bool {
+	return e.category == AlreadyExists
+}
+
+func (e ServiceError) IsInternalError() bool {
+	return e.category == Internal
 }
