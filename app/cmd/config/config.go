@@ -13,8 +13,8 @@ const (
 	configFileExtension = "yaml"
 )
 
-// StaticConfiguration defines the static configuration of the service
-type StaticConfiguration struct {
+// Config defines the static configuration of the service
+type Config struct {
 	// DbConfig defines the database connection needed for the service to start
 	DbConfig DBConfig `mapstructure:"database" valid:"required"`
 }
@@ -22,11 +22,11 @@ type StaticConfiguration struct {
 // DBConfig defines the database configuration
 type DBConfig struct {
 	// PostgreSQL database configuration
-	PostgreSQL *PostgreSQLInfo `mapstructure:"postgresql"`
+	PostgreSQL *PostgreSQL `mapstructure:"postgresql"`
 }
 
-// PostgreSQLInfo defines the connection configuration to a PostgresSQL DB
-type PostgreSQLInfo struct {
+// PostgreSQL defines the connection configuration to a PostgresSQL DB
+type PostgreSQL struct {
 	// Host of database system
 	Host string `mapstructure:"host" valid:"required~hosts is mandatory in SQL DB config"`
 	// Port of database system
@@ -55,16 +55,16 @@ type PostgresSQLClient struct {
 	MaxConnectionLifetime *int `mapstructure:"maxConnectionLifetime"`
 }
 
-func GetStaticConfiguration(path string) (*StaticConfiguration, error) {
+func ReadConfig(path string) (*Config, error) {
 	viper.SetConfigName(configFileName)
 	viper.SetConfigType(configFileExtension)
 	viper.AddConfigPath(path)
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, fmt.Errorf("error reading static config file placed in path [%s] [error:%w]", path, err)
+		return nil, fmt.Errorf("error reading config file placed in path [%s] [error:%w]", path, err)
 	}
 
-	var staticConfiguration StaticConfiguration
+	var staticConfiguration Config
 	err = viper.Unmarshal(&staticConfiguration)
 	if err != nil {
 		panic(err)

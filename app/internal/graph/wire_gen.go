@@ -31,7 +31,7 @@ func initializeHTTPAdapters(useCases *useCasesGraph) (*httpGraph, error) {
 		return nil, err
 	}
 	graphHttpGraph := &httpGraph{
-		HTTPInputAdapter: defaultAPIAdapter,
+		HTTPHandler: defaultAPIAdapter,
 	}
 	return graphHttpGraph, nil
 }
@@ -104,7 +104,7 @@ func initializeUseCases(repositories *storageGraph) (*useCasesGraph, error) {
 // http_injector.go:
 
 type httpGraph struct {
-	HTTPInputAdapter generatedhttpinfra.Handler
+	HTTPHandler generatedhttpinfra.Handler
 }
 
 var httpSet = wire.NewSet(wire.Struct(new(httpGraph), "*"), http.ProvideDefaultAPIAdapter, wire.Bind(new(generatedhttpinfra.Handler), new(*http.DefaultAPIAdapter)), wire.Struct(new(http.DefaultAPIAdapterOptions), "*"))

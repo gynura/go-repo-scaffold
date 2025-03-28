@@ -9,7 +9,7 @@ import (
 )
 
 type httpGraph struct {
-	HTTPInputAdapter generatedhttpinfra.Handler
+	HTTPHandler generatedhttpinfra.Handler
 }
 
 var httpSet = wire.NewSet(
