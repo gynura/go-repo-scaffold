@@ -30,27 +30,27 @@ type UseCase interface {
 type DefaultUseCase struct {
 	storage Storage
 	logger  *slog.Logger
-	queue   Queue
+	//queue   Queue
 }
 
 // ProvideUseCaseOptions defines the options to configure a UserUseCase implementation
 type ProvideUseCaseOptions struct {
 	Storage Storage
-	Queue   Queue
+	//Queue   Queue
 }
 
 // ProvideDefaultUseCase provides the default implementation of the User use case logic
-func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, *errors.ServiceError) {
+func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")
 	}
-	if options.Queue == nil {
-		return nil, errors.NewInvalidArgumentError("no queue provided")
-	}
+	//if options.Queue == nil {
+	//	return nil, errors.NewInvalidArgumentError("no queue provided")
+	//}
 	return &DefaultUseCase{
 		storage: options.Storage,
-		queue:   options.Queue,
-		logger:  slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+		//queue:   options.Queue,
+		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}, nil
 }
 
@@ -104,10 +104,11 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 		return nil, errors.NewInternalError("failed to store user").FromError(err)
 	}
 
-	queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
-	if queueErr != nil {
-		return nil, queueErr
-	}
+	// TODO: uncomment once rabbitmq is injected
+	//queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
+	//if queueErr != nil {
+	//	return nil, queueErr
+	//}
 
 	return &CreateUserOutput{
 		User: *storedUser,
