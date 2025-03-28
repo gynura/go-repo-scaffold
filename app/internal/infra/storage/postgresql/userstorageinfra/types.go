@@ -5,14 +5,14 @@ import "userservice/internal/core/entities"
 // UserDB is the data struct of the resource in the database
 type UserDB struct {
 	entities.ResourceID `storage:"id"`
-	FirstName           string `storage:"first_name"`
-	LastName            string `storage:"last_name"`
-	Email               string `storage:"email"`
-	Password            string `storage:"password"`
-	Country             string `storage:"country"`
-	Nickname            string `storage:"nickname"`
-	CreatedAt           string `storage:"created_at"`
-	UpdatedAt           string `storage:"updated_at"`
+	FirstName           string `storage:"first_name" valid:"required"`
+	LastName            string `storage:"last_name" valid:"required"`
+	Email               string `storage:"email" valid:"required, email"`
+	Password            string `storage:"password" valid:"required"`
+	Country             string `storage:"country" valid:"required"`
+	Nickname            string `storage:"nickname" valid:"required"`
+	CreatedAt           string `storage:"created_at" valid:"required"`
+	UpdatedAt           string `storage:"updated_at" valid:"required"`
 }
 
 // CreateInput is the data struct of the creation of a resource in the database

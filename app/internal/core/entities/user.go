@@ -21,14 +21,21 @@ type UserSpecificData struct {
 	Nickname  string   `valid:"required"`
 }
 
-// SetPassword encapsulates the password assignment so it is not possible to set a password that is not hashed
+// EncryptAndSetPassword encapsulates the password assignment so it is not possible to set a password that is not hashed
 // from outside this package where the User resource logic ends up becoming more diffuse
-func (u *User) SetPassword(rawPassword string) error {
+func (u *User) EncryptAndSetPassword(rawPassword string) error {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 	u.password = password(hashed)
+	return nil
+}
+
+// SetPassword sets the password without encryption.
+// Should just be used when retrieving users from storage
+func (u *User) SetPassword(pass string) error {
+	u.password = password(pass)
 	return nil
 }
 

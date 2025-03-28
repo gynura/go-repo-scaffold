@@ -87,7 +87,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 			Nickname:  input.Nickname,
 		},
 	}
-	err = user.SetPassword(input.Password)
+	err = user.EncryptAndSetPassword(input.Password)
 	if err != nil {
 		// TODO: log errors
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)

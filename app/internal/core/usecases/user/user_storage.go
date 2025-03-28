@@ -11,8 +11,9 @@ import (
 type Storage interface {
 	Add(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError)
 	Get(ctx context.Context, id entities.ResourceID) (*entities.User, *errors.ServiceError)
+	Edit(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError)
 	Remove(ctx context.Context, id entities.ResourceID) *errors.ServiceError
-	List(filters StorageFilters) (*UsersList, *errors.ServiceError)
+	List(ctx context.Context, filters StorageFilters) (*UsersList, *errors.ServiceError)
 }
 
 // StorageFilters defines filter options when listing Users

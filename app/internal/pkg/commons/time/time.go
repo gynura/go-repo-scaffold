@@ -3,6 +3,7 @@ package time
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -26,4 +27,13 @@ func (ct ServiceTime) String() string {
 // MarshalJSON defines the custom JSON serializer
 func (ct ServiceTime) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ct.String())
+}
+
+// FromString creates a ServiceTime from a string or an error if the format of the string is invalid
+func FromString(newTime string) (*ServiceTime, error) {
+	t, err := time.Parse(CustomTimeLayout, newTime)
+	if err != nil {
+		return nil, fmt.Errorf("invalid time format %s, expected YYYY-MM-DDTHH:MM:SS.SSZ", newTime)
+	}
+	return &ServiceTime{Time: t}, nil
 }

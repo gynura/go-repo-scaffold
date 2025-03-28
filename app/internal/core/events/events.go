@@ -11,7 +11,7 @@ type ServiceEvent interface {
 	Payload() interface{}
 }
 
-// EventType wraps string to enforce the definition of a catalogue of events and not passing random strings
+// EventType wraps string to enforce the definition of a catalogue of events and avoid passing random strings
 type EventType string
 
 func (e EventType) String() string {
