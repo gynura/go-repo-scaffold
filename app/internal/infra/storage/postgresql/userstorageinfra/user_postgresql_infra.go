@@ -16,6 +16,23 @@ const (
 	existsUserMapperID = "service.user.exists"
 )
 
+type StorageInfraOptions struct {
+	GenericStorage persistence.Storage
+}
+
+type StorageInfra struct {
+	genericStorage persistence.Storage
+}
+
+func ProvideStorageInfra(options StorageInfraOptions) (*StorageInfra, error) {
+	if options.GenericStorage == nil {
+		return nil, fmt.Errorf("mandatory 'GenericStorage' not provided")
+	}
+	return &StorageInfra{
+		genericStorage: options.GenericStorage,
+	}, nil
+}
+
 func (repository *StorageInfra) Add(ctx context.Context, db CreateInput) (*UserDB, error) {
 	err := repository.genericStorage.ExecuteStmt(ctx, addUserMapperID, db)
 	if err != nil {
@@ -87,21 +104,4 @@ func (repository *StorageInfra) Exists(ctx context.Context, id entities.Resource
 	}
 
 	return existsResult, nil
-}
-
-type StorageInfraOptions struct {
-	GenericStorage persistence.Storage
-}
-
-type StorageInfra struct {
-	genericStorage persistence.Storage
-}
-
-func ProvideStorageInfra(options StorageInfraOptions) (*StorageInfra, error) {
-	if options.GenericStorage == nil {
-		return nil, fmt.Errorf("mandatory 'GenericStorage' not provided")
-	}
-	return &StorageInfra{
-		genericStorage: options.GenericStorage,
-	}, nil
 }

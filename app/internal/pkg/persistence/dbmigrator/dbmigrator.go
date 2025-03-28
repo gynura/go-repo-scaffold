@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	dbSchemas         = "include/dbschemas"
+	dbSchemas         = "config/dbschemas"
 	migrationFileName = "db_migration_steps.yml"
 )
 

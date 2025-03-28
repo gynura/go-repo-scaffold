@@ -19,13 +19,13 @@ type StorageAdapter struct {
 	infra *userstorageinfra.StorageInfra
 }
 
-// RepositoryOptions configures a StorageAdapter
-type RepositoryOptions struct {
+// StorageAdapterOptions configures a StorageAdapter
+type StorageAdapterOptions struct {
 	Infra *userstorageinfra.StorageInfra
 }
 
-// NewRepository creates a StorageAdapter with the given options
-func NewRepository(options RepositoryOptions) (*StorageAdapter, error) {
+// ProvideStorageAdapter creates a StorageAdapter with the given options
+func ProvideStorageAdapter(options StorageAdapterOptions) (*StorageAdapter, error) {
 	return &StorageAdapter{
 		infra: options.Infra,
 	}, nil

@@ -1,9 +1,9 @@
-package app
+package internal
 
 import "embed"
 
-//go:embed include/dbschemas/*
+//go:embed config/dbschemas/*
 var DatabaseMigrations embed.FS
 
-//go:embed include/config/*
+//go:embed config/mappers/*
 var DatabaseMappers embed.FS

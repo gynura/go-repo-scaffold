@@ -6,7 +6,7 @@ CREATE TABLE sv_users
     nickname   VARCHAR(64)  NOT NULL UNIQUE,
     password   TEXT         NOT NULL,
     email      VARCHAR(256) NOT NULL UNIQUE,
-    country    VARCHAR(64),
+    country    VARCHAR(64)  NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL,
     updated_at TIMESTAMPTZ  NOT NULL
 );

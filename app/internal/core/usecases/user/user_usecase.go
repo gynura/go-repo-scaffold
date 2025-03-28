@@ -39,8 +39,8 @@ type ProvideUseCaseOptions struct {
 	Queue   Queue
 }
 
-// ProvideUseCase creates a UserUseCase with the given options.
-func ProvideUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, *errors.ServiceError) {
+// ProvideDefaultUseCase provides the default implementation of the User use case logic
+func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, *errors.ServiceError) {
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")
 	}
@@ -95,7 +95,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 
 	storedUser, addErr := useCase.storage.Add(ctx, user)
 	if addErr != nil {
-		// TODO: better this error log
+		// TODO: improve this error log
 		useCase.logger.Error(addErr.Error())
 		if addErr.IsAlreadyExistsError() {
 			return nil, errors.NewAlreadyExistsError("user %s already exists", user.ID).FromError(err).

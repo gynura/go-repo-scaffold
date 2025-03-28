@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const defaultMappersPath = "internal/include/config/mappers"
+const defaultMappersPath = "internal/config/config/mappers"
 
 // StatementConfig identifies a statement configuration
 type StatementConfig struct {

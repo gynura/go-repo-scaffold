@@ -8,13 +8,6 @@ import (
 	"userservice/internal/infra/http/generatedhttpinfra"
 )
 
-const (
-	defaultApplicationListLimit int = 30
-	maxListApplicationLimit     int = 100
-	defaultAdminUserListLimit   int = 30
-	maxListAdminUserLimit       int = 100
-)
-
 // DefaultAPIAdapter implements the API Handler interface used by the server
 type DefaultAPIAdapter struct {
 	userUseCase user.UseCase
@@ -25,7 +18,7 @@ type DefaultAPIAdapterOptions struct {
 	UserUseCase user.UseCase
 }
 
-// ProvideDefaultAPIAdapter creates a new DefaultAPIAdapter struct
+// ProvideDefaultAPIAdapter provides the default implementation of the REST API Handler
 func ProvideDefaultAPIAdapter(options DefaultAPIAdapterOptions) (*DefaultAPIAdapter, error) {
 	if options.UserUseCase == nil {
 		return nil, errors.New("userUseCase is required")
