@@ -16,7 +16,7 @@ func TestUserServiceError_Error(t *testing.T) {
 		FromError(err).
 		WithMessage("Something went wrong")
 
-	expectedPrefix := fmt.Sprintf("[%s] (%s)", userserviceerrors.Internal, appErr.ErrorID())
+	expectedPrefix := fmt.Sprintf("[%s] (%s)", userserviceerrors.ErrCategoryInternal, appErr.ErrorID())
 	assert.Contains(t, appErr.Error(), expectedPrefix)
 	assert.Contains(t, appErr.Error(), "Something went wrong")
 	assert.Contains(t, appErr.Error(), "wrapped error")
@@ -68,10 +68,10 @@ func TestUserServiceError_ErrorCategoriesConstructors(t *testing.T) {
 	alreadyExistsErr := userserviceerrors.NewAlreadyExistsError("foo")
 	invalidArgErr := userserviceerrors.NewInvalidArgumentError("foo")
 
-	assert.Equal(t, userserviceerrors.Internal, internalErr.Category())
-	assert.Equal(t, userserviceerrors.NotFound, notFoundErr.Category())
-	assert.Equal(t, userserviceerrors.AlreadyExists, alreadyExistsErr.Category())
-	assert.Equal(t, userserviceerrors.InvalidArgument, invalidArgErr.Category())
+	assert.Equal(t, userserviceerrors.ErrCategoryInternal, internalErr.Category())
+	assert.Equal(t, userserviceerrors.ErrCategoryNotFound, notFoundErr.Category())
+	assert.Equal(t, userserviceerrors.ErrCategoryAlreadyExists, alreadyExistsErr.Category())
+	assert.Equal(t, userserviceerrors.ErrCategoryInvalidArgument, invalidArgErr.Category())
 
 	assert.NotEmpty(t, internalErr.ErrorID())
 	assert.NotEmpty(t, notFoundErr.ErrorID())

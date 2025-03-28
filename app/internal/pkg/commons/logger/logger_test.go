@@ -50,7 +50,7 @@ func TestLogger_WithAttributes(t *testing.T) {
 	oldStdout := os.Stdout
 	r, w, err := os.Pipe()
 	require.NoError(t, err)
-	
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {

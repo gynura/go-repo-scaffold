@@ -1,4 +1,4 @@
-## Docs
+## App
 
 ### Requirements
 
@@ -8,21 +8,30 @@
 
 ### How to bundle the API spec
 
-From **users-microservice/app** repository, run:
+From **users-microservice/app**, run:
 ```bash
 make bundle_api
 ```
 
 ### How to lint the API spec
 
-From **users-microservice/app** repository, run:
+From **users-microservice/app**, run:
 ```bash
 make lint_api
 ```
 
 ### How to build and serve the documentation
 
-From **users-microservice/app** repository, run:
+From **users-microservice/app**, run:
 ```bash
 make serve_api
 ```
+
+### How to generate the http infra 
+
+From **users-microservice/app**, run:
+```bash
+make generate_http_infra
+```
+
+> **_NOTE:_**  This command will install the ogen generator for you

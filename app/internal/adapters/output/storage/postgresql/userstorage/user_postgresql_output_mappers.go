@@ -1,11 +1,12 @@
 package userstorage
 
 import (
-	"github.com/asaskevich/govalidator"
 	"userservice/internal/core/entities"
 	"userservice/internal/infra/storage/postgresql/userstorageinfra"
 	"userservice/internal/pkg/commons/time"
 	"userservice/internal/pkg/errors"
+
+	"github.com/asaskevich/govalidator"
 )
 
 func mapToCreateDB(user entities.User) (*userstorageinfra.CreateInput, error) {

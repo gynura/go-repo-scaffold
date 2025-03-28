@@ -69,7 +69,7 @@ func (p *Postgres) GetConnectionData(config interface{}) (*sqlfw.ConnectionData,
 		return nil, errors.New("variable 'SSLMode' cannot be empty")
 	}
 
-	connectionString := fmt.Sprintf("application_name=SIGNARE host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", options.Host, port, options.Username, options.Password, options.Database, options.SSLMode)
+	connectionString := fmt.Sprintf("application_name=USER-MICROSERVICE host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", options.Host, port, options.Username, options.Password, options.Database, options.SSLMode)
 
 	return &sqlfw.ConnectionData{
 		ConnectionString: connectionString,

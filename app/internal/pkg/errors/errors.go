@@ -4,6 +4,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -11,10 +12,10 @@ import (
 type ErrCategory string
 
 const (
-	Internal        ErrCategory = "INTERNAL"
-	InvalidArgument ErrCategory = "INVALID_ARGUMENT"
-	NotFound        ErrCategory = "NOT_FOUND"
-	AlreadyExists   ErrCategory = "ALREADY_EXISTS"
+	ErrCategoryInternal        ErrCategory = "INTERNAL"
+	ErrCategoryInvalidArgument ErrCategory = "INVALID_ARGUMENT"
+	ErrCategoryNotFound        ErrCategory = "NOT_FOUND"
+	ErrCategoryAlreadyExists   ErrCategory = "ALREADY_EXISTS"
 )
 
 // String defines a way to retrieve the string value of an error category.
@@ -96,7 +97,7 @@ func AsServiceError(err error) (*ServiceError, bool) {
 
 func NewInternalError(format string, args ...interface{}) *ServiceError {
 	return &ServiceError{
-		category:    Internal,
+		category:    ErrCategoryInternal,
 		errorID:     uuid.New().String(),
 		internalMsg: fmt.Sprintf(format, args...),
 	}
@@ -104,7 +105,7 @@ func NewInternalError(format string, args ...interface{}) *ServiceError {
 
 func NewNotFoundError(format string, args ...interface{}) *ServiceError {
 	return &ServiceError{
-		category:    NotFound,
+		category:    ErrCategoryNotFound,
 		errorID:     uuid.New().String(),
 		internalMsg: fmt.Sprintf(format, args...),
 	}
@@ -112,7 +113,7 @@ func NewNotFoundError(format string, args ...interface{}) *ServiceError {
 
 func NewAlreadyExistsError(format string, args ...interface{}) *ServiceError {
 	return &ServiceError{
-		category:    AlreadyExists,
+		category:    ErrCategoryAlreadyExists,
 		errorID:     uuid.New().String(),
 		internalMsg: fmt.Sprintf(format, args...),
 	}
@@ -120,24 +121,24 @@ func NewAlreadyExistsError(format string, args ...interface{}) *ServiceError {
 
 func NewInvalidArgumentError(format string, args ...interface{}) *ServiceError {
 	return &ServiceError{
-		category:    InvalidArgument,
+		category:    ErrCategoryInvalidArgument,
 		errorID:     uuid.New().String(),
 		internalMsg: fmt.Sprintf(format, args...),
 	}
 }
 
 func (e ServiceError) IsInvalidArgumentError() bool {
-	return e.category == InvalidArgument
+	return e.category == ErrCategoryInvalidArgument
 }
 
 func (e ServiceError) IsNotFoundError() bool {
-	return e.category == NotFound
+	return e.category == ErrCategoryNotFound
 }
 
 func (e ServiceError) IsAlreadyExistsError() bool {
-	return e.category == AlreadyExists
+	return e.category == ErrCategoryAlreadyExists
 }
 
 func (e ServiceError) IsInternalError() bool {
-	return e.category == Internal
+	return e.category == ErrCategoryInternal
 }

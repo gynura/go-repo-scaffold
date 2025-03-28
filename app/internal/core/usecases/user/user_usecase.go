@@ -15,15 +15,15 @@ import (
 // UseCase defines the functionality to manage User resources
 type UseCase interface {
 	// CreateUser creates a User. It returns the created User or an error if it fails
-	CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error)
+	CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, *errors.ServiceError)
 	// ListUsers returns all the Users or an error if it fails
-	ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, error)
+	ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, *errors.ServiceError)
 	// GetUser returns the requested User or an error if it fails
-	GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, error)
+	GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError)
 	// EditUser edits a User. It returns the edited User or an error if it fails
-	EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, error)
+	EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError)
 	// DeleteUser deletes a User. It returns the deleted User or an error if it fails
-	DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, error)
+	DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError)
 }
 
 // DefaultUseCase defines the default implementation of the user.UseCase interface
@@ -40,7 +40,7 @@ type ProvideUseCaseOptions struct {
 }
 
 // ProvideUseCase creates a UserUseCase with the given options.
-func ProvideUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
+func ProvideUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, *errors.ServiceError) {
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")
 	}
@@ -56,7 +56,7 @@ func ProvideUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
 
 var _ UseCase = new(DefaultUseCase)
 
-func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, error) {
+func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
 		return nil, errors.NewInvalidArgumentError("invalid input to create user").FromError(err).
@@ -104,9 +104,9 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 		return nil, errors.NewInternalError("failed to store user").FromError(err)
 	}
 
-	err = useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
-	if err != nil {
-		return nil, err
+	queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
+	if queueErr != nil {
+		return nil, queueErr
 	}
 
 	return &CreateUserOutput{
@@ -114,22 +114,22 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	}, nil
 }
 
-func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, error) {
+func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, *errors.ServiceError) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, error) {
+func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, error) {
+func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, error) {
+func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {
 	//TODO implement me
 	panic("implement me")
 }
