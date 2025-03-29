@@ -8,12 +8,14 @@ import (
 )
 
 const (
-	addUserMapperID    = "service.user.insert"
-	getUserMapperID    = "service.user.getById"
-	editUserMapperID   = "service.user.update"
-	removeUserMapperID = "service.user.delete"
-	listUsersMapperID  = "service.user.list"
-	existsUserMapperID = "service.user.exists"
+	addUserMapperID           = "service.user.insert"
+	getUserMapperID           = "service.user.getById"
+	getUserByEmailMapperID    = "service.user.getByEmail"
+	getUserByNicknameMapperID = "service.user.getByNickname"
+	editUserMapperID          = "service.user.update"
+	removeUserMapperID        = "service.user.delete"
+	listUsersMapperID         = "service.user.list"
+	existsUserMapperID        = "service.user.exists"
 )
 
 type StorageInfraOptions struct {
@@ -82,6 +84,30 @@ func (repository *StorageInfra) Remove(ctx context.Context, id entities.Resource
 func (repository *StorageInfra) List(ctx context.Context, filters UserDBFilter) ([]UserDB, error) {
 	userDBItems := make([]UserDB, 0)
 	err := repository.genericStorage.QueryAll(ctx, listUsersMapperID, &filters, &userDBItems)
+	if err != nil {
+		return nil, err
+	}
+	return userDBItems, nil
+}
+
+func (repository *StorageInfra) GetByEmail(ctx context.Context, email string) ([]UserDB, error) {
+	var userDBItems []UserDB
+	db := UserDB{}
+	db.Email = email
+
+	err := repository.genericStorage.QueryAll(ctx, getUserByEmailMapperID, db, &userDBItems)
+	if err != nil {
+		return nil, err
+	}
+	return userDBItems, nil
+}
+
+func (repository *StorageInfra) GetByNickname(ctx context.Context, nickname string) ([]UserDB, error) {
+	var userDBItems []UserDB
+	db := UserDB{}
+	db.Nickname = nickname
+
+	err := repository.genericStorage.QueryAll(ctx, getUserByNicknameMapperID, db, &userDBItems)
 	if err != nil {
 		return nil, err
 	}

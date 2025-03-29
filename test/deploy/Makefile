@@ -1,4 +1,7 @@
 
+.PHONY: default
+default: provision start
+
 .PHONY: provision
 provision:
 	docker-compose -f postgresql/docker-compose.yaml up -d

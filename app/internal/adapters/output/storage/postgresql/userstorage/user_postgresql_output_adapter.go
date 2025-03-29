@@ -4,12 +4,10 @@ package userstorage
 import (
 	"context"
 	"userservice/internal/adapters/output/storage"
-	"userservice/internal/adapters/output/storage/postgresql"
 	"userservice/internal/core/entities"
 	"userservice/internal/core/usecases/user"
 	"userservice/internal/infra/storage/postgresql/userstorageinfra"
 	"userservice/internal/pkg/errors"
-	"userservice/internal/pkg/persistence"
 )
 
 var _ user.Storage = new(StorageAdapter)
@@ -158,30 +156,46 @@ func (adapter StorageAdapter) List(ctx context.Context, filters user.StorageFilt
 	return &collection, nil
 }
 
-type storageFilter struct {
-	*userstorageinfra.UserDBFilter
+func (adapter StorageAdapter) GetByEmail(ctx context.Context, email string) (*entities.User, *errors.ServiceError) {
+	storageData, err := adapter.infra.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, storage.PersistenceToServiceError(err)
+	}
+
+	if len(storageData) == 0 {
+		return nil, errors.NewNotFoundError("no User found with email: %s", email)
+	}
+
+	if len(storageData) > 1 {
+		return nil, errors.NewInternalError("more than one User found with email: %s", email)
+	}
+
+	storedUser, err := mapFromDB(storageData[0])
+	if err != nil {
+		return nil, errors.NewInternalError(err.Error())
+	}
+
+	return storedUser, nil
 }
 
-var _ user.StorageFilters = (*storageFilter)(nil)
+func (adapter StorageAdapter) GetByNickname(ctx context.Context, nickname string) (*entities.User, *errors.ServiceError) {
+	storageData, err := adapter.infra.GetByNickname(ctx, nickname)
+	if err != nil {
+		return nil, storage.PersistenceToServiceError(err)
+	}
 
-// Paged limits the maximum amount of items to limit parameter and starts the list in offset parameter.
-func (filter *storageFilter) Paged(limit int, offset int) user.StorageFilters {
-	filter.UserDBFilter = filter.UserDBFilter.Paged(limit, offset)
-	return filter
-}
+	if len(storageData) == 0 {
+		return nil, errors.NewNotFoundError("no User found with nickname: %s", nickname)
+	}
 
-func (filter *storageFilter) OrderByCreatedAt(direction persistence.OrderDirection) user.StorageFilters {
-	filter.UserDBFilter = filter.UserDBFilter.Sort("created_at", direction)
-	return filter
-}
+	if len(storageData) > 1 {
+		return nil, errors.NewInternalError("more than one User found with nickname: %s", nickname)
+	}
 
-func (filter *storageFilter) OrderByUpdatedAt(direction persistence.OrderDirection) user.StorageFilters {
-	filter.UserDBFilter = filter.UserDBFilter.Sort("updated_at", direction)
-	return filter
-}
+	storedUser, err := mapFromDB(storageData[0])
+	if err != nil {
+		return nil, errors.NewInternalError(err.Error())
+	}
 
-func (filter *storageFilter) FilterByCountry(country string) user.StorageFilters {
-	filter.Country = country
-	filter.AppendFilter(postgresql.NewEqualFilter("country"))
-	return filter
+	return storedUser, nil
 }

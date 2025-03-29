@@ -14,6 +14,8 @@ type Storage interface {
 	Edit(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError)
 	Remove(ctx context.Context, id entities.ResourceID) *errors.ServiceError
 	List(ctx context.Context, filters StorageFilters) (*UsersList, *errors.ServiceError)
+	GetByEmail(ctx context.Context, email string) (*entities.User, *errors.ServiceError)
+	GetByNickname(ctx context.Context, nickname string) (*entities.User, *errors.ServiceError)
 }
 
 // StorageFilters defines filter options when listing Users

@@ -1,3 +1,7 @@
+//Extracted from https://github.com/hyperledger-labs/signare/blob/main/app/pkg/commons/persistence/dbmigrator/dbmigrator.go
+// Which is an opensource project that I developed alongside my work colleagues
+// I just refactored it to use slog and not the custom logger we developed
+
 // Package persistence defines the framework to interact with the database storage.
 package persistence
 

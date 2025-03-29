@@ -37,3 +37,8 @@ func FromString(newTime string) (*ServiceTime, error) {
 	}
 	return &ServiceTime{Time: t}, nil
 }
+
+// FromTime creates a ServiceTime from a time.Time one
+func FromTime(t time.Time) (*ServiceTime, error) {
+	return &ServiceTime{Time: t.UTC()}, nil
+}

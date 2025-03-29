@@ -24,8 +24,8 @@ func mapToCreateDB(user entities.User) (*userstorageinfra.CreateInput, error) {
 			Password:   user.Password(),
 			Country:    user.Country,
 			Nickname:   user.Nickname,
-			CreatedAt:  user.CreatedAt.String(),
-			UpdatedAt:  user.UpdatedAt.String(),
+			CreatedAt:  user.CreatedAt.Time,
+			UpdatedAt:  user.UpdatedAt.Time,
 		},
 	}
 	return &db, nil
@@ -46,8 +46,8 @@ func mapToUpdateDB(user entities.User) (*userstorageinfra.EditInput, error) {
 			Password:   user.Password(),
 			Country:    user.Country,
 			Nickname:   user.Nickname,
-			CreatedAt:  user.CreatedAt.String(),
-			UpdatedAt:  user.UpdatedAt.String(),
+			CreatedAt:  user.CreatedAt.Time,
+			UpdatedAt:  user.UpdatedAt.Time,
 		},
 	}
 	return &db, nil
@@ -59,12 +59,12 @@ func mapFromDB(storedUser userstorageinfra.UserDB) (*entities.User, error) {
 		return nil, errors.NewInternalError("invalid stored User format").FromError(err)
 	}
 
-	createdAt, err := time.FromString(storedUser.CreatedAt)
+	createdAt, err := time.FromTime(storedUser.CreatedAt)
 	if err != nil {
 		return nil, errors.NewInternalError("invalid stored User createdAt").FromError(err)
 	}
 
-	updatedAt, err := time.FromString(storedUser.UpdatedAt)
+	updatedAt, err := time.FromTime(storedUser.UpdatedAt)
 	if err != nil {
 		return nil, errors.NewInternalError("invalid stored User updatedAt").FromError(err)
 	}

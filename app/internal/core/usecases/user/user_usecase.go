@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"userservice/internal/core/entities"
@@ -61,6 +62,17 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	if err != nil {
 		return nil, errors.NewInvalidArgumentError("invalid input to create user").FromError(err).
 			WithMessage("Invalid input to create user. Please review your input fields and try again.")
+	}
+
+	// Nicknames are unique alongside IDs and Emails, in order to avoid coupling this check to the plugged db, the business logic needs to implement this checks
+	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
+		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage("nickname %s already exists", input.Nickname)
+	}
+
+	// Emails are also unique in our model so before creating a user we need to check if there's one
+	// This way we can differentiate between an invalid argument and an already exists error
+	if useCase.emailAlreadyExists(ctx, input.Email) {
+		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage("email %s already exists", input.Email)
 	}
 
 	// As the API defines, if no ID is informed, the service will generate a UUID for the resource
@@ -133,4 +145,32 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (useCase DefaultUseCase) emailAlreadyExists(ctx context.Context, email string) bool {
+	userWithEmail, err := useCase.storage.GetByEmail(ctx, email)
+	if err != nil {
+		if err.IsNotFoundError() {
+			return false
+		}
+		useCase.logger.Error(fmt.Sprintf("failed to check if email %s already exists", email), err.Error())
+	}
+	if userWithEmail != nil {
+		return true
+	}
+	return false
+}
+
+func (useCase DefaultUseCase) nicknameAlreadyExists(ctx context.Context, nickname string) bool {
+	userWithNickname, err := useCase.storage.GetByNickname(ctx, nickname)
+	if err != nil {
+		if err.IsNotFoundError() {
+			return false
+		}
+		useCase.logger.Error(fmt.Sprintf("failed to check if nickname %s already exists", nickname), err.Error())
+	}
+	if userWithNickname != nil {
+		return true
+	}
+	return false
 }

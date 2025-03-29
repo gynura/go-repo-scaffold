@@ -24,12 +24,10 @@
     email:
       type: string
       nullable: false
-      format: email
       description: Email address of the user
     country:
       type: string
       nullable: false
-      maxLength: 2
       description: Country of the user
   required:
     - firstName

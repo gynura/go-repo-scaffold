@@ -12,7 +12,7 @@ const (
 	httpCodeInternalError = 500
 	httpCodeConflict      = 409
 
-	defaultInternalErrorMessage = "internal server error"
+	defaultInternalErrorMessage = "Internal server error."
 )
 
 // errorCategoryToErrorStatus maps service error categories to HTTP error statuses
@@ -61,6 +61,6 @@ func selectErrorDescription(err errors.ServiceError, httpCode int) string {
 		return err.ExposedMessage()
 	}
 
-	// But details must be hidden for internal errors always
+	// But details MUST be hidden for internal errors
 	return defaultInternalErrorMessage
 }

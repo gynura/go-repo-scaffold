@@ -64,6 +64,38 @@
         WHERE
         id=:id
     </statement>
+    <statement id="getByEmail">
+        SELECT
+        id,
+        password,
+        nickname,
+        last_name,
+        first_name,
+        created_at,
+        updated_at,
+        country,
+        email
+        FROM
+        svc_users
+        WHERE
+        email=:email
+    </statement>
+    <statement id="getByNickname">
+        SELECT
+        id,
+        password,
+        nickname,
+        last_name,
+        first_name,
+        created_at,
+        updated_at,
+        country,
+        email
+        FROM
+        svc_users
+        WHERE
+        nickname=:nickname
+    </statement>
     <statement id="update">
         UPDATE
         svc_users
