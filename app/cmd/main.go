@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"userservice/cmd/config"
 	"userservice/cmd/flags"
@@ -101,7 +102,8 @@ func startService(_ *cobra.Command, _ []string) {
 	service.Build()
 
 	err = service.StartServer(graph.StartServerOptions{
-		Port: string(rune(port)),
+		Port: strconv.Itoa(port),
+		Host: address,
 	})
 	if err != nil {
 		panic(fmt.Sprintf("Error starting service server: %s\n", err))

@@ -77,12 +77,14 @@ func (graph *ServiceGraph) PersistenceFwConnection() sql.Connection {
 
 // StartServerOptions defines configuration for starting the HTTP server
 type StartServerOptions struct {
-	Port string
+	Host string `validate:"required"`
+	Port string `validate:"required"`
 }
 
 func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
-	if options.Port == "" {
-		return fmt.Errorf("port is required")
+	_, err := govalidator.ValidateStruct(options)
+	if err != nil {
+		return fmt.Errorf("error validating start server options: %w", err)
 	}
 
 	infraServerHandler, err := generatedhttpinfra.NewServer(graph.httpGraph.HTTPHandler)
@@ -91,7 +93,7 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 	}
 
 	server := &http.Server{
-		Addr:         ":" + options.Port,
+		Addr:         options.Host + ":" + options.Port,
 		Handler:      infraServerHandler,
 		ReadTimeout:  15 * time.Second, // TODO: make them configurable (?)
 		WriteTimeout: 15 * time.Second,

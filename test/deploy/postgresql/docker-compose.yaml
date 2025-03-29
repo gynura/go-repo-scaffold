@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  postgres_10_12:
+    image: postgres:10.12
+    container_name: postgres_10_12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: micro_users_db
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    command:
+      - "postgres"
+      - "-c"
+      - "listen_addresses=*"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "max_connections=100"
+
+volumes:
+  postgres_data:
+    driver: local
