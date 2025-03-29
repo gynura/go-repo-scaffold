@@ -32,7 +32,7 @@ func ProvideStorageAdapter(options StorageAdapterOptions) (*StorageAdapter, erro
 func (adapter StorageAdapter) Add(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError) {
 	db, err := mapToCreateDB(data)
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error()).FromError(err)
+		return nil, errors.NewInternalError("error mapping user to create db data").FromError(err)
 	}
 
 	storageData, err := adapter.infra.Add(ctx, *db)
@@ -42,7 +42,7 @@ func (adapter StorageAdapter) Add(ctx context.Context, data entities.User) (*ent
 
 	addedUser, err := mapFromDB(*storageData)
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error()).FromError(err)
+		return nil, errors.NewInternalError("error mapping storage data to User").FromError(err)
 	}
 
 	return addedUser, nil
@@ -64,7 +64,7 @@ func (adapter StorageAdapter) Get(ctx context.Context, id entities.ResourceID) (
 
 	storedUser, err := mapFromDB(storageData[0])
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+		return nil, errors.NewInternalError("error mapping storage data to User").FromError(err)
 	}
 
 	return storedUser, nil
@@ -73,7 +73,7 @@ func (adapter StorageAdapter) Get(ctx context.Context, id entities.ResourceID) (
 func (adapter StorageAdapter) Edit(ctx context.Context, data entities.User) (*entities.User, *errors.ServiceError) {
 	db, err := mapToUpdateDB(data)
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+		return nil, errors.NewInternalError("error mapping user to update db data").FromError(err)
 	}
 
 	result, err := adapter.infra.Edit(ctx, *db)
@@ -149,7 +149,7 @@ func (adapter StorageAdapter) List(ctx context.Context, filters user.StorageFilt
 
 	items, err := mapSliceFromDB(storageData)
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+		return nil, errors.NewInternalError("error mapping storage data to User list").FromError(err)
 	}
 	collection.Items = items
 
@@ -172,7 +172,7 @@ func (adapter StorageAdapter) GetByEmail(ctx context.Context, email string) (*en
 
 	storedUser, err := mapFromDB(storageData[0])
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+		return nil, errors.NewInternalError("error converting storage data to User").FromError(err)
 	}
 
 	return storedUser, nil
@@ -194,7 +194,7 @@ func (adapter StorageAdapter) GetByNickname(ctx context.Context, nickname string
 
 	storedUser, err := mapFromDB(storageData[0])
 	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+		return nil, errors.NewInternalError("error converting storage data to User").FromError(err)
 	}
 
 	return storedUser, nil

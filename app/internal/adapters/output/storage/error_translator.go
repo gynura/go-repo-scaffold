@@ -7,10 +7,10 @@ import (
 
 func PersistenceToServiceError(err error) *errors.ServiceError {
 	if persistence.IsAlreadyExists(err) {
-		return errors.NewAlreadyExistsError(err.Error()).FromError(err)
+		return errors.NewAlreadyExistsError("resource already exists").FromError(err)
 	}
 	if persistence.IsNotFound(err) {
-		return errors.NewNotFoundError(err.Error()).FromError(err)
+		return errors.NewNotFoundError("resource was not found").FromError(err)
 	}
-	return errors.NewInternalError(err.Error()).FromError(err)
+	return errors.NewInternalError("internal storage infra error").FromError(err)
 }

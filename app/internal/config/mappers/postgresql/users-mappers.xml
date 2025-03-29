@@ -105,7 +105,7 @@
         country=:country,
         nickname=:nickname,
         password=:password,
-        updated_at=:updated_at
+        updated_at=:updated_at,
         email=:email
         WHERE
         id=:id

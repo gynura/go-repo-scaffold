@@ -3,9 +3,8 @@ package user
 import (
 	"context"
 	"fmt"
-	"log/slog"
-	"os"
 	"userservice/internal/core/entities"
+	"userservice/internal/pkg/commons/logger"
 	"userservice/internal/pkg/commons/time"
 	"userservice/internal/pkg/errors"
 
@@ -35,7 +34,7 @@ type UseCase interface {
 // DefaultUseCase defines the default implementation of the user.UseCase interface
 type DefaultUseCase struct {
 	storage Storage
-	logger  *slog.Logger
+	logger  *logger.Logger
 	//queue   Queue
 }
 
@@ -56,7 +55,7 @@ func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, erro
 	return &DefaultUseCase{
 		storage: options.Storage,
 		//queue:   options.Queue,
-		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+		logger: logger.NewLogger(),
 	}, nil
 }
 
@@ -65,19 +64,22 @@ var _ UseCase = new(DefaultUseCase)
 func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
+		useCase.logger.Debug(ctx).Message(err.Error())
 		return nil, errors.NewInvalidArgumentError("invalid input to create user").FromError(err).
 			WithMessage("Invalid input to create user. Please review your input fields and try again.")
 	}
 
 	// Nicknames are unique alongside IDs and Emails, in order to avoid coupling this check to the plugged db, the business logic needs to implement this checks
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
+		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
+		return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
 	}
 
 	// Emails are also unique in our model so before creating a user we need to check if there's one
 	// This way we can differentiate between an invalid argument and an already exists error
 	if useCase.emailAlreadyExists(ctx, input.Email) {
-		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
+		useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
+		return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
 	}
 
 	// As the API defines, if no ID is informed, the service will generate a UUID for the resource
@@ -106,20 +108,25 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	}
 	err = user.EncryptAndSetPassword(input.Password)
 	if err != nil {
-		// TODO: log errors
-		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
+		useCase.logger.Error(ctx).Attributes("error encrypting and setting user's password", map[string]any{
+			"userId": input.ID,
+		})
+		return nil, errors.NewInternalError("error encrypting and setting user's password").FromError(err)
 	}
 
 	storedUser, addErr := useCase.storage.Add(ctx, user)
 	if addErr != nil {
-		// TODO: improve this error log
-		useCase.logger.Error(addErr.Error())
+		useCase.logger.Error(ctx).UserServiceError(addErr, user.ID)
 		if addErr.IsAlreadyExistsError() {
-			return nil, errors.NewAlreadyExistsError("user %s already exists", user.ID).FromError(err).
+			return nil, errors.NewAlreadyExistsError("user %s already exists", user.ID).FromError(addErr).
 				WithMessage("user %s already exists", user.ID)
 		}
-		return nil, errors.NewInternalError("failed to store user").FromError(err)
+		return nil, errors.NewInternalError("failed to store user").FromError(addErr)
 	}
+
+	useCase.logger.Info(ctx).Attributes("created new user", map[string]any{
+		"userId": input.ID,
+	})
 
 	// TODO: uncomment once rabbitmq is injected
 	//queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
@@ -140,17 +147,19 @@ func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInpu
 func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
+		useCase.logger.Debug(ctx).Message(err.Error())
 		return nil, errors.NewInvalidArgumentError("invalid input to describe user").FromError(err).
 			WithMessage("Invalid input to describe user. Please review your input fields and try again.")
 	}
 
 	storageUser, getErr := useCase.storage.Get(ctx, input.ResourceID)
 	if getErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(getErr, input.ID)
 		if getErr.IsNotFoundError() {
-			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(getErr).
 				WithMessage("user %s not found", input.ResourceID.ID)
 		}
-		return nil, errors.NewInternalError("failed to get user").FromError(err)
+		return nil, errors.NewInternalError("failed to get user").FromError(getErr)
 	}
 
 	return &GetUserOutput{
@@ -161,26 +170,30 @@ func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (
 func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
+		useCase.logger.Debug(ctx).Message(err.Error())
 		return nil, errors.NewInvalidArgumentError("invalid input to edit user").FromError(err).
 			WithMessage("Invalid input to edit user. Please review your input fields and try again.")
 	}
 
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
+		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
+		return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
 	}
 
 	if useCase.emailAlreadyExists(ctx, input.Email) {
-		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
+		useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
+		return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
 	}
 
 	// When editing a resource we must first fetch the state on the storage of that resource prior to the editing (source of truth)
 	userToBeUpdated, getErr := useCase.storage.Get(ctx, input.ResourceID)
 	if getErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(getErr, input.ID)
 		if getErr.IsNotFoundError() {
-			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(getErr).
 				WithMessage("user %s not found", input.ResourceID.ID)
 		}
-		return nil, errors.NewInternalError("failed to get user").FromError(err)
+		return nil, errors.NewInternalError("failed to get user").FromError(getErr)
 	}
 
 	// Then we will edit that user with the editable fields
@@ -195,13 +208,14 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
 	}
 
-	storageUser, getErr := useCase.storage.Edit(ctx, *userToBeUpdated)
-	if getErr != nil {
-		if getErr.IsNotFoundError() {
-			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+	storageUser, editErr := useCase.storage.Edit(ctx, *userToBeUpdated)
+	if editErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(editErr, input.ID)
+		if editErr.IsNotFoundError() {
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(editErr).
 				WithMessage("user %s not found", input.ResourceID.ID)
 		}
-		return nil, errors.NewInternalError("failed to edit user").FromError(err)
+		return nil, errors.NewInternalError("failed to edit user").FromError(editErr)
 	}
 
 	return &EditUserOutput{
@@ -213,12 +227,14 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
+		useCase.logger.Debug(ctx).Message(err.Error())
 		return nil, errors.NewInvalidArgumentError("invalid input to delete user").FromError(err).
 			WithMessage("Invalid input to delete user. Please review your input fields and try again.")
 	}
 
 	removedUser, removeErr := useCase.storage.Remove(ctx, input.ResourceID)
 	if removeErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(removeErr, input.ID)
 		if removeErr.IsNotFoundError() {
 			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
 				WithMessage("user %s not found", input.ResourceID.ID)
@@ -237,7 +253,7 @@ func (useCase DefaultUseCase) emailAlreadyExists(ctx context.Context, email stri
 		if err.IsNotFoundError() {
 			return false
 		}
-		useCase.logger.Error(fmt.Sprintf("failed to check if email %s already exists", email), err.Error())
+		useCase.logger.Error(ctx).ServiceError(err)
 	}
 	if userWithEmail != nil {
 		return true
@@ -251,7 +267,7 @@ func (useCase DefaultUseCase) nicknameAlreadyExists(ctx context.Context, nicknam
 		if err.IsNotFoundError() {
 			return false
 		}
-		useCase.logger.Error(fmt.Sprintf("failed to check if nickname %s already exists", nickname), err.Error())
+		useCase.logger.Error(ctx).ServiceError(err)
 	}
 	if userWithNickname != nil {
 		return true

@@ -2,16 +2,14 @@ package logger
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"io"
-	"log/slog"
 	"os"
 	"sync"
 	"testing"
 	"time"
-	"userservice/internal/pkg/errors"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestLogger_NewLogger(t *testing.T) {
@@ -20,31 +18,7 @@ func TestLogger_NewLogger(t *testing.T) {
 	require.NotNil(t, logger)
 }
 
-func TestLogger_Info(t *testing.T) {
-	logger := NewLogger()
-	infoLogger := logger.Info("Test info message")
-
-	require.Equal(t, slog.LevelInfo, infoLogger.level)
-	require.Equal(t, "Test info message", infoLogger.msg)
-}
-
-func TestLogger_Error(t *testing.T) {
-	logger := NewLogger()
-	errorLogger := logger.Error("Test error message")
-
-	require.Equal(t, slog.LevelError, errorLogger.level)
-	require.Equal(t, "Test error message", errorLogger.msg)
-}
-
-func TestLogger_ServiceError(t *testing.T) {
-	logger := NewLogger()
-	errorLogger := logger.ServiceError(errors.NewInternalError("Test error message").WithMessage("Expect this!"))
-
-	require.Equal(t, slog.LevelError, errorLogger.level)
-	require.Equal(t, "Expect this!", errorLogger.msg)
-}
-
-func TestLogger_WithAttributes(t *testing.T) {
+func TestLogger_Attributes(t *testing.T) {
 	var buf bytes.Buffer
 	var mu sync.Mutex
 	oldStdout := os.Stdout
@@ -74,7 +48,7 @@ func TestLogger_WithAttributes(t *testing.T) {
 	}
 
 	logger := NewLogger()
-	logger.Info("Created new user").WithAttributes(attributes)
+	logger.Info(context.Background()).Attributes("Created new user", attributes)
 
 	// Small delay to ensure log is written
 	time.Sleep(10 * time.Millisecond)
@@ -83,7 +57,6 @@ func TestLogger_WithAttributes(t *testing.T) {
 	jsonData := buf.Bytes()
 	err = json.Unmarshal(jsonData, &logMap)
 
-	// Debug print if unmarshaling fails
 	if err != nil {
 		t.Logf("Failed to unmarshal JSON: %v", err)
 		t.Logf("Captured JSON data: %s", string(jsonData))

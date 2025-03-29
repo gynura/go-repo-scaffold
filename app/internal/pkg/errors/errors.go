@@ -74,6 +74,10 @@ func (e ServiceError) InnerError() error {
 	return e.innerErr
 }
 
+func (e ServiceError) InternalMessage() string {
+	return e.internalMsg
+}
+
 func (e ServiceError) ErrorID() string {
 	return e.errorID
 }
