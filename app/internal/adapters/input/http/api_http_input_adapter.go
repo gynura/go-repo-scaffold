@@ -78,15 +78,15 @@ func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generat
 	}
 	describedUser, err := d.userUseCase.GetUser(ctx, input)
 	if err != nil {
-		if err.IsInternalError() {
-			response := generatedhttpinfra.UserUsersDescribeInternalServerError(mapServiceErrorToHTTPError(*err))
+		if err.IsInvalidArgumentError() {
+			response := generatedhttpinfra.UserUsersDescribeBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
 		if err.IsNotFoundError() {
 			response := generatedhttpinfra.UserUsersDescribeNotFound(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersDescribeBadRequest(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.UserUsersDescribeInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -118,6 +118,38 @@ func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedht
 }
 
 func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generatedhttpinfra.UserUsersRemoveParams) (generatedhttpinfra.UserUsersRemoveRes, error) {
-	//TODO implement me
-	panic("implement me")
+	input := user.DeleteUserInput{
+		ResourceID: entities.ResourceID{ID: params.UserId},
+	}
+
+	deletedUser, err := d.userUseCase.DeleteUser(ctx, input)
+	if err != nil {
+		if err.IsNotFoundError() {
+			response := generatedhttpinfra.UserUsersRemoveNotFound(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		if err.IsInvalidArgumentError() {
+			response := generatedhttpinfra.UserUsersRemoveBadRequest(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		response := generatedhttpinfra.UserUsersRemoveInternalServerError(mapServiceErrorToHTTPError(*err))
+		return &response, nil
+	}
+
+	return &generatedhttpinfra.DescribeUser{
+		MetaInformation: generatedhttpinfra.MetaInformation{
+			ID:        deletedUser.ID,
+			CreatedAt: deletedUser.CreatedAt.Time,
+			UpdatedAt: deletedUser.UpdatedAt.Time,
+		},
+		SpecificData: generatedhttpinfra.UserSpecificData{
+			FirstName: deletedUser.FirstName,
+			LastName:  deletedUser.LastName,
+			Nickname:  deletedUser.Nickname,
+			Password:  deletedUser.Password(),
+			Email:     deletedUser.Email,
+			Country:   deletedUser.Country,
+		},
+	}, nil
+
 }

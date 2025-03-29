@@ -94,26 +94,26 @@ func (adapter StorageAdapter) Edit(ctx context.Context, data entities.User) (*en
 		return nil, errors.NewInternalError("more than one User found with id: %s", data.ResourceID)
 	}
 
-	storageData, err := adapter.Get(ctx, data.ResourceID)
-	if err != nil {
-		return nil, errors.NewInternalError(err.Error())
+	storedUser, getErr := adapter.Get(ctx, data.ResourceID)
+	if getErr != nil {
+		return nil, getErr
 	}
 
-	return storageData, nil
+	return storedUser, nil
 }
 
-func (adapter StorageAdapter) Remove(ctx context.Context, id entities.ResourceID) *errors.ServiceError {
-	_, err := adapter.infra.Exists(ctx, id)
-	if err != nil {
-		return storage.PersistenceToServiceError(err)
+func (adapter StorageAdapter) Remove(ctx context.Context, id entities.ResourceID) (*entities.User, *errors.ServiceError) {
+	userToBeRemoved, getErr := adapter.Get(ctx, id)
+	if getErr != nil {
+		return nil, getErr
 	}
 
-	_, err = adapter.infra.Remove(ctx, id)
+	_, err := adapter.infra.Remove(ctx, id)
 	if err != nil {
-		return storage.PersistenceToServiceError(err)
+		return nil, storage.PersistenceToServiceError(err)
 	}
 
-	return nil
+	return userToBeRemoved, nil
 }
 
 func (adapter StorageAdapter) List(ctx context.Context, filters user.StorageFilters) (*user.UsersList, *errors.ServiceError) {

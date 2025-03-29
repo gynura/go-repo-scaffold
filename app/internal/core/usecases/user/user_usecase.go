@@ -159,8 +159,24 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 }
 
 func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {
-	//TODO implement me
-	panic("implement me")
+	_, err := govalidator.ValidateStruct(input)
+	if err != nil {
+		return nil, errors.NewInvalidArgumentError("invalid input to delete user").FromError(err).
+			WithMessage("Invalid input to delete user. Please review your input fields and try again.")
+	}
+
+	removedUser, removeErr := useCase.storage.Remove(ctx, input.ResourceID)
+	if removeErr != nil {
+		if removeErr.IsNotFoundError() {
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+				WithMessage("user %s not found", input.ResourceID.ID)
+		}
+		return nil, errors.NewInternalError("failed to delete user").FromError(err)
+	}
+
+	return &DeleteUserOutput{
+		User: *removedUser,
+	}, nil
 }
 
 func (useCase DefaultUseCase) emailAlreadyExists(ctx context.Context, email string) bool {

@@ -15,6 +15,7 @@ type Publisher struct {
 	channel *amqp.Channel
 }
 
+// TODO: define custom rabbitmq infra errors so we can type errors at this layer
 func NewPublisher(conn *amqp.Connection) (*Publisher, error) {
 	ch, err := conn.Channel()
 	if err != nil {
