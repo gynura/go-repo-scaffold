@@ -34,14 +34,14 @@ func (c *codeRecorder) WriteHeader(status int) {
 //
 // Creates a new user.
 //
-// POST /
+// POST /users
 func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/"),
+		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Start a span for this request.
@@ -172,14 +172,14 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 //
 // Describes the specified user in the path.
 //
-// GET /{userId}
+// GET /users/{userId}
 func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.describe"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.
@@ -310,14 +310,14 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 //
 // Updates the specified user in the path.
 //
-// PUT /{userId}
+// PUT /users/{userId}
 func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.edit"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.
@@ -463,14 +463,14 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 //
 // Lists all the users.
 //
-// GET /
+// GET /users
 func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/"),
+		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Start a span for this request.
@@ -617,14 +617,14 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 //
 // Deletes the specified user in the path.
 //
-// DELETE /{userId}
+// DELETE /users/{userId}
 func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.remove"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.

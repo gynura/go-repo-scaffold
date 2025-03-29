@@ -12,31 +12,31 @@ type Handler interface {
 	//
 	// Creates a new user.
 	//
-	// POST /
+	// POST /users
 	UserUsersCreate(ctx context.Context, req OptCreateUser) (UserUsersCreateRes, error)
 	// UserUsersDescribe implements user.users.describe operation.
 	//
 	// Describes the specified user in the path.
 	//
-	// GET /{userId}
+	// GET /users/{userId}
 	UserUsersDescribe(ctx context.Context, params UserUsersDescribeParams) (UserUsersDescribeRes, error)
 	// UserUsersEdit implements user.users.edit operation.
 	//
 	// Updates the specified user in the path.
 	//
-	// PUT /{userId}
+	// PUT /users/{userId}
 	UserUsersEdit(ctx context.Context, req OptUpdateUser, params UserUsersEditParams) (UserUsersEditRes, error)
 	// UserUsersList implements user.users.list operation.
 	//
 	// Lists all the users.
 	//
-	// GET /
+	// GET /users
 	UserUsersList(ctx context.Context, params UserUsersListParams) (UserUsersListRes, error)
 	// UserUsersRemove implements user.users.remove operation.
 	//
 	// Deletes the specified user in the path.
 	//
-	// DELETE /{userId}
+	// DELETE /users/{userId}
 	UserUsersRemove(ctx context.Context, params UserUsersRemoveParams) (UserUsersRemoveRes, error)
 }
 

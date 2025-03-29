@@ -10,7 +10,7 @@ tags:
   - name: User
     description: user resources management functionalities
 paths:
-  /:
+  /users:
     post:
       operationId: user.users.create
       tags:
@@ -57,7 +57,7 @@ paths:
           $ref: '#/components/responses/BadRequestResponse'
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
-  '/{userId}':
+  '/users/{userId}':
     get:
       operationId: user.users.describe
       tags:

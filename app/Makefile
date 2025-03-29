@@ -6,10 +6,13 @@ GENERATED_API_CODE_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generated"
 API_SPEC_ROOT ?= "${GIT_ROOT_DIR}/app/docs/open-api-spec"
 GENERATED_HTTP_INFRA_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generatedhttpinfra"
 
+.PHONY: default
+default: generate_http_infra
+
 .PHONY: bundle_api
 bundle_api:
-	@echo "Bundling API Spec:"
-	swagger-cli bundle -t yaml docs/open-api-spec/index.yaml -o docs/open-api-spec/index_bundled_openapi.yaml
+	@echo "Generating the API spec bundle"
+	swagger-cli bundle -t yaml $(API_SPEC_ROOT)/index.yaml -o $(API_SPEC_BUNDLE)
 
 .PHONY: lint_api
 lint_api: bundle_api
@@ -22,20 +25,16 @@ serve_api:
 	swagger-ui-watcher ${API_SPEC_BUNDLE}
 
 .PHONY: generate_http_infra
-generate_http_infra: bundle generate-api
+generate_http_infra: bundle_api generate-ogen-http-infra
 
-.PHONY: bundle
-bundle:
-	@echo "Generating the API spec bundle"
-	swagger-cli bundle -t yaml $(API_SPEC_ROOT)/index.yaml -o $(API_SPEC_BUNDLE)
 
 .PHONY: install-ogen
 install-ogen:
 	@go install github.com/ogen-go/ogen/cmd/ogen@latest
 
-.PHONY: generate-api
-generate-api: install-ogen
-	@echo "Generating HTTP infra code"
+.PHONY: generate-ogen-http-infra
+generate-ogen-http-infra: install-ogen
+	@echo "Generating HTTP infra code with ogen"
 	@ogen \
 		-target $(GENERATED_HTTP_INFRA_OUTPUT) \
 		-package generatedhttpinfra \

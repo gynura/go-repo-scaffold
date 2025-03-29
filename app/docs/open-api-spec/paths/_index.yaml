@@ -1,4 +1,4 @@
-'/':
+'/users':
   $ref: user/users.yaml
-'/{userId}':
+'/users/{userId}':
   $ref: user/users_id.yaml

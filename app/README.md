@@ -6,6 +6,15 @@
 - [spectral](https://meta.stoplight.io/docs/spectral/)
 - [swagger-ui-watcher](https://www.npmjs.com/package/swagger-ui-watcher)
 
+### How to maintain infra and API aligned
+
+The idea is that everytime something changes inside the API Spec, we run from **users-microservice/app**: 
+```bash
+make 
+```
+
+Which will bundle, lint and generate the http infra go code. 
+
 ### How to bundle the API spec
 
 From **users-microservice/app**, run:

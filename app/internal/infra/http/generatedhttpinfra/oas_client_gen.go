@@ -32,31 +32,31 @@ type Invoker interface {
 	//
 	// Creates a new user.
 	//
-	// POST /
+	// POST /users
 	UserUsersCreate(ctx context.Context, request OptCreateUser) (UserUsersCreateRes, error)
 	// UserUsersDescribe invokes user.users.describe operation.
 	//
 	// Describes the specified user in the path.
 	//
-	// GET /{userId}
+	// GET /users/{userId}
 	UserUsersDescribe(ctx context.Context, params UserUsersDescribeParams) (UserUsersDescribeRes, error)
 	// UserUsersEdit invokes user.users.edit operation.
 	//
 	// Updates the specified user in the path.
 	//
-	// PUT /{userId}
+	// PUT /users/{userId}
 	UserUsersEdit(ctx context.Context, request OptUpdateUser, params UserUsersEditParams) (UserUsersEditRes, error)
 	// UserUsersList invokes user.users.list operation.
 	//
 	// Lists all the users.
 	//
-	// GET /
+	// GET /users
 	UserUsersList(ctx context.Context, params UserUsersListParams) (UserUsersListRes, error)
 	// UserUsersRemove invokes user.users.remove operation.
 	//
 	// Deletes the specified user in the path.
 	//
-	// DELETE /{userId}
+	// DELETE /users/{userId}
 	UserUsersRemove(ctx context.Context, params UserUsersRemoveParams) (UserUsersRemoveRes, error)
 }
 
@@ -107,7 +107,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 //
 // Creates a new user.
 //
-// POST /
+// POST /users
 func (c *Client) UserUsersCreate(ctx context.Context, request OptCreateUser) (UserUsersCreateRes, error) {
 	res, err := c.sendUserUsersCreate(ctx, request)
 	return res, err
@@ -117,7 +117,7 @@ func (c *Client) sendUserUsersCreate(ctx context.Context, request OptCreateUser)
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/"),
+		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Run stopwatch.
@@ -150,7 +150,7 @@ func (c *Client) sendUserUsersCreate(ctx context.Context, request OptCreateUser)
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/"
+	pathParts[0] = "/users"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -182,7 +182,7 @@ func (c *Client) sendUserUsersCreate(ctx context.Context, request OptCreateUser)
 //
 // Describes the specified user in the path.
 //
-// GET /{userId}
+// GET /users/{userId}
 func (c *Client) UserUsersDescribe(ctx context.Context, params UserUsersDescribeParams) (UserUsersDescribeRes, error) {
 	res, err := c.sendUserUsersDescribe(ctx, params)
 	return res, err
@@ -192,7 +192,7 @@ func (c *Client) sendUserUsersDescribe(ctx context.Context, params UserUsersDesc
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.describe"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Run stopwatch.
@@ -225,7 +225,7 @@ func (c *Client) sendUserUsersDescribe(ctx context.Context, params UserUsersDesc
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/"
+	pathParts[0] = "/users/"
 	{
 		// Encode "userId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -272,7 +272,7 @@ func (c *Client) sendUserUsersDescribe(ctx context.Context, params UserUsersDesc
 //
 // Updates the specified user in the path.
 //
-// PUT /{userId}
+// PUT /users/{userId}
 func (c *Client) UserUsersEdit(ctx context.Context, request OptUpdateUser, params UserUsersEditParams) (UserUsersEditRes, error) {
 	res, err := c.sendUserUsersEdit(ctx, request, params)
 	return res, err
@@ -282,7 +282,7 @@ func (c *Client) sendUserUsersEdit(ctx context.Context, request OptUpdateUser, p
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.edit"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Run stopwatch.
@@ -315,7 +315,7 @@ func (c *Client) sendUserUsersEdit(ctx context.Context, request OptUpdateUser, p
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/"
+	pathParts[0] = "/users/"
 	{
 		// Encode "userId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -365,7 +365,7 @@ func (c *Client) sendUserUsersEdit(ctx context.Context, request OptUpdateUser, p
 //
 // Lists all the users.
 //
-// GET /
+// GET /users
 func (c *Client) UserUsersList(ctx context.Context, params UserUsersListParams) (UserUsersListRes, error) {
 	res, err := c.sendUserUsersList(ctx, params)
 	return res, err
@@ -375,7 +375,7 @@ func (c *Client) sendUserUsersList(ctx context.Context, params UserUsersListPara
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/"),
+		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Run stopwatch.
@@ -408,7 +408,7 @@ func (c *Client) sendUserUsersList(ctx context.Context, params UserUsersListPara
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/"
+	pathParts[0] = "/users"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -526,7 +526,7 @@ func (c *Client) sendUserUsersList(ctx context.Context, params UserUsersListPara
 //
 // Deletes the specified user in the path.
 //
-// DELETE /{userId}
+// DELETE /users/{userId}
 func (c *Client) UserUsersRemove(ctx context.Context, params UserUsersRemoveParams) (UserUsersRemoveRes, error) {
 	res, err := c.sendUserUsersRemove(ctx, params)
 	return res, err
@@ -536,7 +536,7 @@ func (c *Client) sendUserUsersRemove(ctx context.Context, params UserUsersRemove
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("user.users.remove"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/{userId}"),
+		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Run stopwatch.
@@ -569,7 +569,7 @@ func (c *Client) sendUserUsersRemove(ctx context.Context, params UserUsersRemove
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/"
+	pathParts[0] = "/users/"
 	{
 		// Encode "userId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{

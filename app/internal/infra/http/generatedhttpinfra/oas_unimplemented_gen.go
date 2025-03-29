@@ -17,7 +17,7 @@ var _ Handler = UnimplementedHandler{}
 //
 // Creates a new user.
 //
-// POST /
+// POST /users
 func (UnimplementedHandler) UserUsersCreate(ctx context.Context, req OptCreateUser) (r UserUsersCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -26,7 +26,7 @@ func (UnimplementedHandler) UserUsersCreate(ctx context.Context, req OptCreateUs
 //
 // Describes the specified user in the path.
 //
-// GET /{userId}
+// GET /users/{userId}
 func (UnimplementedHandler) UserUsersDescribe(ctx context.Context, params UserUsersDescribeParams) (r UserUsersDescribeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -35,7 +35,7 @@ func (UnimplementedHandler) UserUsersDescribe(ctx context.Context, params UserUs
 //
 // Updates the specified user in the path.
 //
-// PUT /{userId}
+// PUT /users/{userId}
 func (UnimplementedHandler) UserUsersEdit(ctx context.Context, req OptUpdateUser, params UserUsersEditParams) (r UserUsersEditRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -44,7 +44,7 @@ func (UnimplementedHandler) UserUsersEdit(ctx context.Context, req OptUpdateUser
 //
 // Lists all the users.
 //
-// GET /
+// GET /users
 func (UnimplementedHandler) UserUsersList(ctx context.Context, params UserUsersListParams) (r UserUsersListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -53,7 +53,7 @@ func (UnimplementedHandler) UserUsersList(ctx context.Context, params UserUsersL
 //
 // Deletes the specified user in the path.
 //
-// DELETE /{userId}
+// DELETE /users/{userId}
 func (UnimplementedHandler) UserUsersRemove(ctx context.Context, params UserUsersRemoveParams) (r UserUsersRemoveRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
