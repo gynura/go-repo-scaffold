@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
+	"userservice/cmd/config"
 	"userservice/cmd/flags"
+	"userservice/internal/graph"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,7 +20,7 @@ const (
 	defaultServerAddress = "localhost"
 	defaultServerPort    = 8080
 	// This is coupled to this test-project, in a real app the default config path should make more sense
-	defaultConfigPath = "../test/examples/service-config.yml"
+	defaultConfigPath = "../test/examples"
 )
 
 var rootCmd = &cobra.Command{
@@ -48,7 +51,6 @@ func configureCmd(cmd *cobra.Command) {
 	cmd.PersistentFlags().Int(flags.PortFlag, defaultServerPort, "Port to listen on")
 	cmd.PersistentFlags().String(flags.ConfigPathFlag, defaultConfigPath, "Path to the service configuration file")
 
-	// Bind flags to viper
 	err := viper.BindPFlag(flags.ServerAddressFlag, cmd.PersistentFlags().Lookup(flags.ServerAddressFlag))
 	if err != nil {
 		panic(fmt.Sprintf("Error binding ServerAddressFlag: %s\n", err))
@@ -62,7 +64,6 @@ func configureCmd(cmd *cobra.Command) {
 		panic(fmt.Sprintf("Error binding ConfigPathFlag: %s\n", err))
 	}
 
-	// I feel like it is better to panic here in the cmd level
 	cobra.OnInitialize(ensureConfigFileExists)
 }
 
@@ -74,15 +75,32 @@ func ensureConfigFileExists() {
 	if err != nil {
 		panic(fmt.Sprintf("Config file [%s] does not exist\n", configPath))
 	}
+
+	viper.SetConfigFile(configPath)
 }
 
-func startService(cmd *cobra.Command, args []string) {
+func startService(_ *cobra.Command, _ []string) {
 	address := viper.GetString(flags.ServerAddressFlag)
 	port := viper.GetInt(flags.PortFlag)
 	configPath := viper.GetString(flags.ConfigPathFlag)
 
-	fmt.Printf("Starting service at %s:%d with config from %s\n",
+	log.Printf("Starting service at %s:%d configured with %s\n\n",
 		address, port, configPath)
 
-	// TODO: run the server here
+	graphConfig, err := config.GetGraphConfig(configPath)
+	if err != nil {
+		panic(fmt.Sprintf("Error loading config: %s\n", err))
+	}
+
+	service, err := graph.New(*graphConfig)
+	if err != nil {
+		panic(fmt.Sprintf("Error creating service graph: %s\n", err))
+	}
+
+	err = service.StartServer(graph.StartServerOptions{
+		Port: string(rune(port)),
+	})
+	if err != nil {
+		panic(fmt.Sprintf("Error starting service server: %s\n", err))
+	}
 }

@@ -3,13 +3,14 @@ package config
 
 import (
 	"fmt"
+	"userservice/internal/graph"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/spf13/viper"
 )
 
 const (
-	configFileName      = "service-config.yml"
+	configFileName      = "service-config.yaml"
 	configFileExtension = "yaml"
 )
 
@@ -55,7 +56,7 @@ type PostgresSQLClient struct {
 	MaxConnectionLifetime *int `mapstructure:"maxConnectionLifetime"`
 }
 
-func ReadConfig(path string) (*Config, error) {
+func readConfig(path string) (*Config, error) {
 	viper.SetConfigName(configFileName)
 	viper.SetConfigType(configFileExtension)
 	viper.AddConfigPath(path)
@@ -75,4 +76,37 @@ func ReadConfig(path string) (*Config, error) {
 	}
 
 	return &staticConfiguration, nil
+}
+
+func GetGraphConfig(path string) (*graph.Config, error) {
+	config, err := readConfig(path)
+	if err != nil {
+		return nil, err
+	}
+
+	graphConfig := graph.Config{
+		Libraries: graph.LibrariesConfig{
+			PersistenceFw: graph.PersistenceFwConfig{
+				PostgreSQL: &graph.PostgresSQLConfig{
+					Host:     config.DbConfig.PostgreSQL.Host,
+					Port:     &config.DbConfig.PostgreSQL.Port,
+					Scheme:   &config.DbConfig.PostgreSQL.Scheme,
+					Username: config.DbConfig.PostgreSQL.Username,
+					Password: config.DbConfig.PostgreSQL.Password,
+					SSLMode:  config.DbConfig.PostgreSQL.SSLMode,
+					Database: config.DbConfig.PostgreSQL.Database,
+				},
+			},
+		},
+	}
+
+	if config.DbConfig.PostgreSQL.SQLClient != nil {
+		graphConfig.Libraries.PersistenceFw.PostgreSQL.SQLClient = &graph.PostgresSQLClientConfig{
+			MaxIdleConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxIdleConnections,
+			MaxOpenConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxOpenConnections,
+			MaxConnectionLifetime: config.DbConfig.PostgreSQL.SQLClient.MaxConnectionLifetime,
+		}
+	}
+
+	return &graphConfig, nil
 }

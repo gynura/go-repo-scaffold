@@ -15,7 +15,7 @@ type LibrariesConfig struct {
 // PersistenceFwConfig persistence framework configuration
 type PersistenceFwConfig struct {
 	// PostgreSQL configuration to connect to a PostgreSQL database
-	PostgreSQL *PostgresSQLConfig `valid:"optional"`
+	PostgreSQL *PostgresSQLConfig `valid:"optional"` // This is optional since the idea is to extend it with as many databases as supported
 }
 
 // PostgresSQLConfig configuration to connect to a PostgreSQL database
