@@ -2,7 +2,7 @@
 package flags
 
 const (
-	ServerAddressFlag = "listen-address"
-	RestAPIPortFlag   = "rest-api-port"
-	ConfigPathFlag    = "config"
+	ServerAddressFlag = "address"
+	PortFlag          = "port"
+	ConfigPathFlag    = "config-path"
 )

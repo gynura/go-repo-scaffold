@@ -1,4 +1,4 @@
-// Package postgres defines the PostgresSQL functionalities.
+// Package postgresql defines the PostgresSQL functionalities.
 package postgres
 
 import (
@@ -14,14 +14,14 @@ import (
 	"github.com/jmoiron/sqlx/reflectx"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	_ "github.com/jackc/pgx/v5/stdlib" // register userstorage driver
+	_ "github.com/jackc/pgx/v5/stdlib" // needed to register driver
 	"github.com/jmoiron/sqlx"
 
 	sqlfw "userservice/internal/pkg/persistence/sql"
 )
 
 const (
-	DialectName = "postgres"
+	DialectName = "postgresql"
 )
 
 func init() {
@@ -36,7 +36,7 @@ func init() {
 	sqlfw.RegisterDialect(DialectName, &db)
 }
 
-const defaultMigrationsTable = "adhara_migrations"
+const defaultMigrationsTable = "migrations"
 
 type Postgres struct {
 	db              *sqlx.DB
@@ -48,7 +48,7 @@ type Postgres struct {
 func (p *Postgres) GetConnectionData(config interface{}) (*sqlfw.ConnectionData, error) {
 	options, ok := config.(*sqlfw.PostgresInfo)
 	if !ok {
-		return nil, fmt.Errorf("invalid config to open a connection to postgres [%v]", config)
+		return nil, fmt.Errorf("invalid config to open a connection to postgresql [%v]", config)
 	}
 
 	port := strconv.Itoa(options.Port)
@@ -116,7 +116,7 @@ func (p *Postgres) InitMigration(ctx context.Context, migrationsTablePrefix *str
 		p.migrationsTable = *migrationsTablePrefix + "_" + p.migrationsTable
 	}
 
-	err := p.ensureAdharaMigrationTables(ctx)
+	err := p.ensureMigrationTableExists(ctx)
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func (p *Postgres) RunMigration(ctx context.Context, migration string) error {
 	return nil
 }
 
-func (p *Postgres) ensureAdharaMigrationTables(ctx context.Context) (err error) {
+func (p *Postgres) ensureMigrationTableExists(ctx context.Context) (err error) {
 	query := `CREATE TABLE IF NOT EXISTS ` + p.migrationsTable + ` (version bigint not null primary key, dirty boolean not null, description text)`
 	if _, err = p.conn.ExecContext(ctx, query); err != nil {
 		return err

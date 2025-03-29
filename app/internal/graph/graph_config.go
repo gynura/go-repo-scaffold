@@ -6,7 +6,7 @@ type Config struct {
 	Libraries LibrariesConfig `valid:"required"`
 }
 
-// LibrariesConfig configuration of the different libraries used by the signare
+// LibrariesConfig configuration of the different libraries used by the service
 type LibrariesConfig struct {
 	// PersistenceFw persistence framework configuration
 	PersistenceFw PersistenceFwConfig `valid:"required"`
@@ -24,7 +24,7 @@ type PostgresSQLConfig struct {
 	Host string `valid:"required"`
 	// Port of database system. Default value is 5432
 	Port *int `valid:"optional"`
-	// Scheme of database system. Default value is "postgres"
+	// Scheme of database system. Default value is "postgresql"
 	Scheme *string `valid:"optional"`
 	// Username to use in database system
 	Username string `valid:"required"`

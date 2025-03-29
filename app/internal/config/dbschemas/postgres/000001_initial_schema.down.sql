@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS sv_users;
+DROP TABLE IF EXISTS svc_users;

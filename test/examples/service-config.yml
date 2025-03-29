@@ -2,8 +2,8 @@ database:
   postgresql:
     host: 'localhost'
     port: 5432
-    scheme: 'postgres'
+    scheme: 'postgresql'
     database: 'micro_users_db'
-    username: 'postgres'
-    password: 'postgres'
+    username: 'postgresql'
+    password: 'postgresql'
     sslmode: 'disable'

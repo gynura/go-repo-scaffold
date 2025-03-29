@@ -1,4 +1,4 @@
-CREATE TABLE sv_users
+CREATE TABLE svc_users
 (
     id         VARCHAR(64)  NOT NULL,
     first_name VARCHAR(64)  NOT NULL,
@@ -10,4 +10,4 @@ CREATE TABLE sv_users
     created_at TIMESTAMPTZ  NOT NULL,
     updated_at TIMESTAMPTZ  NOT NULL
 );
-CREATE INDEX idx_sv_users_country ON sv_users (country);
+CREATE INDEX idx_svc_users_country ON svc_users (country);

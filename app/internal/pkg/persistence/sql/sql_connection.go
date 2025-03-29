@@ -22,7 +22,7 @@ type Connection interface {
 // ConnectionFwOptions defines the options to configure a Connection
 type ConnectionFwOptions struct {
 	// Postgres defines the PostgresSQL connection information
-	Postgres *PostgresInfo `mapstructure:"postgres"`
+	Postgres *PostgresInfo `mapstructure:"postgresql"`
 	// SQLite defines the SQLite connection information
 	SQLite *SQLiteInfo
 }
@@ -108,7 +108,7 @@ func checkOnlyOneNilDialect(options ConnectionFwOptions) (bool, string, interfac
 
 	if options.Postgres != nil {
 		count++
-		propName = "postgres"
+		propName = "postgresql"
 		config = options.Postgres
 	}
 	if options.SQLite != nil {

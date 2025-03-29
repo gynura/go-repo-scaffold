@@ -1,8 +1,8 @@
 //Extracted from https://github.com/hyperledger-labs/signare/blob/main/app/pkg/commons/persistence/dbmigrator/dbmigrator.go
-// Which is an opensource project that I developed alongside my colleagues on my current job
+// Which is an opensource project that I developed alongside my work colleagues
 // I just refactored it to use slog and not the custom logger we developed
 
-// Package dbmigrator defines the functionalities for database migrations.
+// Package dbmigrator defines the functionalities for database migration
 package dbmigrator
 
 import (

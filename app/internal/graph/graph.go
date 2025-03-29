@@ -18,10 +18,6 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-const (
-	defaultAPIPort = "8080"
-)
-
 type ServiceGraph struct {
 	config Config
 
@@ -85,7 +81,7 @@ type StartServerOptions struct {
 
 func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 	if options.Port == "" {
-		options.Port = defaultAPIPort
+		return fmt.Errorf("port is required")
 	}
 
 	infraServerHandler, err := generatedhttpinfra.NewServer(graph.httpGraph.HTTPHandler)

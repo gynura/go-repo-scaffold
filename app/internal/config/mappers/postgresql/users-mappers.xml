@@ -1,6 +1,6 @@
 <mapping id="service.user">
     <statement id="insert">
-        INSERT INTO sv_users (
+        INSERT INTO svc_users (
         id,
         first_name,
         last_name,
@@ -34,7 +34,7 @@
         country,
         email
         FROM
-        sv_users
+        svc_users
         WHERE
         {{ if .FilterGroup }}
         {{ range $counter, $filter := .FilterGroup.Filters }}
@@ -60,13 +60,13 @@
         country,
         email
         FROM
-        sv_users
+        svc_users
         WHERE
         id=:id
     </statement>
     <statement id="update">
         UPDATE
-        sv_users
+        svc_users
         SET
         last_name=:last_name,
         first_name=:first_name,
@@ -80,11 +80,11 @@
     </statement>
     <statement id="delete">
         DELETE FROM
-        sv_users
+        svc_users
         WHERE
         id=:id
     </statement>
     <statement id="exists">
-        SELECT 1 AS exists_result where EXISTS(SELECT 1 FROM sv_users WHERE id=:id)
+        SELECT 1 AS exists_result where EXISTS(SELECT 1 FROM svc_users WHERE id=:id)
     </statement>
 </mapping>
