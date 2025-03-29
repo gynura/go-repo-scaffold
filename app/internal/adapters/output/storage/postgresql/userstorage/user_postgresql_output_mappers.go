@@ -17,15 +17,15 @@ func mapToCreateDB(user entities.User) (*userstorageinfra.CreateInput, error) {
 
 	db := userstorageinfra.CreateInput{
 		UserDB: userstorageinfra.UserDB{
-			ResourceID: user.ResourceID,
-			FirstName:  user.FirstName,
-			LastName:   user.LastName,
-			Email:      user.Email,
-			Password:   user.Password(),
-			Country:    user.Country,
-			Nickname:   user.Nickname,
-			CreatedAt:  user.CreatedAt.Time,
-			UpdatedAt:  user.UpdatedAt.Time,
+			ID:        user.ResourceID.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+			Password:  user.Password(),
+			Country:   user.Country,
+			Nickname:  user.Nickname,
+			CreatedAt: user.CreatedAt.Time,
+			UpdatedAt: user.UpdatedAt.Time,
 		},
 	}
 	return &db, nil
@@ -39,15 +39,15 @@ func mapToUpdateDB(user entities.User) (*userstorageinfra.EditInput, error) {
 
 	db := userstorageinfra.EditInput{
 		UserDB: userstorageinfra.UserDB{
-			ResourceID: user.ResourceID,
-			FirstName:  user.FirstName,
-			LastName:   user.LastName,
-			Email:      user.Email,
-			Password:   user.Password(),
-			Country:    user.Country,
-			Nickname:   user.Nickname,
-			CreatedAt:  user.CreatedAt.Time,
-			UpdatedAt:  user.UpdatedAt.Time,
+			ID:        user.ResourceID.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+			Password:  user.Password(),
+			Country:   user.Country,
+			Nickname:  user.Nickname,
+			CreatedAt: user.CreatedAt.Time,
+			UpdatedAt: user.UpdatedAt.Time,
 		},
 	}
 	return &db, nil

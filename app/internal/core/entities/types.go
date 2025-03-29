@@ -19,7 +19,7 @@ const (
 
 // ResourceID defines the standard format for unique identifiers for resources
 type ResourceID struct {
-	ID string `json:"id" storage:"id"`
+	ID string `json:"id"`
 }
 
 type Timestamps struct {

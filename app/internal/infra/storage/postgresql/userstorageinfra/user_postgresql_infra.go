@@ -41,7 +41,7 @@ func (repository *StorageInfra) Add(ctx context.Context, db CreateInput) (*UserD
 		return nil, err
 	}
 
-	result, err := repository.Get(ctx, db.ResourceID)
+	result, err := repository.Get(ctx, entities.ResourceID{ID: db.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (repository *StorageInfra) Get(ctx context.Context, id entities.ResourceID)
 }
 
 func (repository *StorageInfra) Edit(ctx context.Context, db EditInput) (*persistence.ExecuteStmtWithStorageResultOutput, error) {
-	_, err := repository.Exists(ctx, db.ResourceID)
+	_, err := repository.Exists(ctx, entities.ResourceID{ID: db.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +114,11 @@ func (repository *StorageInfra) GetByNickname(ctx context.Context, nickname stri
 	return userDBItems, nil
 }
 
-func (repository *StorageInfra) Exists(ctx context.Context, id entities.ResourceID) ([]ExistsOutput, error) {
+func (repository *StorageInfra) Exists(ctx context.Context, resourceID entities.ResourceID) ([]ExistsOutput, error) {
 	var existsResult []ExistsOutput
 
 	db := UserDB{}
-	db.ResourceID = id
+	db.ID = resourceID.ID
 
 	err := repository.genericStorage.QueryAll(ctx, existsUserMapperID, db, &existsResult)
 	if err != nil {

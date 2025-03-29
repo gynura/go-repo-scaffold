@@ -2,12 +2,11 @@ package userstorageinfra
 
 import (
 	"time"
-	"userservice/internal/core/entities"
 )
 
 // UserDB is the data struct of the resource in the database
 type UserDB struct {
-	entities.ResourceID
+	ID        string    `storage:"id" valid:"required"`
 	FirstName string    `storage:"first_name" valid:"required"`
 	LastName  string    `storage:"last_name" valid:"required"`
 	Email     string    `storage:"email" valid:"required, email"`

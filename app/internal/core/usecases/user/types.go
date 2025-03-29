@@ -37,7 +37,7 @@ type GetUserInput struct {
 
 // GetUserOutput represents the response structure containing the requested User data.
 type GetUserOutput struct {
-	User entities.User
+	entities.User
 }
 
 // EditUserInput represents the input parameters required to update an existing User.
@@ -53,7 +53,7 @@ type EditUserInput struct {
 
 // EditUserOutput represents the response structure after updating a User.
 type EditUserOutput struct {
-	User entities.User
+	entities.User
 }
 
 // DeleteUserInput represents the input parameters required to delete a User.
@@ -63,7 +63,7 @@ type DeleteUserInput struct {
 
 // DeleteUserOutput represents the response structure after deleting a User.
 type DeleteUserOutput struct {
-	User entities.User
+	entities.User
 }
 
 // ListUsersInput represents the input parameters to retrieve a paginated list of Users.

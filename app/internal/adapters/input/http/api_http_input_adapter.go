@@ -71,8 +71,40 @@ func (d DefaultAPIAdapter) UserUsersCreate(ctx context.Context, req generatedhtt
 }
 
 func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generatedhttpinfra.UserUsersDescribeParams) (generatedhttpinfra.UserUsersDescribeRes, error) {
-	//TODO implement me
-	panic("implement me")
+	input := user.GetUserInput{
+		ResourceID: entities.ResourceID{
+			ID: params.UserId,
+		},
+	}
+	describedUser, err := d.userUseCase.GetUser(ctx, input)
+	if err != nil {
+		if err.IsInternalError() {
+			response := generatedhttpinfra.UserUsersDescribeInternalServerError(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		if err.IsNotFoundError() {
+			response := generatedhttpinfra.UserUsersDescribeNotFound(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		response := generatedhttpinfra.UserUsersDescribeBadRequest(mapServiceErrorToHTTPError(*err))
+		return &response, nil
+	}
+
+	return &generatedhttpinfra.DescribeUser{
+		MetaInformation: generatedhttpinfra.MetaInformation{
+			ID:        describedUser.ID,
+			CreatedAt: describedUser.CreatedAt.Time,
+			UpdatedAt: describedUser.UpdatedAt.Time,
+		},
+		SpecificData: generatedhttpinfra.UserSpecificData{
+			FirstName: describedUser.FirstName,
+			LastName:  describedUser.LastName,
+			Nickname:  describedUser.Nickname,
+			Password:  describedUser.Password(),
+			Email:     describedUser.Email,
+			Country:   describedUser.Country,
+		},
+	}, nil
 }
 
 func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpinfra.OptUpdateUser, params generatedhttpinfra.UserUsersEditParams) (generatedhttpinfra.UserUsersEditRes, error) {

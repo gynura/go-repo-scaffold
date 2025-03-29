@@ -133,8 +133,24 @@ func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInpu
 }
 
 func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError) {
-	//TODO implement me
-	panic("implement me")
+	_, err := govalidator.ValidateStruct(input)
+	if err != nil {
+		return nil, errors.NewInvalidArgumentError("invalid input to describe user").FromError(err).
+			WithMessage("Invalid input to describe user. Please review your input fields and try again.")
+	}
+
+	storageUser, getErr := useCase.storage.Get(ctx, input.ResourceID)
+	if getErr != nil {
+		if getErr.IsNotFoundError() {
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+				WithMessage("user %s not found", input.ResourceID.ID)
+		}
+		return nil, errors.NewInternalError("failed to get user").FromError(err)
+	}
+
+	return &GetUserOutput{
+		User: *storageUser,
+	}, nil
 }
 
 func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError) {
