@@ -14,6 +14,7 @@ import (
 	"userservice/internal/infra/http/generatedhttpinfra"
 	"userservice/internal/pkg/commons/validators"
 	"userservice/internal/pkg/persistence/sql"
+	_ "userservice/internal/pkg/persistence/sql/init" // Imported to run the supported sql dialects registry
 
 	"github.com/asaskevich/govalidator"
 )

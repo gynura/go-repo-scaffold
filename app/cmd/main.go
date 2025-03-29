@@ -97,6 +97,9 @@ func startService(_ *cobra.Command, _ []string) {
 		panic(fmt.Sprintf("Error creating service graph: %s\n", err))
 	}
 
+	// Build injects all the required dependencies
+	service.Build()
+
 	err = service.StartServer(graph.StartServerOptions{
 		Port: string(rune(port)),
 	})
