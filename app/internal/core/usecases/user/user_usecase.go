@@ -13,6 +13,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	emailAlreadyExistsMessage    string = "Email %s is already registered"
+	nicknameAlreadyExistsMessage string = "Nickname %s is not available"
+)
+
 // UseCase defines the functionality to manage User resources
 type UseCase interface {
 	// CreateUser creates a User. It returns the created User or an error if it fails
@@ -66,13 +71,13 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 
 	// Nicknames are unique alongside IDs and Emails, in order to avoid coupling this check to the plugged db, the business logic needs to implement this checks
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage("nickname %s already exists", input.Nickname)
+		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
 	}
 
 	// Emails are also unique in our model so before creating a user we need to check if there's one
 	// This way we can differentiate between an invalid argument and an already exists error
 	if useCase.emailAlreadyExists(ctx, input.Email) {
-		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage("email %s already exists", input.Email)
+		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
 	}
 
 	// As the API defines, if no ID is informed, the service will generate a UUID for the resource
@@ -154,8 +159,55 @@ func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (
 }
 
 func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError) {
-	//TODO implement me
-	panic("implement me")
+	_, err := govalidator.ValidateStruct(input)
+	if err != nil {
+		return nil, errors.NewInvalidArgumentError("invalid input to edit user").FromError(err).
+			WithMessage("Invalid input to edit user. Please review your input fields and try again.")
+	}
+
+	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
+		return nil, errors.NewInvalidArgumentError("nickname %s already exists", input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
+	}
+
+	if useCase.emailAlreadyExists(ctx, input.Email) {
+		return nil, errors.NewInvalidArgumentError("email %s already exists", input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
+	}
+
+	// When editing a resource we must first fetch the state on the storage of that resource prior to the editing (source of truth)
+	userToBeUpdated, getErr := useCase.storage.Get(ctx, input.ResourceID)
+	if getErr != nil {
+		if getErr.IsNotFoundError() {
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+				WithMessage("user %s not found", input.ResourceID.ID)
+		}
+		return nil, errors.NewInternalError("failed to get user").FromError(err)
+	}
+
+	// Then we will edit that user with the editable fields
+	userToBeUpdated.MetaInformation.Timestamps.UpdatedAt = time.Now()
+	userToBeUpdated.Nickname = input.Nickname
+	userToBeUpdated.Email = input.Email
+	userToBeUpdated.FirstName = input.FirstName
+	userToBeUpdated.LastName = input.LastName
+	userToBeUpdated.Country = input.Country
+	err = userToBeUpdated.SetPassword(input.Password)
+	if err != nil {
+		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
+	}
+
+	storageUser, getErr := useCase.storage.Edit(ctx, *userToBeUpdated)
+	if getErr != nil {
+		if getErr.IsNotFoundError() {
+			return nil, errors.NewNotFoundError("user %s not found", input.ResourceID.ID).FromError(err).
+				WithMessage("user %s not found", input.ResourceID.ID)
+		}
+		return nil, errors.NewInternalError("failed to edit user").FromError(err)
+	}
+
+	return &EditUserOutput{
+		User: *storageUser,
+	}, nil
+
 }
 
 func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {

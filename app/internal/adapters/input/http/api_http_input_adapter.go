@@ -45,11 +45,15 @@ func (d DefaultAPIAdapter) UserUsersCreate(ctx context.Context, req generatedhtt
 	}
 	createdUser, err := d.userUseCase.CreateUser(ctx, input)
 	if err != nil {
-		if err.IsInternalError() {
-			response := generatedhttpinfra.UserUsersCreateInternalServerError(mapServiceErrorToHTTPError(*err))
+		if err.IsInvalidArgumentError() {
+			response := generatedhttpinfra.UserUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
+		if err.IsAlreadyExistsError() {
+			response := generatedhttpinfra.UserUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		response := generatedhttpinfra.UserUsersCreateInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -108,8 +112,45 @@ func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generat
 }
 
 func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpinfra.OptUpdateUser, params generatedhttpinfra.UserUsersEditParams) (generatedhttpinfra.UserUsersEditRes, error) {
-	//TODO implement me
-	panic("implement me")
+	input := user.EditUserInput{
+		ResourceID: entities.ResourceID{ID: params.UserId},
+		FirstName:  req.Value.SpecificData.FirstName,
+		LastName:   req.Value.SpecificData.LastName,
+		Email:      req.Value.SpecificData.Email,
+		Password:   req.Value.SpecificData.Password,
+		Country:    req.Value.SpecificData.Country,
+		Nickname:   req.Value.SpecificData.Nickname,
+	}
+
+	editedUser, err := d.userUseCase.EditUser(ctx, input)
+	if err != nil {
+		if err.IsInvalidArgumentError() {
+			response := generatedhttpinfra.UserUsersEditBadRequest(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		if err.IsNotFoundError() {
+			response := generatedhttpinfra.UserUsersEditNotFound(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		response := generatedhttpinfra.UserUsersEditInternalServerError(mapServiceErrorToHTTPError(*err))
+		return &response, nil
+	}
+
+	return &generatedhttpinfra.DescribeUser{
+		MetaInformation: generatedhttpinfra.MetaInformation{
+			ID:        editedUser.ID,
+			CreatedAt: editedUser.CreatedAt.Time,
+			UpdatedAt: editedUser.UpdatedAt.Time,
+		},
+		SpecificData: generatedhttpinfra.UserSpecificData{
+			FirstName: editedUser.FirstName,
+			LastName:  editedUser.LastName,
+			Nickname:  editedUser.Nickname,
+			Password:  editedUser.Password(),
+			Email:     editedUser.Email,
+			Country:   editedUser.Country,
+		},
+	}, nil
 }
 
 func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedhttpinfra.UserUsersListParams) (generatedhttpinfra.UserUsersListRes, error) {
