@@ -36,13 +36,13 @@ type UseCase interface {
 type DefaultUseCase struct {
 	storage Storage
 	logger  *logger.Logger
-	//queue   Queue
+	queue   Queue
 }
 
 // ProvideUseCaseOptions defines the options to configure a UserUseCase implementation
 type ProvideUseCaseOptions struct {
 	Storage Storage
-	//Queue   Queue
+	Queue   Queue
 }
 
 // ProvideDefaultUseCase provides the default implementation of the User use case logic
@@ -50,13 +50,14 @@ func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, erro
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")
 	}
-	//if options.Queue == nil {
-	//	return nil, errors.NewInvalidArgumentError("no queue provided")
-	//}
+	if options.Queue == nil {
+		return nil, errors.NewInvalidArgumentError("no queue provided")
+	}
+
 	return &DefaultUseCase{
 		storage: options.Storage,
-		//queue:   options.Queue,
-		logger: logger.NewLogger(),
+		queue:   options.Queue,
+		logger:  logger.NewLogger(),
 	}, nil
 }
 
@@ -134,11 +135,11 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 		"userId": input.ID,
 	})
 
-	// TODO: uncomment once rabbitmq is injected
-	//queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
-	//if queueErr != nil {
-	//	return nil, queueErr
-	//}
+	queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
+	if queueErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(queueErr, user.ID)
+		return nil, errors.NewInternalError("error notifying created user with id: ", user.ID).FromError(queueErr)
+	}
 
 	return &CreateUserOutput{
 		User: *storedUser,
@@ -263,7 +264,7 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
 	}
 
-	storageUser, editErr := useCase.storage.Edit(ctx, *userToBeUpdated)
+	storedUser, editErr := useCase.storage.Edit(ctx, *userToBeUpdated)
 	if editErr != nil {
 		useCase.logger.Error(ctx).UserServiceError(editErr, input.ID)
 		if editErr.IsNotFoundError() {
@@ -277,8 +278,14 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 		"userId": input.ID,
 	})
 
+	queueErr := useCase.queue.NotifyEditUser(ctx, storedUser.ResourceID)
+	if queueErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(queueErr, storedUser.ID)
+		return nil, errors.NewInternalError("error notifying edited user with id: ", storedUser.ID).FromError(queueErr)
+	}
+
 	return &EditUserOutput{
-		User: *storageUser,
+		User: *storedUser,
 	}, nil
 
 }
@@ -308,6 +315,12 @@ func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserIn
 	useCase.logger.Info(ctx).Attributes("successfully deleted user", map[string]any{
 		"userId": input.ID,
 	})
+
+	queueErr := useCase.queue.NotifyRemoveUser(ctx, removedUser.ResourceID)
+	if queueErr != nil {
+		useCase.logger.Error(ctx).UserServiceError(queueErr, removedUser.ID)
+		return nil, errors.NewInternalError("error notifying removed user with id: ", removedUser.ID).FromError(queueErr)
+	}
 
 	return &DeleteUserOutput{
 		User: *removedUser,

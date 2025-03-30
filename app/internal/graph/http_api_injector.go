@@ -8,12 +8,12 @@ import (
 	"userservice/internal/infra/http/generatedhttpinfra"
 )
 
-type httpGraph struct {
+type httpAPIGraph struct {
 	HTTPHandler generatedhttpinfra.Handler
 }
 
-var httpSet = wire.NewSet(
-	wire.Struct(new(httpGraph), "*"),
+var httpAPISet = wire.NewSet(
+	wire.Struct(new(httpAPIGraph), "*"),
 
 	// HTTP Input Adapter
 	http.ProvideDefaultAPIAdapter,
@@ -21,13 +21,13 @@ var httpSet = wire.NewSet(
 	wire.Struct(new(http.DefaultAPIAdapterOptions), "*"),
 )
 
-func initializeHTTPAdapters(
+func initializeHTTPAPIGraph(
 	useCases *useCasesGraph,
-) (*httpGraph, error) {
-	wire.Build(httpSet,
+) (*httpAPIGraph, error) {
+	wire.Build(httpAPISet,
 		wire.FieldsOf(new(*useCasesGraph),
 			"userUseCase",
 		),
 	)
-	return &httpGraph{}, nil
+	return &httpAPIGraph{}, nil
 }

@@ -28,7 +28,7 @@ var storageSet = wire.NewSet(
 	wire.Struct(new(userstorage.StorageAdapterOptions), "*"),
 )
 
-func InitializeStorage(
+func initializeStorage(
 	persistenceFramework persistence.Storage,
 ) (*storageGraph, error) {
 	wire.Build(storageSet)

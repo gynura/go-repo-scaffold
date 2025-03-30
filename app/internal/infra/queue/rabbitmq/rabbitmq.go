@@ -1,4 +1,4 @@
-// Package rabbitmq defines the infra layer forp publishing messages through a rabbit mq queue
+// Package rabbitmq defines the infra layer for publishing messages through a rabbit mq queue
 package rabbitmq
 
 import (
@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/url"
 	"userservice/internal/core/events"
+	"userservice/internal/infra/queue"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // userServiceExchangeName defines the only exchange in the user microservice domain
+// A consumer must declare the queue and bind it to the exchange to receive messages
 const userServiceExchangeName = "user_service"
 
 type Publisher struct {
@@ -22,10 +24,12 @@ type Publisher struct {
 type NewPublisherOptions struct {
 	Username string
 	Password string
-	Host     string // e.g., "rabbitmq"
-	Port     int    // e.g., 5672
-	VHost    string // e.g., "/"
+	Host     string
+	Port     int
+	VHost    string
 }
+
+var _ queue.Publisher = new(Publisher)
 
 // buildURL constructs the AMQP URL
 func (opts NewPublisherOptions) buildURL() string {
@@ -39,7 +43,7 @@ func (opts NewPublisherOptions) buildURL() string {
 }
 
 // TODO: define custom rabbitmq infra errors so we can type errors at this layer
-func NewPublisher(options NewPublisherOptions) (*Publisher, error) {
+func ProvidePublisher(options NewPublisherOptions) (*Publisher, error) {
 	conn, err := amqp.Dial(options.buildURL())
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)

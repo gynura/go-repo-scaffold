@@ -1,4 +1,4 @@
-package userrabbitmq
+package userqueue
 
 import (
 	"userservice/internal/core/entities"

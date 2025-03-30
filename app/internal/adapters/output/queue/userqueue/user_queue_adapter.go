@@ -1,36 +1,36 @@
-package userrabbitmq
+package userqueue
 
 import (
 	"context"
 	"userservice/internal/core/entities"
 	"userservice/internal/core/usecases/user"
-	"userservice/internal/infra/queue/rabbitmq"
+	"userservice/internal/infra/queue"
 	"userservice/internal/pkg/errors"
 )
 
-// UserQueueAdapter defines the default implementation of the user.Queue interface
-type UserQueueAdapter struct {
-	publisher rabbitmq.Publisher
+// QueueAdapter defines the default implementation of the user.Queue interface
+type QueueAdapter struct {
+	publisher queue.Publisher
 }
 
-// ProvideUserQueueAdapterOptions defines the options to configure a UserUserQueueAdapter
-type ProvideUserQueueAdapterOptions struct {
-	Publisher *rabbitmq.Publisher
+// ProvideQueueAdapterOptions defines the options to configure a UserUserQueueAdapter
+type ProvideQueueAdapterOptions struct {
+	Publisher *queue.Publisher
 }
 
-// ProvideUserQueueAdapter creates a UserUserQueueAdapter with the given options
-func ProvideUserQueueAdapter(options ProvideUserQueueAdapterOptions) (*UserQueueAdapter, error) {
-	if options.Publisher != nil {
+// ProvideQueueAdapter creates a UserUserQueueAdapter with the given options
+func ProvideQueueAdapter(options ProvideQueueAdapterOptions) (*QueueAdapter, error) {
+	if options.Publisher == nil {
 		return nil, errors.NewInternalError("no publisher provided")
 	}
-	return &UserQueueAdapter{
+	return &QueueAdapter{
 		publisher: *options.Publisher,
 	}, nil
 }
 
-var _ user.Queue = new(UserQueueAdapter)
+var _ user.Queue = new(QueueAdapter)
 
-func (adapter UserQueueAdapter) NotifyCreatedUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
+func (adapter QueueAdapter) NotifyCreatedUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
 	createdUserEvent := userEvent{
 		eventType: createdUserEventType,
 		userID:    userID,
@@ -40,7 +40,7 @@ func (adapter UserQueueAdapter) NotifyCreatedUser(_ context.Context, userID enti
 	if err != nil {
 		// TODO: add error translator to be able to control error types from the infra layer
 		// If we had the error translator we could do something like:
-		// if translator.IsConnectionTimeout() then return errors.NewConnectionTimeout("rabbit mq connection timeout").FromError(err)...
+		// if translator.IsConnectionTimeout() then return errors.NewConnectionTimeout("queue connection timeout").FromError(err)...
 		// For now we will wrap all of them as internal errors
 		return errors.NewInternalError("error publishing created user event").FromError(err)
 	}
@@ -48,7 +48,7 @@ func (adapter UserQueueAdapter) NotifyCreatedUser(_ context.Context, userID enti
 	return nil
 }
 
-func (adapter UserQueueAdapter) NotifyRemoveUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
+func (adapter QueueAdapter) NotifyRemoveUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
 	removeUserEvent := userEvent{
 		eventType: removedUserEventType,
 		userID:    userID,
@@ -62,7 +62,7 @@ func (adapter UserQueueAdapter) NotifyRemoveUser(_ context.Context, userID entit
 	return nil
 }
 
-func (adapter UserQueueAdapter) NotifyEditUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
+func (adapter QueueAdapter) NotifyEditUser(_ context.Context, userID entities.ResourceID) *errors.ServiceError {
 	editUserEvent := userEvent{
 		eventType: editedUserEventType,
 		userID:    userID,

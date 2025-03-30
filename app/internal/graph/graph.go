@@ -13,7 +13,6 @@ import (
 	"time"
 	"userservice/internal/infra/http/generatedhttpinfra"
 	"userservice/internal/pkg/commons/validators"
-	"userservice/internal/pkg/persistence/sql"
 	_ "userservice/internal/pkg/persistence/sql/init" // Imported to run the supported sql dialects registry
 
 	"github.com/asaskevich/govalidator"
@@ -25,7 +24,8 @@ type ServiceGraph struct {
 	useCasesGraph  *useCasesGraph
 	storageGraph   *storageGraph
 	librariesGraph *librariesGraph
-	httpGraph      *httpGraph
+	httpAPIGraph   *httpAPIGraph
+	infraGraph     *infraGraph
 }
 
 func New(config Config) (*ServiceGraph, error) {
@@ -52,27 +52,29 @@ func (graph *ServiceGraph) Build() {
 		panic(err)
 	}
 
+	// Infra layer
+	graph.infraGraph, err = initializeInfraGraph(graph.config)
+	if err != nil {
+		panic(err)
+	}
+
 	// Storage layer
-	graph.storageGraph, err = InitializeStorage(graph.librariesGraph.persistenceFramework)
+	graph.storageGraph, err = initializeStorage(graph.librariesGraph.persistenceFramework)
 	if err != nil {
 		panic(err)
 	}
 
 	// Business logic layer
-	graph.useCasesGraph, err = initializeUseCases(graph.storageGraph)
+	graph.useCasesGraph, err = initializeUseCases(graph.storageGraph, graph.infraGraph)
 	if err != nil {
 		panic(err)
 	}
 
-	// HTTP Adapters
-	graph.httpGraph, err = initializeHTTPAdapters(graph.useCasesGraph)
+	// HTTP API Adapter
+	graph.httpAPIGraph, err = initializeHTTPAPIGraph(graph.useCasesGraph)
 	if err != nil {
 		panic(err)
 	}
-}
-
-func (graph *ServiceGraph) PersistenceFwConnection() sql.Connection {
-	return graph.librariesGraph.persistenceConnection
 }
 
 // StartServerOptions defines configuration for starting the HTTP server
@@ -87,7 +89,7 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 		return fmt.Errorf("error validating start server options: %w", err)
 	}
 
-	infraServerHandler, err := generatedhttpinfra.NewServer(graph.httpGraph.HTTPHandler)
+	infraServerHandler, err := generatedhttpinfra.NewServer(graph.httpAPIGraph.HTTPHandler)
 	if err != nil {
 		return fmt.Errorf("failed to create http infra handler server: %w", err)
 	}

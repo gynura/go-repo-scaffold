@@ -9,19 +9,27 @@ package graph
 import (
 	"errors"
 	"github.com/google/wire"
+	"strconv"
 	"userservice/internal"
 	"userservice/internal/adapters/input/http"
+	"userservice/internal/adapters/output/queue/userqueue"
 	"userservice/internal/adapters/output/storage/postgresql/userstorage"
 	"userservice/internal/core/usecases/user"
 	"userservice/internal/infra/http/generatedhttpinfra"
+	"userservice/internal/infra/queue"
+	"userservice/internal/infra/queue/rabbitmq"
 	"userservice/internal/infra/storage/postgresql/userstorageinfra"
 	"userservice/internal/pkg/persistence"
 	"userservice/internal/pkg/persistence/sql"
 )
 
-// Injectors from http_injector.go:
+import (
+	_ "userservice/internal/pkg/persistence/sql/init"
+)
 
-func initializeHTTPAdapters(useCases *useCasesGraph) (*httpGraph, error) {
+// Injectors from http_api_injector.go:
+
+func initializeHTTPAPIGraph(useCases *useCasesGraph) (*httpAPIGraph, error) {
 	useCase := useCases.UserUseCase
 	defaultAPIAdapterOptions := http.DefaultAPIAdapterOptions{
 		UserUseCase: useCase,
@@ -30,10 +38,24 @@ func initializeHTTPAdapters(useCases *useCasesGraph) (*httpGraph, error) {
 	if err != nil {
 		return nil, err
 	}
-	graphHttpGraph := &httpGraph{
+	graphHttpAPIGraph := &httpAPIGraph{
 		HTTPHandler: defaultAPIAdapter,
 	}
-	return graphHttpGraph, nil
+	return graphHttpAPIGraph, nil
+}
+
+// Injectors from infra_injector.go:
+
+func initializeInfraGraph(config Config) (*infraGraph, error) {
+	newPublisherOptions := provideRabbitMQPublisherOptions(config)
+	publisher, err := rabbitmq.ProvidePublisher(newPublisherOptions)
+	if err != nil {
+		return nil, err
+	}
+	graphInfraGraph := &infraGraph{
+		publisher: publisher,
+	}
+	return graphInfraGraph, nil
 }
 
 // Injectors from libraries_injector.go:
@@ -63,7 +85,7 @@ func initializeLibraries(config Config) (*librariesGraph, error) {
 
 // Injectors from storage_injector.go:
 
-func InitializeStorage(persistenceFramework persistence.Storage) (*storageGraph, error) {
+func initializeStorage(persistenceFramework persistence.Storage) (*storageGraph, error) {
 	storageInfraOptions := userstorageinfra.StorageInfraOptions{
 		GenericStorage: persistenceFramework,
 	}
@@ -86,10 +108,19 @@ func InitializeStorage(persistenceFramework persistence.Storage) (*storageGraph,
 
 // Injectors from usecases_injector.go:
 
-func initializeUseCases(repositories *storageGraph) (*useCasesGraph, error) {
+func initializeUseCases(repositories *storageGraph, infra *infraGraph) (*useCasesGraph, error) {
 	storage := repositories.userStorage
+	publisher := &infra.publisher
+	provideQueueAdapterOptions := userqueue.ProvideQueueAdapterOptions{
+		Publisher: publisher,
+	}
+	queueAdapter, err := userqueue.ProvideQueueAdapter(provideQueueAdapterOptions)
+	if err != nil {
+		return nil, err
+	}
 	provideUseCaseOptions := user.ProvideUseCaseOptions{
 		Storage: storage,
+		Queue:   queueAdapter,
 	}
 	defaultUseCase, err := user.ProvideDefaultUseCase(provideUseCaseOptions)
 	if err != nil {
@@ -101,13 +132,35 @@ func initializeUseCases(repositories *storageGraph) (*useCasesGraph, error) {
 	return graphUseCasesGraph, nil
 }
 
-// http_injector.go:
+// http_api_injector.go:
 
-type httpGraph struct {
+type httpAPIGraph struct {
 	HTTPHandler generatedhttpinfra.Handler
 }
 
-var httpSet = wire.NewSet(wire.Struct(new(httpGraph), "*"), http.ProvideDefaultAPIAdapter, wire.Bind(new(generatedhttpinfra.Handler), new(*http.DefaultAPIAdapter)), wire.Struct(new(http.DefaultAPIAdapterOptions), "*"))
+var httpAPISet = wire.NewSet(wire.Struct(new(httpAPIGraph), "*"), http.ProvideDefaultAPIAdapter, wire.Bind(new(generatedhttpinfra.Handler), new(*http.DefaultAPIAdapter)), wire.Struct(new(http.DefaultAPIAdapterOptions), "*"))
+
+// infra_injector.go:
+
+type infraGraph struct {
+	publisher queue.Publisher
+}
+
+var httpSet = wire.NewSet(wire.Struct(new(infraGraph), "*"), provideRabbitMQPublisherOptions, rabbitmq.ProvidePublisher, wire.Bind(new(queue.Publisher), new(*rabbitmq.Publisher)))
+
+func provideRabbitMQPublisherOptions(config Config) rabbitmq.NewPublisherOptions {
+	port, err := strconv.Atoi(config.QueueConfig.RabbitMQ.Port)
+	if err != nil {
+		panic(err)
+	}
+	return rabbitmq.NewPublisherOptions{
+		Username: config.QueueConfig.RabbitMQ.Username,
+		Password: config.QueueConfig.RabbitMQ.Password,
+		Host:     config.QueueConfig.RabbitMQ.Host,
+		Port:     port,
+		VHost:    config.QueueConfig.RabbitMQ.VHost,
+	}
+}
 
 // libraries_injector.go:
 
@@ -212,4 +265,4 @@ type useCasesGraph struct {
 	UserUseCase user.UseCase
 }
 
-var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"))
+var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"), userqueue.ProvideQueueAdapter, wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)), wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"))
