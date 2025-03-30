@@ -6,6 +6,7 @@ GENERATED_API_CODE_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generated"
 API_SPEC_ROOT ?= "${GIT_ROOT_DIR}/app/docs/open-api-spec"
 GENERATED_HTTP_INFRA_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generatedhttpinfra"
 GENERATED_MOCKS_OUTPUT ?= "internal/test/generatedmocks"
+APP_NAME ?= usersvc
 
 .PHONY: default
 default: generate_http_infra
@@ -32,7 +33,6 @@ generate_http_infra: bundle_api generate-ogen-http-infra
 install-ogen:
 	@go install github.com/ogen-go/ogen/cmd/ogen@latest
 
-
 .PHONY: install-mockgen
 install-mockgen:
 	@go install go.uber.org/mock/mockgen@latest
@@ -48,7 +48,7 @@ generate-ogen-http-infra: install-ogen
 	@echo "✅ Code generated successfully"
 
 # TODO: this could be done with a script or a go process that reads a file where we define all the needed interfaces to be mocked
-# as it is right now, it is highly coupled to the only usecase there is
+# as it is right now, it is highly coupled to the only use case being tested
 .PHONY: generate_mocks
 generate_mocks: install-mockgen
 	@echo "Generating mocks"
@@ -56,3 +56,15 @@ generate_mocks: install-mockgen
 	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_storage.go -destination=${GENERATED_MOCKS_OUTPUT}/user_storage_mock.go -package=generatedmocks
 	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_queue.go -destination=${GENERATED_MOCKS_OUTPUT}/user_queue_mock.go -package=generatedmocks
 	@echo "✅ Mocks generated successfully inside ${GENERATED_MOCKS_OUTPUT}"
+
+.PHONY: unit_test
+unit_test:
+	@echo "Executing unit tests"
+	go test $(shell go list ./... | grep -v generated) -v -cover
+
+.PHONY: build
+build:
+	@echo "🔧 Building binary"
+	go build -o bin/$(APP_NAME) ./cmd
+
+
