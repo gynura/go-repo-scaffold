@@ -38,7 +38,11 @@
         {{ if .FilterGroup }}
         WHERE
         {{ range $counter, $filter := .FilterGroup.Filters }}
+        {{ if lt $counter 1}}
+        {{$filter.ToSQLStmt}}
+        {{ else }}
         AND {{$filter.ToSQLStmt}}
+        {{ end }}
         {{end}}
         {{ end }}
         {{ if .Order }}
