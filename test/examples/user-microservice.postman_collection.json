@@ -1,0 +1,144 @@
+{
+	"info": {
+		"_postman_id": "34f16174-f1bb-45d1-b511-07c3eece5c92",
+		"name": "user-microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19952632"
+	},
+	"item": [
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"Sasuke\",\n    \"specificData\": {\n        \"firstName\": \"Sasuke\",\n        \"lastName\": \"Uchiha\",\n        \"nickname\": \"edgeLord\",\n        \"password\": \"IhateNaruto\",\n        \"email\": \"sasuke@gmail.com\",\n        \"country\": \"LeafVillage\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit User",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"specificData\": {\n        \"firstName\": \"Sasuke\",\n        \"lastName\": \"Uchiha\",\n        \"nickname\": \"edgeLord\",\n        \"password\": \"IhateNaruto\",\n        \"email\": \"sasuke@gmail.com\",\n        \"country\": \"LeafVillage\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/:userId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "12345abcde67890"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Describe User",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users/:userId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "Sasuke"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users/:userId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "aca4a496-aaa7-4f5b-9a11-2df19618018f"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
