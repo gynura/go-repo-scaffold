@@ -5,13 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 	"userservice/internal/infra/http/generatedhttpinfra"
+	"userservice/internal/infra/http/middlewares"
+	"userservice/internal/pkg/commons/logger"
 	"userservice/internal/pkg/commons/validators"
 	_ "userservice/internal/pkg/persistence/sql/init" // Imported to run the supported sql dialects registry
 
@@ -94,9 +95,11 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 		return fmt.Errorf("failed to create http infra handler server: %w", err)
 	}
 
+	loggingMiddleware := middlewares.LoggingMiddleware(infraServerHandler)
+
 	server := &http.Server{
 		Addr:         options.Host + ":" + options.Port,
-		Handler:      infraServerHandler,
+		Handler:      loggingMiddleware,
 		ReadTimeout:  15 * time.Second, // TODO: make them configurable (?)
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -109,22 +112,23 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 	)
 	defer stop()
 
+	serviceLogger := logger.NewLogger()
+
 	go func() {
-		log.Printf("Starting server on :%s", options.Port)
+		serviceLogger.Info(ctx).Message("Starting server on %s:%s", options.Host, options.Port)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("HTTP server ListenAndServe error: %v", err)
+			serviceLogger.Info(ctx).Message("HTTP server ListenAndServe error: %v", err)
 		}
 	}()
 
+	// Very simple graceful shutdown approach, once the server is terminated (context cancellation) we
+	// try to give a 5 seconds timeout allowing ongoing connections to finish within that time frame
 	<-ctx.Done()
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: make graceful timeout configurable
 	defer cancel()
-
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("server shutdown error: %w", err)
 	}
-
-	log.Println("Server gracefully stopped")
+	serviceLogger.Info(ctx).Message("Server gracefully stopped")
 	return nil
 }

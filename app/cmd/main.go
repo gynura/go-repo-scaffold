@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -84,9 +83,6 @@ func startService(_ *cobra.Command, _ []string) {
 	address := viper.GetString(flags.ServerAddressFlag)
 	port := viper.GetInt(flags.PortFlag)
 	configPath := viper.GetString(flags.ConfigPathFlag)
-
-	log.Printf("Starting service at %s:%d configured with %s\n\n",
-		address, port, configPath)
 
 	graphConfig, err := config.GetGraphConfig(configPath)
 	if err != nil {
