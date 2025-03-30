@@ -7,3 +7,10 @@ database:
     username: 'postgres'
     password: 'postgres'
     sslmode: 'disable'
+queue:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    vhost: /

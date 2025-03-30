@@ -3,6 +3,8 @@ package rabbitmq
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/url"
 	"userservice/internal/core/events"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,8 +17,34 @@ type Publisher struct {
 	channel *amqp.Channel
 }
 
+// NewPublisherOptions contain the attributes needed to construct a RabbitMQ connection
+// This way who consumes this infra doesn't have to worry about constructing a proper RabbitMQ URL
+type NewPublisherOptions struct {
+	Username string
+	Password string
+	Host     string // e.g., "rabbitmq"
+	Port     int    // e.g., 5672
+	VHost    string // e.g., "/"
+}
+
+// buildURL constructs the AMQP URL
+func (opts NewPublisherOptions) buildURL() string {
+	return fmt.Sprintf("amqp://%s:%s@%s:%d%s",
+		url.QueryEscape(opts.Username),
+		url.QueryEscape(opts.Password),
+		opts.Host,
+		opts.Port,
+		opts.VHost,
+	)
+}
+
 // TODO: define custom rabbitmq infra errors so we can type errors at this layer
-func NewPublisher(conn *amqp.Connection) (*Publisher, error) {
+func NewPublisher(options NewPublisherOptions) (*Publisher, error) {
+	conn, err := amqp.Dial(options.buildURL())
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
+	}
+
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err

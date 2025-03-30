@@ -18,12 +18,32 @@ const (
 type Config struct {
 	// DbConfig defines the database connection needed for the service to start
 	DbConfig DBConfig `mapstructure:"database" valid:"required"`
+	// QueueConfig defines the queue connection needed for the service to start
+	QueueConfig QueueConfig `mapstructure:"queue" valid:"required"`
 }
 
 // DBConfig defines the database configuration
 type DBConfig struct {
-	// PostgreSQL database configuration
 	PostgreSQL *PostgreSQL `mapstructure:"postgresql"`
+}
+
+// QueueConfig defines the queue configuration
+type QueueConfig struct {
+	RabbitMQ *RabbitMQ `mapstructure:"rabbitmq"`
+}
+
+// RabbitMQ defines the connection configuration to a RabbitMQ queue
+type RabbitMQ struct {
+	// Host address of the queue
+	Host string `mapstructure:"host"`
+	// Port of queue system
+	Port string `mapstructure:"port"`
+	// Username to use in order to connect to the queue
+	Username string `mapstructure:"username"`
+	// Password to use in order to connect to the queue
+	Password string `mapstructure:"password"`
+	// Vhost name to connect to in the queue
+	VHost string `mapstructure:"vhost"`
 }
 
 // PostgreSQL defines the connection configuration to a PostgresSQL DB
@@ -86,25 +106,41 @@ func GetGraphConfig(path string) (*graph.Config, error) {
 
 	graphConfig := graph.Config{
 		Libraries: graph.LibrariesConfig{
-			PersistenceFw: graph.PersistenceFwConfig{
-				PostgreSQL: &graph.PostgresSQLConfig{
-					Host:     config.DbConfig.PostgreSQL.Host,
-					Port:     &config.DbConfig.PostgreSQL.Port,
-					Scheme:   &config.DbConfig.PostgreSQL.Scheme,
-					Username: config.DbConfig.PostgreSQL.Username,
-					Password: config.DbConfig.PostgreSQL.Password,
-					SSLMode:  config.DbConfig.PostgreSQL.SSLMode,
-					Database: config.DbConfig.PostgreSQL.Database,
-				},
-			},
+			PersistenceFw: graph.PersistenceFwConfig{},
 		},
+		QueueConfig: graph.QueueConfig{},
 	}
 
-	if config.DbConfig.PostgreSQL.SQLClient != nil {
-		graphConfig.Libraries.PersistenceFw.PostgreSQL.SQLClient = &graph.PostgresSQLClientConfig{
-			MaxIdleConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxIdleConnections,
-			MaxOpenConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxOpenConnections,
-			MaxConnectionLifetime: config.DbConfig.PostgreSQL.SQLClient.MaxConnectionLifetime,
+	if config.QueueConfig.RabbitMQ != nil {
+		rabbitConfig := &graph.RabbitMQ{
+			Host:     config.QueueConfig.RabbitMQ.Host,
+			Port:     config.QueueConfig.RabbitMQ.Port,
+			Username: config.QueueConfig.RabbitMQ.Username,
+			Password: config.QueueConfig.RabbitMQ.Password,
+			VHost:    config.QueueConfig.RabbitMQ.VHost,
+		}
+		graphConfig.QueueConfig.RabbitMQ = rabbitConfig
+	}
+
+	if config.DbConfig.PostgreSQL != nil {
+		postgresConfig := &graph.PostgresSQLConfig{
+			Host:     config.DbConfig.PostgreSQL.Host,
+			Port:     &config.DbConfig.PostgreSQL.Port,
+			Scheme:   &config.DbConfig.PostgreSQL.Scheme,
+			Username: config.DbConfig.PostgreSQL.Username,
+			Password: config.DbConfig.PostgreSQL.Password,
+			SSLMode:  config.DbConfig.PostgreSQL.SSLMode,
+			Database: config.DbConfig.PostgreSQL.Database,
+		}
+
+		graphConfig.Libraries.PersistenceFw.PostgreSQL = postgresConfig
+
+		if config.DbConfig.PostgreSQL.SQLClient != nil {
+			graphConfig.Libraries.PersistenceFw.PostgreSQL.SQLClient = &graph.PostgresSQLClientConfig{
+				MaxIdleConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxIdleConnections,
+				MaxOpenConnections:    config.DbConfig.PostgreSQL.SQLClient.MaxOpenConnections,
+				MaxConnectionLifetime: config.DbConfig.PostgreSQL.SQLClient.MaxConnectionLifetime,
+			}
 		}
 	}
 

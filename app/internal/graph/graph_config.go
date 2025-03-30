@@ -4,6 +4,27 @@ package graph
 type Config struct {
 	// Libraries configuration
 	Libraries LibrariesConfig `valid:"required"`
+	// Queue configuration
+	QueueConfig QueueConfig `valid:"required"`
+}
+
+// QueueConfig defines the queue configuration
+type QueueConfig struct {
+	RabbitMQ *RabbitMQ `valid:"optional"`
+}
+
+// RabbitMQ defines the connection configuration to a RabbitMQ queue
+type RabbitMQ struct {
+	// Host address of the queue
+	Host string `valid:"required"`
+	// Port of queue system
+	Port string `valid:"required"`
+	// Username to use in order to connect to the queue
+	Username string `valid:"required"`
+	// Password to use in order to connect to the queue
+	Password string `valid:"required"`
+	// Vhost name to connect to in the queue
+	VHost string `valid:"required"`
 }
 
 // LibrariesConfig configuration of the different libraries used by the service
