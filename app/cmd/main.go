@@ -20,7 +20,7 @@ const (
 	defaultServerAddress = "localhost"
 	defaultServerPort    = 8080
 	// This is coupled to this test-project, in a real app the default config path should make more sense
-	defaultConfigPath = "../test/examples"
+	defaultConfigPath = "../../test/examples"
 )
 
 var rootCmd = &cobra.Command{
