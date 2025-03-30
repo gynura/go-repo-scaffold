@@ -162,7 +162,7 @@ func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedht
 		Country:        params.Country.Value,
 	}
 
-	_, err := d.userUseCase.ListUsers(ctx, input)
+	usersList, err := d.userUseCase.ListUsers(ctx, input)
 	if err != nil {
 		if err.IsInvalidArgumentError() {
 			response := generatedhttpinfra.UserUsersListBadRequest(mapServiceErrorToHTTPError(*err))
@@ -172,7 +172,12 @@ func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedht
 		return &response, nil
 	}
 
-	return &generatedhttpinfra.UserList{}, nil
+	return &generatedhttpinfra.UserList{
+		Items:        adaptUserList(usersList.Items),
+		Limit:        usersList.Limit,
+		Offset:       usersList.Offset,
+		HasMoreItems: usersList.HasMoreItems,
+	}, nil
 }
 
 func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generatedhttpinfra.UserUsersRemoveParams) (generatedhttpinfra.UserUsersRemoveRes, error) {
@@ -210,4 +215,28 @@ func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generated
 		},
 	}, nil
 
+}
+
+func adaptUserList(items []entities.User) []generatedhttpinfra.DescribeUser {
+	var adaptedList []generatedhttpinfra.DescribeUser
+	for _, item := range items {
+		adaptedUser := generatedhttpinfra.DescribeUser{
+			MetaInformation: generatedhttpinfra.MetaInformation{
+				ID:        item.ID,
+				CreatedAt: item.CreatedAt.Time,
+				UpdatedAt: item.UpdatedAt.Time,
+			},
+			SpecificData: generatedhttpinfra.UserSpecificData{
+				FirstName: item.FirstName,
+				LastName:  item.LastName,
+				Nickname:  item.Nickname,
+				Password:  item.Password(),
+				Email:     item.Email,
+				Country:   item.Country,
+			},
+		}
+		adaptedList = append(adaptedList, adaptedUser)
+	}
+
+	return adaptedList
 }

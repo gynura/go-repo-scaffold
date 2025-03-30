@@ -27,7 +27,6 @@ serve_api:
 .PHONY: generate_http_infra
 generate_http_infra: bundle_api generate-ogen-http-infra
 
-
 .PHONY: install-ogen
 install-ogen:
 	@go install github.com/ogen-go/ogen/cmd/ogen@latest
