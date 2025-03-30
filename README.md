@@ -6,6 +6,8 @@ Small microservice that manages Users written in Go (v1.24.1).
 - [Project folders architecture](#project-folders-architecture)
 - [How to run the service](#how-to-run-the-service)
 - [How to test](#how-to-test)
+- [Design choices](#design-choices)
+- [Improvements](#improvements)
 
 ## Project folders architecture
 
@@ -137,4 +139,14 @@ To install the service follow this steps:
 
 ## How to test
 
-Inside ``test/examples`` there's a postman collection that covers all the API endpoints
+You can serve the API Spec from ``/app/docs`` running:
+```bash
+make serve_api
+```
+Inside ``test/examples`` there's a postman collection that covers all the API endpoints.
+
+
+## Design choices
+
+
+## Improvements
