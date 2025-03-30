@@ -4,8 +4,8 @@ Small microservice that manages Users written in Go (v1.24.1).
 
 ## Contents
 - [Project folders architecture](#project-folders-architecture)
-- [How to build the binary](#how-to-build-the-binary)
 - [How to run the service](#how-to-run-the-service)
+- [How to test](#how-to-test)
 
 ## Project folders architecture
 
@@ -18,7 +18,7 @@ The service is written following hexagonal architecture:
 │   │   ├── config                                   # Static configuration definition
 │   │   └── flags                                    # Command flags definitions
 │   ├── docs                                         # Service documentation
-│   │   ├── config                                   # Configuration to serve/lint/format the docs
+│   │   ├── config                                   # Configuration to lint the docs
 │   │   └── open-api-spec                            # Open API Spec definition of the service's REST API
 │   │       ├── components
 │   │       │   ├── parameters
@@ -134,3 +134,7 @@ To install the service follow this steps:
    ./usersvc
    ```
 > **_NOTE:_**  By default the apps runs on localhost:8080, you can change it with the **address** and **port** flags
+
+## How to test
+
+Inside ``test/examples`` there's a postman collection that covers all the API endpoints
