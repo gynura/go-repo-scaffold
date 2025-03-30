@@ -6,6 +6,7 @@ import (
 
 const (
 	defaultOrderDirection = entities.OrderDesc
+	defaultLimit          = 100
 )
 
 // UsersList defines a paginated list of User resources.

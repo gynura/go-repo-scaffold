@@ -174,8 +174,10 @@ func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInpu
 		filters.OrderByUpdatedAt(persistence.OrderDirection(direction))
 	}
 
+	pageLimit := defaultLimit
 	if input.PageLimit > 0 {
-		filters.Paged(input.PageLimit, input.PageOffset)
+		pageLimit = input.PageLimit
+		filters.Paged(pageLimit, input.PageOffset)
 	}
 
 	userList, listErr := useCase.storage.List(ctx, filters)
