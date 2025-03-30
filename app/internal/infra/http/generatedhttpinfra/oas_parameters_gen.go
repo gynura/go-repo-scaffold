@@ -15,13 +15,13 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// UserUsersDescribeParams is parameters of user.users.describe operation.
-type UserUsersDescribeParams struct {
+// UsersvcUsersDescribeParams is parameters of usersvc.users.describe operation.
+type UsersvcUsersDescribeParams struct {
 	// Identifier of the user resource.
 	UserId string
 }
 
-func unpackUserUsersDescribeParams(packed middleware.Parameters) (params UserUsersDescribeParams) {
+func unpackUsersvcUsersDescribeParams(packed middleware.Parameters) (params UsersvcUsersDescribeParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "userId",
@@ -32,7 +32,7 @@ func unpackUserUsersDescribeParams(packed middleware.Parameters) (params UserUse
 	return params
 }
 
-func decodeUserUsersDescribeParams(args [1]string, argsEscaped bool, r *http.Request) (params UserUsersDescribeParams, _ error) {
+func decodeUsersvcUsersDescribeParams(args [1]string, argsEscaped bool, r *http.Request) (params UsersvcUsersDescribeParams, _ error) {
 	// Decode path: userId.
 	if err := func() error {
 		param := args[0]
@@ -81,13 +81,13 @@ func decodeUserUsersDescribeParams(args [1]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// UserUsersEditParams is parameters of user.users.edit operation.
-type UserUsersEditParams struct {
+// UsersvcUsersEditParams is parameters of usersvc.users.edit operation.
+type UsersvcUsersEditParams struct {
 	// Identifier of the user resource.
 	UserId string
 }
 
-func unpackUserUsersEditParams(packed middleware.Parameters) (params UserUsersEditParams) {
+func unpackUsersvcUsersEditParams(packed middleware.Parameters) (params UsersvcUsersEditParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "userId",
@@ -98,7 +98,7 @@ func unpackUserUsersEditParams(packed middleware.Parameters) (params UserUsersEd
 	return params
 }
 
-func decodeUserUsersEditParams(args [1]string, argsEscaped bool, r *http.Request) (params UserUsersEditParams, _ error) {
+func decodeUsersvcUsersEditParams(args [1]string, argsEscaped bool, r *http.Request) (params UsersvcUsersEditParams, _ error) {
 	// Decode path: userId.
 	if err := func() error {
 		param := args[0]
@@ -147,8 +147,8 @@ func decodeUserUsersEditParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// UserUsersListParams is parameters of user.users.list operation.
-type UserUsersListParams struct {
+// UsersvcUsersListParams is parameters of usersvc.users.list operation.
+type UsersvcUsersListParams struct {
 	// Number of items to return when listing a resource.
 	Limit OptInt
 	// Number of resources to skip before starting to return results.
@@ -167,7 +167,7 @@ type UserUsersListParams struct {
 	Country OptString
 }
 
-func unpackUserUsersListParams(packed middleware.Parameters) (params UserUsersListParams) {
+func unpackUsersvcUsersListParams(packed middleware.Parameters) (params UsersvcUsersListParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "limit",
@@ -216,7 +216,7 @@ func unpackUserUsersListParams(packed middleware.Parameters) (params UserUsersLi
 	return params
 }
 
-func decodeUserUsersListParams(args [0]string, argsEscaped bool, r *http.Request) (params UserUsersListParams, _ error) {
+func decodeUsersvcUsersListParams(args [0]string, argsEscaped bool, r *http.Request) (params UsersvcUsersListParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: limit.
 	{
@@ -476,13 +476,13 @@ func decodeUserUsersListParams(args [0]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// UserUsersRemoveParams is parameters of user.users.remove operation.
-type UserUsersRemoveParams struct {
+// UsersvcUsersRemoveParams is parameters of usersvc.users.remove operation.
+type UsersvcUsersRemoveParams struct {
 	// Identifier of the user resource.
 	UserId string
 }
 
-func unpackUserUsersRemoveParams(packed middleware.Parameters) (params UserUsersRemoveParams) {
+func unpackUsersvcUsersRemoveParams(packed middleware.Parameters) (params UsersvcUsersRemoveParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "userId",
@@ -493,7 +493,7 @@ func unpackUserUsersRemoveParams(packed middleware.Parameters) (params UserUsers
 	return params
 }
 
-func decodeUserUsersRemoveParams(args [1]string, argsEscaped bool, r *http.Request) (params UserUsersRemoveParams, _ error) {
+func decodeUsersvcUsersRemoveParams(args [1]string, argsEscaped bool, r *http.Request) (params UsersvcUsersRemoveParams, _ error) {
 	// Decode path: userId.
 	if err := func() error {
 		param := args[0]

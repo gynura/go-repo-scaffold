@@ -12,7 +12,7 @@ const (
 	httpCodeInternalError = 500
 	httpCodeConflict      = 409
 
-	defaultInternalErrorMessage = "Internal server error."
+	defaultInternalErrorMessage = "Internal server error. Please contact support."
 )
 
 // errorCategoryToErrorStatus maps service error categories to HTTP error statuses

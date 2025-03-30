@@ -14,7 +14,101 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeUserUsersCreateResponse(resp *http.Response) (res UserUsersCreateRes, _ error) {
+func decodeUsersvcHealthLiveResponse(resp *http.Response) (res UsersvcHealthLiveRes, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Health
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			// Validate response.
+			if err := func() error {
+				if err := response.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "validate")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	case 500:
+		// Code 500.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Error
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			// Validate response.
+			if err := func() error {
+				if err := response.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "validate")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+}
+
+func decodeUsersvcUsersCreateResponse(resp *http.Response) (res UsersvcUsersCreateRes, _ error) {
 	switch resp.StatusCode {
 	case 201:
 		// Code 201.
@@ -74,7 +168,7 @@ func decodeUserUsersCreateResponse(resp *http.Response) (res UserUsersCreateRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersCreateBadRequest
+			var response UsersvcUsersCreateBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -118,7 +212,7 @@ func decodeUserUsersCreateResponse(resp *http.Response) (res UserUsersCreateRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersCreateInternalServerError
+			var response UsersvcUsersCreateInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -152,7 +246,7 @@ func decodeUserUsersCreateResponse(resp *http.Response) (res UserUsersCreateRes,
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeUserUsersDescribeResponse(resp *http.Response) (res UserUsersDescribeRes, _ error) {
+func decodeUsersvcUsersDescribeResponse(resp *http.Response) (res UsersvcUsersDescribeRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -212,7 +306,7 @@ func decodeUserUsersDescribeResponse(resp *http.Response) (res UserUsersDescribe
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersDescribeBadRequest
+			var response UsersvcUsersDescribeBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -256,7 +350,7 @@ func decodeUserUsersDescribeResponse(resp *http.Response) (res UserUsersDescribe
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersDescribeNotFound
+			var response UsersvcUsersDescribeNotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -300,7 +394,7 @@ func decodeUserUsersDescribeResponse(resp *http.Response) (res UserUsersDescribe
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersDescribeInternalServerError
+			var response UsersvcUsersDescribeInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -334,7 +428,7 @@ func decodeUserUsersDescribeResponse(resp *http.Response) (res UserUsersDescribe
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeUserUsersEditResponse(resp *http.Response) (res UserUsersEditRes, _ error) {
+func decodeUsersvcUsersEditResponse(resp *http.Response) (res UsersvcUsersEditRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -394,7 +488,7 @@ func decodeUserUsersEditResponse(resp *http.Response) (res UserUsersEditRes, _ e
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersEditBadRequest
+			var response UsersvcUsersEditBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -438,7 +532,7 @@ func decodeUserUsersEditResponse(resp *http.Response) (res UserUsersEditRes, _ e
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersEditNotFound
+			var response UsersvcUsersEditNotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -482,7 +576,7 @@ func decodeUserUsersEditResponse(resp *http.Response) (res UserUsersEditRes, _ e
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersEditInternalServerError
+			var response UsersvcUsersEditInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -516,7 +610,7 @@ func decodeUserUsersEditResponse(resp *http.Response) (res UserUsersEditRes, _ e
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeUserUsersListResponse(resp *http.Response) (res UserUsersListRes, _ error) {
+func decodeUsersvcUsersListResponse(resp *http.Response) (res UsersvcUsersListRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -576,7 +670,7 @@ func decodeUserUsersListResponse(resp *http.Response) (res UserUsersListRes, _ e
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersListBadRequest
+			var response UsersvcUsersListBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -620,7 +714,7 @@ func decodeUserUsersListResponse(resp *http.Response) (res UserUsersListRes, _ e
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersListInternalServerError
+			var response UsersvcUsersListInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -654,7 +748,7 @@ func decodeUserUsersListResponse(resp *http.Response) (res UserUsersListRes, _ e
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeUserUsersRemoveResponse(resp *http.Response) (res UserUsersRemoveRes, _ error) {
+func decodeUsersvcUsersRemoveResponse(resp *http.Response) (res UsersvcUsersRemoveRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -714,7 +808,7 @@ func decodeUserUsersRemoveResponse(resp *http.Response) (res UserUsersRemoveRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersRemoveBadRequest
+			var response UsersvcUsersRemoveBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -758,7 +852,7 @@ func decodeUserUsersRemoveResponse(resp *http.Response) (res UserUsersRemoveRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersRemoveNotFound
+			var response UsersvcUsersRemoveNotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -802,7 +896,7 @@ func decodeUserUsersRemoveResponse(resp *http.Response) (res UserUsersRemoveRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UserUsersRemoveInternalServerError
+			var response UsersvcUsersRemoveInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

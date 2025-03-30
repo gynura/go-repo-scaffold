@@ -521,6 +521,405 @@ func (s *ErrorErrorStatus) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *Health) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *Health) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("uptime")
+		e.Float64(s.Uptime)
+	}
+	{
+		e.FieldStart("checks")
+		s.Checks.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfHealth = [3]string{
+	0: "status",
+	1: "uptime",
+	2: "checks",
+}
+
+// Decode decodes Health from json.
+func (s *Health) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode Health to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "status":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "uptime":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Float64()
+				s.Uptime = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uptime\"")
+			}
+		case "checks":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Checks.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"checks\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode Health")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfHealth) {
+					name = jsonFieldsNameOfHealth[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *Health) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *Health) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *HealthChecks) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *HealthChecks) encodeFields(e *jx.Encoder) {
+	{
+		if s.Queue.Set {
+			e.FieldStart("queue")
+			s.Queue.Encode(e)
+		}
+	}
+	{
+		if s.Database.Set {
+			e.FieldStart("database")
+			s.Database.Encode(e)
+		}
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+var jsonFieldsNameOfHealthChecks = [2]string{
+	0: "queue",
+	1: "database",
+}
+
+// Decode decodes HealthChecks from json.
+func (s *HealthChecks) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode HealthChecks to nil")
+	}
+	s.AdditionalProps = map[string]string{}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "queue":
+			if err := func() error {
+				s.Queue.Reset()
+				if err := s.Queue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"queue\"")
+			}
+		case "database":
+			if err := func() error {
+				s.Database.Reset()
+				if err := s.Database.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"database\"")
+			}
+		default:
+			var elem string
+			if err := func() error {
+				v, err := d.Str()
+				elem = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
+			}
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode HealthChecks")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *HealthChecks) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *HealthChecks) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s HealthChecksAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s HealthChecksAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Str(elem)
+	}
+}
+
+// Decode decodes HealthChecksAdditional from json.
+func (s *HealthChecksAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode HealthChecksAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem string
+		if err := func() error {
+			v, err := d.Str()
+			elem = string(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode HealthChecksAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s HealthChecksAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *HealthChecksAdditional) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes HealthChecksDatabase as json.
+func (s HealthChecksDatabase) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes HealthChecksDatabase from json.
+func (s *HealthChecksDatabase) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode HealthChecksDatabase to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch HealthChecksDatabase(v) {
+	case HealthChecksDatabaseUP:
+		*s = HealthChecksDatabaseUP
+	case HealthChecksDatabaseDOWN:
+		*s = HealthChecksDatabaseDOWN
+	default:
+		*s = HealthChecksDatabase(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s HealthChecksDatabase) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *HealthChecksDatabase) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes HealthChecksQueue as json.
+func (s HealthChecksQueue) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes HealthChecksQueue from json.
+func (s *HealthChecksQueue) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode HealthChecksQueue to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch HealthChecksQueue(v) {
+	case HealthChecksQueueUP:
+		*s = HealthChecksQueueUP
+	case HealthChecksQueueDOWN:
+		*s = HealthChecksQueueDOWN
+	default:
+		*s = HealthChecksQueue(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s HealthChecksQueue) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *HealthChecksQueue) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes HealthStatus as json.
+func (s HealthStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes HealthStatus from json.
+func (s *HealthStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode HealthStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch HealthStatus(v) {
+	case HealthStatusUP:
+		*s = HealthStatusUP
+	case HealthStatusDOWN:
+		*s = HealthStatusDOWN
+	default:
+		*s = HealthStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s HealthStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *HealthStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *MetaInformation) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -679,6 +1078,72 @@ func (s OptCreateUser) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptCreateUser) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes HealthChecksDatabase as json.
+func (o OptHealthChecksDatabase) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes HealthChecksDatabase from json.
+func (o *OptHealthChecksDatabase) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptHealthChecksDatabase to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptHealthChecksDatabase) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptHealthChecksDatabase) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes HealthChecksQueue as json.
+func (o OptHealthChecksQueue) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes HealthChecksQueue from json.
+func (o *OptHealthChecksQueue) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptHealthChecksQueue to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptHealthChecksQueue) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptHealthChecksQueue) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -1199,17 +1664,17 @@ func (s *UserSpecificData) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersCreateBadRequest as json.
-func (s *UserUsersCreateBadRequest) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersCreateBadRequest as json.
+func (s *UsersvcUsersCreateBadRequest) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersCreateBadRequest from json.
-func (s *UserUsersCreateBadRequest) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersCreateBadRequest from json.
+func (s *UsersvcUsersCreateBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersCreateBadRequest to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersCreateBadRequest to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1220,34 +1685,34 @@ func (s *UserUsersCreateBadRequest) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersCreateBadRequest(unwrapped)
+	*s = UsersvcUsersCreateBadRequest(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersCreateBadRequest) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersCreateBadRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersCreateBadRequest) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersCreateBadRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersCreateInternalServerError as json.
-func (s *UserUsersCreateInternalServerError) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersCreateInternalServerError as json.
+func (s *UsersvcUsersCreateInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersCreateInternalServerError from json.
-func (s *UserUsersCreateInternalServerError) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersCreateInternalServerError from json.
+func (s *UsersvcUsersCreateInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersCreateInternalServerError to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersCreateInternalServerError to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1258,34 +1723,34 @@ func (s *UserUsersCreateInternalServerError) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersCreateInternalServerError(unwrapped)
+	*s = UsersvcUsersCreateInternalServerError(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersCreateInternalServerError) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersCreateInternalServerError) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersCreateInternalServerError) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersCreateInternalServerError) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersDescribeBadRequest as json.
-func (s *UserUsersDescribeBadRequest) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersDescribeBadRequest as json.
+func (s *UsersvcUsersDescribeBadRequest) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersDescribeBadRequest from json.
-func (s *UserUsersDescribeBadRequest) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersDescribeBadRequest from json.
+func (s *UsersvcUsersDescribeBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersDescribeBadRequest to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersDescribeBadRequest to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1296,34 +1761,34 @@ func (s *UserUsersDescribeBadRequest) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersDescribeBadRequest(unwrapped)
+	*s = UsersvcUsersDescribeBadRequest(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersDescribeBadRequest) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersDescribeBadRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersDescribeBadRequest) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersDescribeBadRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersDescribeInternalServerError as json.
-func (s *UserUsersDescribeInternalServerError) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersDescribeInternalServerError as json.
+func (s *UsersvcUsersDescribeInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersDescribeInternalServerError from json.
-func (s *UserUsersDescribeInternalServerError) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersDescribeInternalServerError from json.
+func (s *UsersvcUsersDescribeInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersDescribeInternalServerError to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersDescribeInternalServerError to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1334,34 +1799,34 @@ func (s *UserUsersDescribeInternalServerError) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersDescribeInternalServerError(unwrapped)
+	*s = UsersvcUsersDescribeInternalServerError(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersDescribeInternalServerError) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersDescribeInternalServerError) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersDescribeInternalServerError) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersDescribeInternalServerError) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersDescribeNotFound as json.
-func (s *UserUsersDescribeNotFound) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersDescribeNotFound as json.
+func (s *UsersvcUsersDescribeNotFound) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersDescribeNotFound from json.
-func (s *UserUsersDescribeNotFound) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersDescribeNotFound from json.
+func (s *UsersvcUsersDescribeNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersDescribeNotFound to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersDescribeNotFound to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1372,34 +1837,34 @@ func (s *UserUsersDescribeNotFound) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersDescribeNotFound(unwrapped)
+	*s = UsersvcUsersDescribeNotFound(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersDescribeNotFound) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersDescribeNotFound) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersDescribeNotFound) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersDescribeNotFound) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersEditBadRequest as json.
-func (s *UserUsersEditBadRequest) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersEditBadRequest as json.
+func (s *UsersvcUsersEditBadRequest) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersEditBadRequest from json.
-func (s *UserUsersEditBadRequest) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersEditBadRequest from json.
+func (s *UsersvcUsersEditBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersEditBadRequest to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersEditBadRequest to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1410,34 +1875,34 @@ func (s *UserUsersEditBadRequest) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersEditBadRequest(unwrapped)
+	*s = UsersvcUsersEditBadRequest(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersEditBadRequest) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersEditBadRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersEditBadRequest) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersEditBadRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersEditInternalServerError as json.
-func (s *UserUsersEditInternalServerError) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersEditInternalServerError as json.
+func (s *UsersvcUsersEditInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersEditInternalServerError from json.
-func (s *UserUsersEditInternalServerError) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersEditInternalServerError from json.
+func (s *UsersvcUsersEditInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersEditInternalServerError to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersEditInternalServerError to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1448,34 +1913,34 @@ func (s *UserUsersEditInternalServerError) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersEditInternalServerError(unwrapped)
+	*s = UsersvcUsersEditInternalServerError(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersEditInternalServerError) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersEditInternalServerError) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersEditInternalServerError) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersEditInternalServerError) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersEditNotFound as json.
-func (s *UserUsersEditNotFound) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersEditNotFound as json.
+func (s *UsersvcUsersEditNotFound) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersEditNotFound from json.
-func (s *UserUsersEditNotFound) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersEditNotFound from json.
+func (s *UsersvcUsersEditNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersEditNotFound to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersEditNotFound to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1486,34 +1951,34 @@ func (s *UserUsersEditNotFound) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersEditNotFound(unwrapped)
+	*s = UsersvcUsersEditNotFound(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersEditNotFound) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersEditNotFound) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersEditNotFound) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersEditNotFound) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersListBadRequest as json.
-func (s *UserUsersListBadRequest) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersListBadRequest as json.
+func (s *UsersvcUsersListBadRequest) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersListBadRequest from json.
-func (s *UserUsersListBadRequest) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersListBadRequest from json.
+func (s *UsersvcUsersListBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersListBadRequest to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersListBadRequest to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1524,34 +1989,34 @@ func (s *UserUsersListBadRequest) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersListBadRequest(unwrapped)
+	*s = UsersvcUsersListBadRequest(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersListBadRequest) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersListBadRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersListBadRequest) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersListBadRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersListInternalServerError as json.
-func (s *UserUsersListInternalServerError) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersListInternalServerError as json.
+func (s *UsersvcUsersListInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersListInternalServerError from json.
-func (s *UserUsersListInternalServerError) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersListInternalServerError from json.
+func (s *UsersvcUsersListInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersListInternalServerError to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersListInternalServerError to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1562,34 +2027,34 @@ func (s *UserUsersListInternalServerError) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersListInternalServerError(unwrapped)
+	*s = UsersvcUsersListInternalServerError(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersListInternalServerError) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersListInternalServerError) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersListInternalServerError) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersListInternalServerError) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersRemoveBadRequest as json.
-func (s *UserUsersRemoveBadRequest) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersRemoveBadRequest as json.
+func (s *UsersvcUsersRemoveBadRequest) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersRemoveBadRequest from json.
-func (s *UserUsersRemoveBadRequest) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersRemoveBadRequest from json.
+func (s *UsersvcUsersRemoveBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersRemoveBadRequest to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersRemoveBadRequest to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1600,34 +2065,34 @@ func (s *UserUsersRemoveBadRequest) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersRemoveBadRequest(unwrapped)
+	*s = UsersvcUsersRemoveBadRequest(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersRemoveBadRequest) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersRemoveBadRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersRemoveBadRequest) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersRemoveBadRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersRemoveInternalServerError as json.
-func (s *UserUsersRemoveInternalServerError) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersRemoveInternalServerError as json.
+func (s *UsersvcUsersRemoveInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersRemoveInternalServerError from json.
-func (s *UserUsersRemoveInternalServerError) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersRemoveInternalServerError from json.
+func (s *UsersvcUsersRemoveInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersRemoveInternalServerError to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersRemoveInternalServerError to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1638,34 +2103,34 @@ func (s *UserUsersRemoveInternalServerError) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersRemoveInternalServerError(unwrapped)
+	*s = UsersvcUsersRemoveInternalServerError(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersRemoveInternalServerError) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersRemoveInternalServerError) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersRemoveInternalServerError) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersRemoveInternalServerError) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes UserUsersRemoveNotFound as json.
-func (s *UserUsersRemoveNotFound) Encode(e *jx.Encoder) {
+// Encode encodes UsersvcUsersRemoveNotFound as json.
+func (s *UsersvcUsersRemoveNotFound) Encode(e *jx.Encoder) {
 	unwrapped := (*Error)(s)
 
 	unwrapped.Encode(e)
 }
 
-// Decode decodes UserUsersRemoveNotFound from json.
-func (s *UserUsersRemoveNotFound) Decode(d *jx.Decoder) error {
+// Decode decodes UsersvcUsersRemoveNotFound from json.
+func (s *UsersvcUsersRemoveNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUsersRemoveNotFound to nil")
+		return errors.New("invalid: unable to decode UsersvcUsersRemoveNotFound to nil")
 	}
 	var unwrapped Error
 	if err := func() error {
@@ -1676,19 +2141,19 @@ func (s *UserUsersRemoveNotFound) Decode(d *jx.Decoder) error {
 	}(); err != nil {
 		return errors.Wrap(err, "alias")
 	}
-	*s = UserUsersRemoveNotFound(unwrapped)
+	*s = UsersvcUsersRemoveNotFound(unwrapped)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUsersRemoveNotFound) MarshalJSON() ([]byte, error) {
+func (s *UsersvcUsersRemoveNotFound) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUsersRemoveNotFound) UnmarshalJSON(data []byte) error {
+func (s *UsersvcUsersRemoveNotFound) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

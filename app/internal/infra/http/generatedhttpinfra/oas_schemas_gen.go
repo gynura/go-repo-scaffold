@@ -62,10 +62,10 @@ func (s *DescribeUser) SetSpecificData(val UserSpecificData) {
 	s.SpecificData = val
 }
 
-func (*DescribeUser) userUsersCreateRes()   {}
-func (*DescribeUser) userUsersDescribeRes() {}
-func (*DescribeUser) userUsersEditRes()     {}
-func (*DescribeUser) userUsersRemoveRes()   {}
+func (*DescribeUser) usersvcUsersCreateRes()   {}
+func (*DescribeUser) usersvcUsersDescribeRes() {}
+func (*DescribeUser) usersvcUsersEditRes()     {}
+func (*DescribeUser) usersvcUsersRemoveRes()   {}
 
 // Ref: #/components/schemas/Error
 type Error struct {
@@ -81,6 +81,8 @@ func (s *Error) GetError() ErrorError {
 func (s *Error) SetError(val ErrorError) {
 	s.Error = val
 }
+
+func (*Error) usersvcHealthLiveRes() {}
 
 type ErrorError struct {
 	// HTTP response code.
@@ -203,6 +205,222 @@ func (s *ErrorErrorStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/Health
+type Health struct {
+	// Overall health status of the service.
+	Status HealthStatus `json:"status"`
+	// The uptime of the service in seconds.
+	Uptime float64      `json:"uptime"`
+	Checks HealthChecks `json:"checks"`
+}
+
+// GetStatus returns the value of Status.
+func (s *Health) GetStatus() HealthStatus {
+	return s.Status
+}
+
+// GetUptime returns the value of Uptime.
+func (s *Health) GetUptime() float64 {
+	return s.Uptime
+}
+
+// GetChecks returns the value of Checks.
+func (s *Health) GetChecks() HealthChecks {
+	return s.Checks
+}
+
+// SetStatus sets the value of Status.
+func (s *Health) SetStatus(val HealthStatus) {
+	s.Status = val
+}
+
+// SetUptime sets the value of Uptime.
+func (s *Health) SetUptime(val float64) {
+	s.Uptime = val
+}
+
+// SetChecks sets the value of Checks.
+func (s *Health) SetChecks(val HealthChecks) {
+	s.Checks = val
+}
+
+func (*Health) usersvcHealthLiveRes() {}
+
+type HealthChecks struct {
+	// Status of the plugged queue service.
+	Queue OptHealthChecksQueue `json:"queue"`
+	// Status of the plugged database service.
+	Database        OptHealthChecksDatabase `json:"database"`
+	AdditionalProps HealthChecksAdditional
+}
+
+// GetQueue returns the value of Queue.
+func (s *HealthChecks) GetQueue() OptHealthChecksQueue {
+	return s.Queue
+}
+
+// GetDatabase returns the value of Database.
+func (s *HealthChecks) GetDatabase() OptHealthChecksDatabase {
+	return s.Database
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *HealthChecks) GetAdditionalProps() HealthChecksAdditional {
+	return s.AdditionalProps
+}
+
+// SetQueue sets the value of Queue.
+func (s *HealthChecks) SetQueue(val OptHealthChecksQueue) {
+	s.Queue = val
+}
+
+// SetDatabase sets the value of Database.
+func (s *HealthChecks) SetDatabase(val OptHealthChecksDatabase) {
+	s.Database = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *HealthChecks) SetAdditionalProps(val HealthChecksAdditional) {
+	s.AdditionalProps = val
+}
+
+type HealthChecksAdditional map[string]string
+
+func (s *HealthChecksAdditional) init() HealthChecksAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Status of the plugged database service.
+type HealthChecksDatabase string
+
+const (
+	HealthChecksDatabaseUP   HealthChecksDatabase = "UP"
+	HealthChecksDatabaseDOWN HealthChecksDatabase = "DOWN"
+)
+
+// AllValues returns all HealthChecksDatabase values.
+func (HealthChecksDatabase) AllValues() []HealthChecksDatabase {
+	return []HealthChecksDatabase{
+		HealthChecksDatabaseUP,
+		HealthChecksDatabaseDOWN,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s HealthChecksDatabase) MarshalText() ([]byte, error) {
+	switch s {
+	case HealthChecksDatabaseUP:
+		return []byte(s), nil
+	case HealthChecksDatabaseDOWN:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *HealthChecksDatabase) UnmarshalText(data []byte) error {
+	switch HealthChecksDatabase(data) {
+	case HealthChecksDatabaseUP:
+		*s = HealthChecksDatabaseUP
+		return nil
+	case HealthChecksDatabaseDOWN:
+		*s = HealthChecksDatabaseDOWN
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Status of the plugged queue service.
+type HealthChecksQueue string
+
+const (
+	HealthChecksQueueUP   HealthChecksQueue = "UP"
+	HealthChecksQueueDOWN HealthChecksQueue = "DOWN"
+)
+
+// AllValues returns all HealthChecksQueue values.
+func (HealthChecksQueue) AllValues() []HealthChecksQueue {
+	return []HealthChecksQueue{
+		HealthChecksQueueUP,
+		HealthChecksQueueDOWN,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s HealthChecksQueue) MarshalText() ([]byte, error) {
+	switch s {
+	case HealthChecksQueueUP:
+		return []byte(s), nil
+	case HealthChecksQueueDOWN:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *HealthChecksQueue) UnmarshalText(data []byte) error {
+	switch HealthChecksQueue(data) {
+	case HealthChecksQueueUP:
+		*s = HealthChecksQueueUP
+		return nil
+	case HealthChecksQueueDOWN:
+		*s = HealthChecksQueueDOWN
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Overall health status of the service.
+type HealthStatus string
+
+const (
+	HealthStatusUP   HealthStatus = "UP"
+	HealthStatusDOWN HealthStatus = "DOWN"
+)
+
+// AllValues returns all HealthStatus values.
+func (HealthStatus) AllValues() []HealthStatus {
+	return []HealthStatus{
+		HealthStatusUP,
+		HealthStatusDOWN,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s HealthStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case HealthStatusUP:
+		return []byte(s), nil
+	case HealthStatusDOWN:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *HealthStatus) UnmarshalText(data []byte) error {
+	switch HealthStatus(data) {
+	case HealthStatusUP:
+		*s = HealthStatusUP
+		return nil
+	case HealthStatusDOWN:
+		*s = HealthStatusDOWN
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Metainformation that is shared across all the app's resources.
 // Ref: #/components/schemas/MetaInformation
 type MetaInformation struct {
@@ -285,6 +503,98 @@ func (o OptCreateUser) Get() (v CreateUser, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptCreateUser) Or(d CreateUser) CreateUser {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptHealthChecksDatabase returns new OptHealthChecksDatabase with value set to v.
+func NewOptHealthChecksDatabase(v HealthChecksDatabase) OptHealthChecksDatabase {
+	return OptHealthChecksDatabase{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptHealthChecksDatabase is optional HealthChecksDatabase.
+type OptHealthChecksDatabase struct {
+	Value HealthChecksDatabase
+	Set   bool
+}
+
+// IsSet returns true if OptHealthChecksDatabase was set.
+func (o OptHealthChecksDatabase) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptHealthChecksDatabase) Reset() {
+	var v HealthChecksDatabase
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptHealthChecksDatabase) SetTo(v HealthChecksDatabase) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptHealthChecksDatabase) Get() (v HealthChecksDatabase, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptHealthChecksDatabase) Or(d HealthChecksDatabase) HealthChecksDatabase {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptHealthChecksQueue returns new OptHealthChecksQueue with value set to v.
+func NewOptHealthChecksQueue(v HealthChecksQueue) OptHealthChecksQueue {
+	return OptHealthChecksQueue{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptHealthChecksQueue is optional HealthChecksQueue.
+type OptHealthChecksQueue struct {
+	Value HealthChecksQueue
+	Set   bool
+}
+
+// IsSet returns true if OptHealthChecksQueue was set.
+func (o OptHealthChecksQueue) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptHealthChecksQueue) Reset() {
+	var v HealthChecksQueue
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptHealthChecksQueue) SetTo(v HealthChecksQueue) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptHealthChecksQueue) Get() (v HealthChecksQueue, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptHealthChecksQueue) Or(d HealthChecksQueue) HealthChecksQueue {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -734,7 +1044,7 @@ func (s *UserList) SetHasMoreItems(val bool) {
 	s.HasMoreItems = val
 }
 
-func (*UserList) userUsersListRes() {}
+func (*UserList) usersvcUsersListRes() {}
 
 // Ref: #/components/schemas/UserSpecificData
 type UserSpecificData struct {
@@ -812,54 +1122,54 @@ func (s *UserSpecificData) SetCountry(val string) {
 	s.Country = val
 }
 
-type UserUsersCreateBadRequest Error
+type UsersvcUsersCreateBadRequest Error
 
-func (*UserUsersCreateBadRequest) userUsersCreateRes() {}
+func (*UsersvcUsersCreateBadRequest) usersvcUsersCreateRes() {}
 
-type UserUsersCreateInternalServerError Error
+type UsersvcUsersCreateInternalServerError Error
 
-func (*UserUsersCreateInternalServerError) userUsersCreateRes() {}
+func (*UsersvcUsersCreateInternalServerError) usersvcUsersCreateRes() {}
 
-type UserUsersDescribeBadRequest Error
+type UsersvcUsersDescribeBadRequest Error
 
-func (*UserUsersDescribeBadRequest) userUsersDescribeRes() {}
+func (*UsersvcUsersDescribeBadRequest) usersvcUsersDescribeRes() {}
 
-type UserUsersDescribeInternalServerError Error
+type UsersvcUsersDescribeInternalServerError Error
 
-func (*UserUsersDescribeInternalServerError) userUsersDescribeRes() {}
+func (*UsersvcUsersDescribeInternalServerError) usersvcUsersDescribeRes() {}
 
-type UserUsersDescribeNotFound Error
+type UsersvcUsersDescribeNotFound Error
 
-func (*UserUsersDescribeNotFound) userUsersDescribeRes() {}
+func (*UsersvcUsersDescribeNotFound) usersvcUsersDescribeRes() {}
 
-type UserUsersEditBadRequest Error
+type UsersvcUsersEditBadRequest Error
 
-func (*UserUsersEditBadRequest) userUsersEditRes() {}
+func (*UsersvcUsersEditBadRequest) usersvcUsersEditRes() {}
 
-type UserUsersEditInternalServerError Error
+type UsersvcUsersEditInternalServerError Error
 
-func (*UserUsersEditInternalServerError) userUsersEditRes() {}
+func (*UsersvcUsersEditInternalServerError) usersvcUsersEditRes() {}
 
-type UserUsersEditNotFound Error
+type UsersvcUsersEditNotFound Error
 
-func (*UserUsersEditNotFound) userUsersEditRes() {}
+func (*UsersvcUsersEditNotFound) usersvcUsersEditRes() {}
 
-type UserUsersListBadRequest Error
+type UsersvcUsersListBadRequest Error
 
-func (*UserUsersListBadRequest) userUsersListRes() {}
+func (*UsersvcUsersListBadRequest) usersvcUsersListRes() {}
 
-type UserUsersListInternalServerError Error
+type UsersvcUsersListInternalServerError Error
 
-func (*UserUsersListInternalServerError) userUsersListRes() {}
+func (*UsersvcUsersListInternalServerError) usersvcUsersListRes() {}
 
-type UserUsersRemoveBadRequest Error
+type UsersvcUsersRemoveBadRequest Error
 
-func (*UserUsersRemoveBadRequest) userUsersRemoveRes() {}
+func (*UsersvcUsersRemoveBadRequest) usersvcUsersRemoveRes() {}
 
-type UserUsersRemoveInternalServerError Error
+type UsersvcUsersRemoveInternalServerError Error
 
-func (*UserUsersRemoveInternalServerError) userUsersRemoveRes() {}
+func (*UsersvcUsersRemoveInternalServerError) usersvcUsersRemoveRes() {}
 
-type UserUsersRemoveNotFound Error
+type UsersvcUsersRemoveNotFound Error
 
-func (*UserUsersRemoveNotFound) userUsersRemoveRes() {}
+func (*UsersvcUsersRemoveNotFound) usersvcUsersRemoveRes() {}

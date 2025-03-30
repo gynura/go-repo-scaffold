@@ -30,22 +30,141 @@ func (c *codeRecorder) WriteHeader(status int) {
 	c.ResponseWriter.WriteHeader(status)
 }
 
-// handleUserUsersCreateRequest handles user.users.create operation.
+// handleUsersvcHealthLiveRequest handles usersvc.health.live operation.
+//
+// Service status.
+//
+// GET /health
+func (s *Server) handleUsersvcHealthLiveRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("usersvc.health.live"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/health"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcHealthLiveOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code >= 100 && code < 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err error
+	)
+
+	var response UsersvcHealthLiveRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    UsersvcHealthLiveOperation,
+			OperationSummary: "Information to check if the service is healthy or not",
+			OperationID:      "usersvc.health.live",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = UsersvcHealthLiveRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.UsersvcHealthLive(ctx)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.UsersvcHealthLive(ctx)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeUsersvcHealthLiveResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleUsersvcUsersCreateRequest handles usersvc.users.create operation.
 //
 // Creates a new user.
 //
 // POST /users
-func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUsersvcUsersCreateRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("user.users.create"),
+		otelogen.OperationID("usersvc.users.create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), UserUsersCreateOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcUsersCreateOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -100,11 +219,11 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: UserUsersCreateOperation,
-			ID:   "user.users.create",
+			Name: UsersvcUsersCreateOperation,
+			ID:   "usersvc.users.create",
 		}
 	)
-	request, close, err := s.decodeUserUsersCreateRequest(r)
+	request, close, err := s.decodeUsersvcUsersCreateRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -120,13 +239,13 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 		}
 	}()
 
-	var response UserUsersCreateRes
+	var response UsersvcUsersCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    UserUsersCreateOperation,
+			OperationName:    UsersvcUsersCreateOperation,
 			OperationSummary: "Creates a user",
-			OperationID:      "user.users.create",
+			OperationID:      "usersvc.users.create",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
@@ -135,7 +254,7 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 		type (
 			Request  = OptCreateUser
 			Params   = struct{}
-			Response = UserUsersCreateRes
+			Response = UsersvcUsersCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -146,12 +265,12 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UserUsersCreate(ctx, request)
+				response, err = s.h.UsersvcUsersCreate(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UserUsersCreate(ctx, request)
+		response, err = s.h.UsersvcUsersCreate(ctx, request)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -159,7 +278,7 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 		return
 	}
 
-	if err := encodeUserUsersCreateResponse(response, w, span); err != nil {
+	if err := encodeUsersvcUsersCreateResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -168,22 +287,22 @@ func (s *Server) handleUserUsersCreateRequest(args [0]string, argsEscaped bool, 
 	}
 }
 
-// handleUserUsersDescribeRequest handles user.users.describe operation.
+// handleUsersvcUsersDescribeRequest handles usersvc.users.describe operation.
 //
 // Describes the specified user in the path.
 //
 // GET /users/{userId}
-func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUsersvcUsersDescribeRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("user.users.describe"),
+		otelogen.OperationID("usersvc.users.describe"),
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), UserUsersDescribeOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcUsersDescribeOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -238,11 +357,11 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: UserUsersDescribeOperation,
-			ID:   "user.users.describe",
+			Name: UsersvcUsersDescribeOperation,
+			ID:   "usersvc.users.describe",
 		}
 	)
-	params, err := decodeUserUsersDescribeParams(args, argsEscaped, r)
+	params, err := decodeUsersvcUsersDescribeParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -253,13 +372,13 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 		return
 	}
 
-	var response UserUsersDescribeRes
+	var response UsersvcUsersDescribeRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    UserUsersDescribeOperation,
+			OperationName:    UsersvcUsersDescribeOperation,
 			OperationSummary: "Describes a user",
-			OperationID:      "user.users.describe",
+			OperationID:      "usersvc.users.describe",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -272,8 +391,8 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 
 		type (
 			Request  = struct{}
-			Params   = UserUsersDescribeParams
-			Response = UserUsersDescribeRes
+			Params   = UsersvcUsersDescribeParams
+			Response = UsersvcUsersDescribeRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -282,14 +401,14 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 		](
 			m,
 			mreq,
-			unpackUserUsersDescribeParams,
+			unpackUsersvcUsersDescribeParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UserUsersDescribe(ctx, params)
+				response, err = s.h.UsersvcUsersDescribe(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UserUsersDescribe(ctx, params)
+		response, err = s.h.UsersvcUsersDescribe(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -297,7 +416,7 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 		return
 	}
 
-	if err := encodeUserUsersDescribeResponse(response, w, span); err != nil {
+	if err := encodeUsersvcUsersDescribeResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -306,22 +425,22 @@ func (s *Server) handleUserUsersDescribeRequest(args [1]string, argsEscaped bool
 	}
 }
 
-// handleUserUsersEditRequest handles user.users.edit operation.
+// handleUsersvcUsersEditRequest handles usersvc.users.edit operation.
 //
 // Updates the specified user in the path.
 //
 // PUT /users/{userId}
-func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUsersvcUsersEditRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("user.users.edit"),
+		otelogen.OperationID("usersvc.users.edit"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), UserUsersEditOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcUsersEditOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -376,11 +495,11 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: UserUsersEditOperation,
-			ID:   "user.users.edit",
+			Name: UsersvcUsersEditOperation,
+			ID:   "usersvc.users.edit",
 		}
 	)
-	params, err := decodeUserUsersEditParams(args, argsEscaped, r)
+	params, err := decodeUsersvcUsersEditParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -390,7 +509,7 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeUserUsersEditRequest(r)
+	request, close, err := s.decodeUsersvcUsersEditRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -406,13 +525,13 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 		}
 	}()
 
-	var response UserUsersEditRes
+	var response UsersvcUsersEditRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    UserUsersEditOperation,
+			OperationName:    UsersvcUsersEditOperation,
 			OperationSummary: "Updates a user",
-			OperationID:      "user.users.edit",
+			OperationID:      "usersvc.users.edit",
 			Body:             request,
 			Params: middleware.Parameters{
 				{
@@ -425,8 +544,8 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 
 		type (
 			Request  = OptUpdateUser
-			Params   = UserUsersEditParams
-			Response = UserUsersEditRes
+			Params   = UsersvcUsersEditParams
+			Response = UsersvcUsersEditRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -435,14 +554,14 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 		](
 			m,
 			mreq,
-			unpackUserUsersEditParams,
+			unpackUsersvcUsersEditParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UserUsersEdit(ctx, request, params)
+				response, err = s.h.UsersvcUsersEdit(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UserUsersEdit(ctx, request, params)
+		response, err = s.h.UsersvcUsersEdit(ctx, request, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -450,7 +569,7 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 		return
 	}
 
-	if err := encodeUserUsersEditResponse(response, w, span); err != nil {
+	if err := encodeUsersvcUsersEditResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -459,22 +578,22 @@ func (s *Server) handleUserUsersEditRequest(args [1]string, argsEscaped bool, w 
 	}
 }
 
-// handleUserUsersListRequest handles user.users.list operation.
+// handleUsersvcUsersListRequest handles usersvc.users.list operation.
 //
 // Lists all the users.
 //
 // GET /users
-func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUsersvcUsersListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("user.users.list"),
+		otelogen.OperationID("usersvc.users.list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/users"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), UserUsersListOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcUsersListOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -529,11 +648,11 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: UserUsersListOperation,
-			ID:   "user.users.list",
+			Name: UsersvcUsersListOperation,
+			ID:   "usersvc.users.list",
 		}
 	)
-	params, err := decodeUserUsersListParams(args, argsEscaped, r)
+	params, err := decodeUsersvcUsersListParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -544,13 +663,13 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 		return
 	}
 
-	var response UserUsersListRes
+	var response UsersvcUsersListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    UserUsersListOperation,
+			OperationName:    UsersvcUsersListOperation,
 			OperationSummary: "Lists users",
-			OperationID:      "user.users.list",
+			OperationID:      "usersvc.users.list",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -579,8 +698,8 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 
 		type (
 			Request  = struct{}
-			Params   = UserUsersListParams
-			Response = UserUsersListRes
+			Params   = UsersvcUsersListParams
+			Response = UsersvcUsersListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -589,14 +708,14 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 		](
 			m,
 			mreq,
-			unpackUserUsersListParams,
+			unpackUsersvcUsersListParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UserUsersList(ctx, params)
+				response, err = s.h.UsersvcUsersList(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UserUsersList(ctx, params)
+		response, err = s.h.UsersvcUsersList(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -604,7 +723,7 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 		return
 	}
 
-	if err := encodeUserUsersListResponse(response, w, span); err != nil {
+	if err := encodeUsersvcUsersListResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -613,22 +732,22 @@ func (s *Server) handleUserUsersListRequest(args [0]string, argsEscaped bool, w 
 	}
 }
 
-// handleUserUsersRemoveRequest handles user.users.remove operation.
+// handleUsersvcUsersRemoveRequest handles usersvc.users.remove operation.
 //
 // Deletes the specified user in the path.
 //
 // DELETE /users/{userId}
-func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUsersvcUsersRemoveRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("user.users.remove"),
+		otelogen.OperationID("usersvc.users.remove"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), UserUsersRemoveOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UsersvcUsersRemoveOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -683,11 +802,11 @@ func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, 
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: UserUsersRemoveOperation,
-			ID:   "user.users.remove",
+			Name: UsersvcUsersRemoveOperation,
+			ID:   "usersvc.users.remove",
 		}
 	)
-	params, err := decodeUserUsersRemoveParams(args, argsEscaped, r)
+	params, err := decodeUsersvcUsersRemoveParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -698,13 +817,13 @@ func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, 
 		return
 	}
 
-	var response UserUsersRemoveRes
+	var response UsersvcUsersRemoveRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    UserUsersRemoveOperation,
+			OperationName:    UsersvcUsersRemoveOperation,
 			OperationSummary: "Removes a user resource",
-			OperationID:      "user.users.remove",
+			OperationID:      "usersvc.users.remove",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -717,8 +836,8 @@ func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, 
 
 		type (
 			Request  = struct{}
-			Params   = UserUsersRemoveParams
-			Response = UserUsersRemoveRes
+			Params   = UsersvcUsersRemoveParams
+			Response = UsersvcUsersRemoveRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -727,14 +846,14 @@ func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, 
 		](
 			m,
 			mreq,
-			unpackUserUsersRemoveParams,
+			unpackUsersvcUsersRemoveParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UserUsersRemove(ctx, params)
+				response, err = s.h.UsersvcUsersRemove(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UserUsersRemove(ctx, params)
+		response, err = s.h.UsersvcUsersRemove(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -742,7 +861,7 @@ func (s *Server) handleUserUsersRemoveRequest(args [1]string, argsEscaped bool, 
 		return
 	}
 
-	if err := encodeUserUsersRemoveResponse(response, w, span); err != nil {
+	if err := encodeUsersvcUsersRemoveResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

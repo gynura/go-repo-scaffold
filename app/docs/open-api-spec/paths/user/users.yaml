@@ -1,5 +1,5 @@
 post:
-  operationId: user.users.create
+  operationId: usersvc.users.create
   tags:
     - User
   summary: Creates a user
@@ -23,7 +23,7 @@ post:
       $ref: '../../components/_index.yaml#/responses/InternalServerErrorResponse'
 
 get:
-  operationId: user.users.list
+  operationId: usersvc.users.list
   tags:
     - User
   summary: Lists users

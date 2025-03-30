@@ -1,5 +1,5 @@
 get:
-  operationId: user.users.describe
+  operationId: usersvc.users.describe
   tags:
     - User
   summary: Describes a user
@@ -21,7 +21,7 @@ get:
       $ref: '../../components/_index.yaml#/responses/InternalServerErrorResponse'
 
 put:
-  operationId: user.users.edit
+  operationId: usersvc.users.edit
   tags:
     - User
   summary: Updates a user
@@ -49,7 +49,7 @@ put:
       $ref: '../../components/_index.yaml#/responses/InternalServerErrorResponse'
 
 delete:
-  operationId: user.users.remove
+  operationId: usersvc.users.remove
   tags:
     - User
   summary: Removes a user resource

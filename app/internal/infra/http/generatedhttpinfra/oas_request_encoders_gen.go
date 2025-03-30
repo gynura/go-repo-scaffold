@@ -11,7 +11,7 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeUserUsersCreateRequest(
+func encodeUsersvcUsersCreateRequest(
 	req OptCreateUser,
 	r *http.Request,
 ) error {
@@ -31,7 +31,7 @@ func encodeUserUsersCreateRequest(
 	return nil
 }
 
-func encodeUserUsersEditRequest(
+func encodeUsersvcUsersEditRequest(
 	req OptUpdateUser,
 	r *http.Request,
 ) error {

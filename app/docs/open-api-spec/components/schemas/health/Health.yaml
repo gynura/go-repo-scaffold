@@ -1,0 +1,37 @@
+type: object
+additionalProperties: false
+properties:
+  status:
+    type: string
+    enum: [UP, DOWN]
+    description: |
+      Overall health status of the service
+  uptime:
+    type: number
+    description: |
+      The uptime of the service in seconds
+  checks:
+    type: object
+    additionalProperties:
+      type: string
+    properties:
+      queue:
+        type: string
+        enum: [UP, DOWN]
+        description: |
+          Status of the plugged queue service.
+      database:
+        type: string
+        enum: [UP, DOWN]
+        description: |
+          Status of the plugged database service.
+required:
+  - status
+  - uptime
+  - checks
+example:
+  status: "UP"
+  uptime: 74
+  checks:
+    queue: "UP"
+    database: "UP"

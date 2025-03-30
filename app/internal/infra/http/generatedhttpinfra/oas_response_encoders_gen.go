@@ -11,7 +11,40 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeUserUsersCreateResponse(response UserUsersCreateRes, w http.ResponseWriter, span trace.Span) error {
+func encodeUsersvcHealthLiveResponse(response UsersvcHealthLiveRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *Health:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *Error:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(500)
+		span.SetStatus(codes.Error, http.StatusText(500))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeUsersvcUsersCreateResponse(response UsersvcUsersCreateRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DescribeUser:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -26,7 +59,7 @@ func encodeUserUsersCreateResponse(response UserUsersCreateRes, w http.ResponseW
 
 		return nil
 
-	case *UserUsersCreateBadRequest:
+	case *UsersvcUsersCreateBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -39,7 +72,7 @@ func encodeUserUsersCreateResponse(response UserUsersCreateRes, w http.ResponseW
 
 		return nil
 
-	case *UserUsersCreateInternalServerError:
+	case *UsersvcUsersCreateInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -57,7 +90,7 @@ func encodeUserUsersCreateResponse(response UserUsersCreateRes, w http.ResponseW
 	}
 }
 
-func encodeUserUsersDescribeResponse(response UserUsersDescribeRes, w http.ResponseWriter, span trace.Span) error {
+func encodeUsersvcUsersDescribeResponse(response UsersvcUsersDescribeRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DescribeUser:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -72,7 +105,7 @@ func encodeUserUsersDescribeResponse(response UserUsersDescribeRes, w http.Respo
 
 		return nil
 
-	case *UserUsersDescribeBadRequest:
+	case *UsersvcUsersDescribeBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -85,7 +118,7 @@ func encodeUserUsersDescribeResponse(response UserUsersDescribeRes, w http.Respo
 
 		return nil
 
-	case *UserUsersDescribeNotFound:
+	case *UsersvcUsersDescribeNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -98,7 +131,7 @@ func encodeUserUsersDescribeResponse(response UserUsersDescribeRes, w http.Respo
 
 		return nil
 
-	case *UserUsersDescribeInternalServerError:
+	case *UsersvcUsersDescribeInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -116,7 +149,7 @@ func encodeUserUsersDescribeResponse(response UserUsersDescribeRes, w http.Respo
 	}
 }
 
-func encodeUserUsersEditResponse(response UserUsersEditRes, w http.ResponseWriter, span trace.Span) error {
+func encodeUsersvcUsersEditResponse(response UsersvcUsersEditRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DescribeUser:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -131,7 +164,7 @@ func encodeUserUsersEditResponse(response UserUsersEditRes, w http.ResponseWrite
 
 		return nil
 
-	case *UserUsersEditBadRequest:
+	case *UsersvcUsersEditBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -144,7 +177,7 @@ func encodeUserUsersEditResponse(response UserUsersEditRes, w http.ResponseWrite
 
 		return nil
 
-	case *UserUsersEditNotFound:
+	case *UsersvcUsersEditNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -157,7 +190,7 @@ func encodeUserUsersEditResponse(response UserUsersEditRes, w http.ResponseWrite
 
 		return nil
 
-	case *UserUsersEditInternalServerError:
+	case *UsersvcUsersEditInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -175,7 +208,7 @@ func encodeUserUsersEditResponse(response UserUsersEditRes, w http.ResponseWrite
 	}
 }
 
-func encodeUserUsersListResponse(response UserUsersListRes, w http.ResponseWriter, span trace.Span) error {
+func encodeUsersvcUsersListResponse(response UsersvcUsersListRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *UserList:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -190,7 +223,7 @@ func encodeUserUsersListResponse(response UserUsersListRes, w http.ResponseWrite
 
 		return nil
 
-	case *UserUsersListBadRequest:
+	case *UsersvcUsersListBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -203,7 +236,7 @@ func encodeUserUsersListResponse(response UserUsersListRes, w http.ResponseWrite
 
 		return nil
 
-	case *UserUsersListInternalServerError:
+	case *UsersvcUsersListInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -221,7 +254,7 @@ func encodeUserUsersListResponse(response UserUsersListRes, w http.ResponseWrite
 	}
 }
 
-func encodeUserUsersRemoveResponse(response UserUsersRemoveRes, w http.ResponseWriter, span trace.Span) error {
+func encodeUsersvcUsersRemoveResponse(response UsersvcUsersRemoveRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DescribeUser:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -236,7 +269,7 @@ func encodeUserUsersRemoveResponse(response UserUsersRemoveRes, w http.ResponseW
 
 		return nil
 
-	case *UserUsersRemoveBadRequest:
+	case *UsersvcUsersRemoveBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -249,7 +282,7 @@ func encodeUserUsersRemoveResponse(response UserUsersRemoveRes, w http.ResponseW
 
 		return nil
 
-	case *UserUsersRemoveNotFound:
+	case *UsersvcUsersRemoveNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -262,7 +295,7 @@ func encodeUserUsersRemoveResponse(response UserUsersRemoveRes, w http.ResponseW
 
 		return nil
 
-	case *UserUsersRemoveInternalServerError:
+	case *UsersvcUsersRemoveInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))

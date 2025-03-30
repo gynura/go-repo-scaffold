@@ -158,6 +158,132 @@ func (s ErrorErrorStatus) Validate() error {
 	}
 }
 
+func (s *Health) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.Uptime)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "uptime",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Checks.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "checks",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *HealthChecks) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Queue.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "queue",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Database.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "database",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s HealthChecksDatabase) Validate() error {
+	switch s {
+	case "UP":
+		return nil
+	case "DOWN":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s HealthChecksQueue) Validate() error {
+	switch s {
+	case "UP":
+		return nil
+	case "DOWN":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s HealthStatus) Validate() error {
+	switch s {
+	case "UP":
+		return nil
+	case "DOWN":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *MetaInformation) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -343,7 +469,7 @@ func (s *UserSpecificData) Validate() error {
 	return nil
 }
 
-func (s *UserUsersCreateBadRequest) Validate() error {
+func (s *UsersvcUsersCreateBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -351,7 +477,7 @@ func (s *UserUsersCreateBadRequest) Validate() error {
 	return nil
 }
 
-func (s *UserUsersCreateInternalServerError) Validate() error {
+func (s *UsersvcUsersCreateInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -359,7 +485,7 @@ func (s *UserUsersCreateInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *UserUsersDescribeBadRequest) Validate() error {
+func (s *UsersvcUsersDescribeBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -367,7 +493,7 @@ func (s *UserUsersDescribeBadRequest) Validate() error {
 	return nil
 }
 
-func (s *UserUsersDescribeInternalServerError) Validate() error {
+func (s *UsersvcUsersDescribeInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -375,7 +501,7 @@ func (s *UserUsersDescribeInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *UserUsersDescribeNotFound) Validate() error {
+func (s *UsersvcUsersDescribeNotFound) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -383,7 +509,7 @@ func (s *UserUsersDescribeNotFound) Validate() error {
 	return nil
 }
 
-func (s *UserUsersEditBadRequest) Validate() error {
+func (s *UsersvcUsersEditBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -391,7 +517,7 @@ func (s *UserUsersEditBadRequest) Validate() error {
 	return nil
 }
 
-func (s *UserUsersEditInternalServerError) Validate() error {
+func (s *UsersvcUsersEditInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -399,7 +525,7 @@ func (s *UserUsersEditInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *UserUsersEditNotFound) Validate() error {
+func (s *UsersvcUsersEditNotFound) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -407,7 +533,7 @@ func (s *UserUsersEditNotFound) Validate() error {
 	return nil
 }
 
-func (s *UserUsersListBadRequest) Validate() error {
+func (s *UsersvcUsersListBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -415,7 +541,7 @@ func (s *UserUsersListBadRequest) Validate() error {
 	return nil
 }
 
-func (s *UserUsersListInternalServerError) Validate() error {
+func (s *UsersvcUsersListInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -423,7 +549,7 @@ func (s *UserUsersListInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *UserUsersRemoveBadRequest) Validate() error {
+func (s *UsersvcUsersRemoveBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -431,7 +557,7 @@ func (s *UserUsersRemoveBadRequest) Validate() error {
 	return nil
 }
 
-func (s *UserUsersRemoveInternalServerError) Validate() error {
+func (s *UsersvcUsersRemoveInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -439,7 +565,7 @@ func (s *UserUsersRemoveInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *UserUsersRemoveNotFound) Validate() error {
+func (s *UsersvcUsersRemoveNotFound) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err

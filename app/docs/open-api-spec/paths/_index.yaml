@@ -1,4 +1,9 @@
+# User endpoints
 '/users':
   $ref: user/users.yaml
 '/users/{userId}':
   $ref: user/users_id.yaml
+
+# Health endpoints
+'/health':
+  $ref: health/health.yaml

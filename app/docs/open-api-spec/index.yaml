@@ -10,6 +10,8 @@ servers:
 tags:
   - name: User
     description: user resources management functionalities
+  - name: Health
+    description: service health checks functionalities
 
 paths:
   $ref: ./paths/_index.yaml

@@ -49,64 +49,98 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/users"
+		case '/': // Prefix: "/"
 
-			if l := len("/users"); len(elem) >= l && elem[0:l] == "/users" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				switch r.Method {
-				case "GET":
-					s.handleUserUsersListRequest([0]string{}, elemIsEscaped, w, r)
-				case "POST":
-					s.handleUserUsersCreateRequest([0]string{}, elemIsEscaped, w, r)
-				default:
-					s.notAllowed(w, r, "GET,POST")
-				}
-
-				return
+				break
 			}
 			switch elem[0] {
-			case '/': // Prefix: "/"
+			case 'h': // Prefix: "health"
 
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "userId"
-				// Leaf parameter, slashes are prohibited
-				idx := strings.IndexByte(elem, '/')
-				if idx >= 0 {
-					break
-				}
-				args[0] = elem
-				elem = ""
-
 				if len(elem) == 0 {
 					// Leaf node.
 					switch r.Method {
-					case "DELETE":
-						s.handleUserUsersRemoveRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
 					case "GET":
-						s.handleUserUsersDescribeRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					case "PUT":
-						s.handleUserUsersEditRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
+						s.handleUsersvcHealthLiveRequest([0]string{}, elemIsEscaped, w, r)
 					default:
-						s.notAllowed(w, r, "DELETE,GET,PUT")
+						s.notAllowed(w, r, "GET")
 					}
 
 					return
+				}
+
+			case 'u': // Prefix: "users"
+
+				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "GET":
+						s.handleUsersvcUsersListRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleUsersvcUsersCreateRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "userId"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "DELETE":
+							s.handleUsersvcUsersRemoveRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "GET":
+							s.handleUsersvcUsersDescribeRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "PUT":
+							s.handleUsersvcUsersEditRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "DELETE,GET,PUT")
+						}
+
+						return
+					}
+
 				}
 
 			}
@@ -191,84 +225,122 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/users"
+		case '/': // Prefix: "/"
 
-			if l := len("/users"); len(elem) >= l && elem[0:l] == "/users" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				switch method {
-				case "GET":
-					r.name = UserUsersListOperation
-					r.summary = "Lists users"
-					r.operationID = "user.users.list"
-					r.pathPattern = "/users"
-					r.args = args
-					r.count = 0
-					return r, true
-				case "POST":
-					r.name = UserUsersCreateOperation
-					r.summary = "Creates a user"
-					r.operationID = "user.users.create"
-					r.pathPattern = "/users"
-					r.args = args
-					r.count = 0
-					return r, true
-				default:
-					return
-				}
+				break
 			}
 			switch elem[0] {
-			case '/': // Prefix: "/"
+			case 'h': // Prefix: "health"
 
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
-				// Param: "userId"
-				// Leaf parameter, slashes are prohibited
-				idx := strings.IndexByte(elem, '/')
-				if idx >= 0 {
-					break
-				}
-				args[0] = elem
-				elem = ""
-
 				if len(elem) == 0 {
 					// Leaf node.
 					switch method {
-					case "DELETE":
-						r.name = UserUsersRemoveOperation
-						r.summary = "Removes a user resource"
-						r.operationID = "user.users.remove"
-						r.pathPattern = "/users/{userId}"
-						r.args = args
-						r.count = 1
-						return r, true
 					case "GET":
-						r.name = UserUsersDescribeOperation
-						r.summary = "Describes a user"
-						r.operationID = "user.users.describe"
-						r.pathPattern = "/users/{userId}"
+						r.name = UsersvcHealthLiveOperation
+						r.summary = "Information to check if the service is healthy or not"
+						r.operationID = "usersvc.health.live"
+						r.pathPattern = "/health"
 						r.args = args
-						r.count = 1
-						return r, true
-					case "PUT":
-						r.name = UserUsersEditOperation
-						r.summary = "Updates a user"
-						r.operationID = "user.users.edit"
-						r.pathPattern = "/users/{userId}"
-						r.args = args
-						r.count = 1
+						r.count = 0
 						return r, true
 					default:
 						return
 					}
+				}
+
+			case 'u': // Prefix: "users"
+
+				if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = UsersvcUsersListOperation
+						r.summary = "Lists users"
+						r.operationID = "usersvc.users.list"
+						r.pathPattern = "/users"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = UsersvcUsersCreateOperation
+						r.summary = "Creates a user"
+						r.operationID = "usersvc.users.create"
+						r.pathPattern = "/users"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "userId"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "DELETE":
+							r.name = UsersvcUsersRemoveOperation
+							r.summary = "Removes a user resource"
+							r.operationID = "usersvc.users.remove"
+							r.pathPattern = "/users/{userId}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "GET":
+							r.name = UsersvcUsersDescribeOperation
+							r.summary = "Describes a user"
+							r.operationID = "usersvc.users.describe"
+							r.pathPattern = "/users/{userId}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "PUT":
+							r.name = UsersvcUsersEditOperation
+							r.summary = "Updates a user"
+							r.operationID = "usersvc.users.edit"
+							r.pathPattern = "/users/{userId}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
 				}
 
 			}

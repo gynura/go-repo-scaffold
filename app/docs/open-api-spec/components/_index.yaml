@@ -10,7 +10,9 @@ schemas:
     $ref: ./schemas/user/UpdateUser.yaml
   UserSpecificData:
     $ref: ./schemas/user/UserSpecificData.yaml
-
+## Health
+  Health:
+    $ref: ./schemas/health/Health.yaml
 ## Common
   Pagination:
     $ref: ./schemas/common/Pagination.yaml

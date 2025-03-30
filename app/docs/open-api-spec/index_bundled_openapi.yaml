@@ -9,10 +9,12 @@ servers:
 tags:
   - name: User
     description: user resources management functionalities
+  - name: Health
+    description: service health checks functionalities
 paths:
   /users:
     post:
-      operationId: user.users.create
+      operationId: usersvc.users.create
       tags:
         - User
       summary: Creates a user
@@ -35,7 +37,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     get:
-      operationId: user.users.list
+      operationId: usersvc.users.list
       tags:
         - User
       summary: Lists users
@@ -59,7 +61,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
   '/users/{userId}':
     get:
-      operationId: user.users.describe
+      operationId: usersvc.users.describe
       tags:
         - User
       summary: Describes a user
@@ -80,7 +82,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     put:
-      operationId: user.users.edit
+      operationId: usersvc.users.edit
       tags:
         - User
       summary: Updates a user
@@ -107,7 +109,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     delete:
-      operationId: user.users.remove
+      operationId: usersvc.users.remove
       tags:
         - User
       summary: Removes a user resource
@@ -125,6 +127,22 @@ paths:
           $ref: '#/components/responses/BadRequestResponse'
         '404':
           $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /health:
+    get:
+      operationId: usersvc.health.live
+      tags:
+        - Health
+      summary: Information to check if the service is healthy or not
+      description: Service status
+      responses:
+        '200':
+          description: null
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
 components:
@@ -243,6 +261,50 @@ components:
         - password
         - email
         - country
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - UP
+            - DOWN
+          description: |
+            Overall health status of the service
+        uptime:
+          type: number
+          description: |
+            The uptime of the service in seconds
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+          properties:
+            queue:
+              type: string
+              enum:
+                - UP
+                - DOWN
+              description: |
+                Status of the plugged queue service.
+            database:
+              type: string
+              enum:
+                - UP
+                - DOWN
+              description: |
+                Status of the plugged database service.
+      required:
+        - status
+        - uptime
+        - checks
+      example:
+        status: UP
+        uptime: 74
+        checks:
+          queue: UP
+          database: UP
     Pagination:
       type: object
       additionalProperties: false
