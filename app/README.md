@@ -44,3 +44,12 @@ make generate_http_infra
 ```
 
 > **_NOTE:_**  This command will install the ogen generator for you
+
+### How to generate mocks
+
+From **users-microservice/app**, run:
+```bash
+make generate_mocks
+```
+
+> **_NOTE:_**  This command will install the mockgen generator for you
