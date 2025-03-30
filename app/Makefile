@@ -5,6 +5,7 @@ API_SPEC_BUNDLE ?= "${GIT_ROOT_DIR}/app/docs/open-api-spec/index_bundled_openapi
 GENERATED_API_CODE_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generated"
 API_SPEC_ROOT ?= "${GIT_ROOT_DIR}/app/docs/open-api-spec"
 GENERATED_HTTP_INFRA_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generatedhttpinfra"
+GENERATED_MOCKS_OUTPUT ?= "internal/test/generatedmocks"
 
 .PHONY: default
 default: generate_http_infra
@@ -51,7 +52,7 @@ generate-ogen-http-infra: install-ogen
 .PHONY: generate_mocks
 generate_mocks: install-mockgen
 	@echo "Generating mocks"
-	@mkdir -p app/internal/test/generatedmocks
-	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_storage.go -destination=internal/test/generatedmocks/user_storage_mock.go -package=generatedmocks
-	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_queue.go -destination=internal/test/generatedmocks/user_queue_mock.go -package=generatedmocks
-	@echo "✅ Mocks generated successfully inside internal/test/generatedmocks"
+	@mkdir -p $(GENERATED_MOCKS_OUTPUT)
+	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_storage.go -destination=${GENERATED_MOCKS_OUTPUT}/user_storage_mock.go -package=generatedmocks
+	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_queue.go -destination=${GENERATED_MOCKS_OUTPUT}/user_queue_mock.go -package=generatedmocks
+	@echo "✅ Mocks generated successfully inside ${GENERATED_MOCKS_OUTPUT}"
