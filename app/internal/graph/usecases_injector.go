@@ -5,11 +5,13 @@ package graph
 import (
 	"github.com/google/wire"
 	"userservice/internal/adapters/output/queue/userqueue"
+	"userservice/internal/core/usecases/health"
 	"userservice/internal/core/usecases/user"
 )
 
 type useCasesGraph struct {
-	UserUseCase user.UseCase
+	userUseCase   user.UseCase
+	HealthUseCase health.UseCase
 }
 
 var useCasesSet = wire.NewSet(
@@ -24,6 +26,11 @@ var useCasesSet = wire.NewSet(
 	userqueue.ProvideQueueAdapter,
 	wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)),
 	wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"),
+
+	// Health Use Case
+	health.ProvideDefaultUseCase,
+	wire.Bind(new(health.UseCase), new(*health.DefaultUseCase)),
+	wire.Struct(new(health.ProvideUseCaseOptions), "*"),
 )
 
 func initializeUseCases(

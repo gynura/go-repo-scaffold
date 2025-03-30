@@ -13,7 +13,6 @@ type ServiceTime struct {
 }
 
 // Now creates a new ServiceTime with the current UTC time
-
 func Now() ServiceTime {
 	return ServiceTime{Time: time.Now().UTC()}
 }

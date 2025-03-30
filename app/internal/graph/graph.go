@@ -114,6 +114,9 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 
 	serviceLogger := logger.NewLogger()
 
+	// Before starting the server we need to set the startAt time for the health use case
+	graph.useCasesGraph.HealthUseCase.SetStartedAt(ctx)
+
 	go func() {
 		serviceLogger.Info(ctx).Message("Starting server on %s:%s", options.Host, options.Port)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {

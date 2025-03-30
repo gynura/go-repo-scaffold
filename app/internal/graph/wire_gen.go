@@ -14,6 +14,7 @@ import (
 	"userservice/internal/adapters/input/http"
 	"userservice/internal/adapters/output/queue/userqueue"
 	"userservice/internal/adapters/output/storage/postgresql/userstorage"
+	"userservice/internal/core/usecases/health"
 	"userservice/internal/core/usecases/user"
 	"userservice/internal/infra/http/generatedhttpinfra"
 	"userservice/internal/infra/queue"
@@ -30,9 +31,11 @@ import (
 // Injectors from http_api_injector.go:
 
 func initializeHTTPAPIGraph(useCases *useCasesGraph) (*httpAPIGraph, error) {
-	useCase := useCases.UserUseCase
+	useCase := useCases.userUseCase
+	healthUseCase := useCases.HealthUseCase
 	defaultAPIAdapterOptions := http.DefaultAPIAdapterOptions{
-		UserUseCase: useCase,
+		UserUseCase:   useCase,
+		HealthUseCase: healthUseCase,
 	}
 	defaultAPIAdapter, err := http.ProvideDefaultAPIAdapter(defaultAPIAdapterOptions)
 	if err != nil {
@@ -126,8 +129,14 @@ func initializeUseCases(repositories *storageGraph, infra *infraGraph) (*useCase
 	if err != nil {
 		return nil, err
 	}
+	healthProvideUseCaseOptions := health.ProvideUseCaseOptions{}
+	healthDefaultUseCase, err := health.ProvideDefaultUseCase(healthProvideUseCaseOptions)
+	if err != nil {
+		return nil, err
+	}
 	graphUseCasesGraph := &useCasesGraph{
-		UserUseCase: defaultUseCase,
+		userUseCase:   defaultUseCase,
+		HealthUseCase: healthDefaultUseCase,
 	}
 	return graphUseCasesGraph, nil
 }
@@ -262,7 +271,8 @@ var storageSet = wire.NewSet(wire.Struct(new(storageGraph), "*"), userstorageinf
 // usecases_injector.go:
 
 type useCasesGraph struct {
-	UserUseCase user.UseCase
+	userUseCase   user.UseCase
+	HealthUseCase health.UseCase
 }
 
-var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"), userqueue.ProvideQueueAdapter, wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)), wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"))
+var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"), userqueue.ProvideQueueAdapter, wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)), wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"), health.ProvideDefaultUseCase, wire.Bind(new(health.UseCase), new(*health.DefaultUseCase)), wire.Struct(new(health.ProvideUseCaseOptions), "*"))

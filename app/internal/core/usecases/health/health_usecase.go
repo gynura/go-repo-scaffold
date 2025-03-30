@@ -34,7 +34,7 @@ func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, erro
 
 var _ UseCase = new(DefaultUseCase)
 
-func (d DefaultUseCase) Check(_ context.Context) (*CheckOutput, *errors.ServiceError) {
+func (d *DefaultUseCase) Check(_ context.Context) (*CheckOutput, *errors.ServiceError) {
 	return &CheckOutput{
 		Status:    StatusUp,
 		StartedAt: d.startedAt,
@@ -45,6 +45,7 @@ func (d DefaultUseCase) Check(_ context.Context) (*CheckOutput, *errors.ServiceE
 	}, nil
 }
 
-func (d DefaultUseCase) SetStartedAt(_ context.Context) {
-	d.startedAt = time.Now()
+func (d *DefaultUseCase) SetStartedAt(_ context.Context) {
+	now := time.Now()
+	d.startedAt = now
 }

@@ -27,6 +27,7 @@ func initializeHTTPAPIGraph(
 	wire.Build(httpAPISet,
 		wire.FieldsOf(new(*useCasesGraph),
 			"userUseCase",
+			"HealthUseCase",
 		),
 	)
 	return &httpAPIGraph{}, nil
