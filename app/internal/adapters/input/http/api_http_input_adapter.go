@@ -154,8 +154,25 @@ func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpi
 }
 
 func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedhttpinfra.UserUsersListParams) (generatedhttpinfra.UserUsersListRes, error) {
-	//TODO implement me
-	panic("implement me")
+	input := user.ListUsersInput{
+		PageLimit:      params.Limit.Value,
+		PageOffset:     params.Offset.Value,
+		OrderBy:        string(params.OrderBy.Value),
+		OrderDirection: string(params.OrderDirection.Value),
+		Country:        params.Country.Value,
+	}
+
+	_, err := d.userUseCase.ListUsers(ctx, input)
+	if err != nil {
+		if err.IsInvalidArgumentError() {
+			response := generatedhttpinfra.UserUsersListBadRequest(mapServiceErrorToHTTPError(*err))
+			return &response, nil
+		}
+		response := generatedhttpinfra.UserUsersListInternalServerError(mapServiceErrorToHTTPError(*err))
+		return &response, nil
+	}
+
+	return &generatedhttpinfra.UserList{}, nil
 }
 
 func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generatedhttpinfra.UserUsersRemoveParams) (generatedhttpinfra.UserUsersRemoveRes, error) {

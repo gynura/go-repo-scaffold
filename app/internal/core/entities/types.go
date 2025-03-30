@@ -1,7 +1,10 @@
 // Package entities defines custom data types ready to be used across the app
 package entities
 
-import "userservice/internal/pkg/commons/time"
+import (
+	"errors"
+	"userservice/internal/pkg/commons/time"
+)
 
 // OrderBy defines the resource's attribute used to order when listing
 type OrderBy string
@@ -38,4 +41,15 @@ type Pagination struct {
 	Limit        int  `json:"limit"`        // number of items per page in the collection
 	Offset       int  `json:"offset"`       // starting point (index) of the collection
 	HasMoreItems bool `json:"hasMoreItems"` // indicates if there are additional pages of data available
+}
+
+func ToOrderDirection(direction string) (OrderDirection, error) {
+	switch direction {
+	case "asc":
+		return OrderAsc, nil
+	case "desc":
+		return OrderDesc, nil
+	default:
+		return "", errors.New("unsupported direction")
+	}
 }

@@ -16,6 +16,9 @@ type Storage interface {
 	List(ctx context.Context, filters StorageFilters) (*UsersList, *errors.ServiceError)
 	GetByEmail(ctx context.Context, email string) (*entities.User, *errors.ServiceError)
 	GetByNickname(ctx context.Context, nickname string) (*entities.User, *errors.ServiceError)
+
+	// ProvideFilters functions as the constructor of the StorageFilers to starting filtering Users data
+	ProvideFilters() StorageFilters
 }
 
 // StorageFilters defines filter options when listing Users

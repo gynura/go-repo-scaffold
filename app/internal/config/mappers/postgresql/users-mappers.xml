@@ -35,8 +35,8 @@
         email
         FROM
         svc_users
-        WHERE
         {{ if .FilterGroup }}
+        WHERE
         {{ range $counter, $filter := .FilterGroup.Filters }}
         AND {{$filter.ToSQLStmt}}
         {{end}}

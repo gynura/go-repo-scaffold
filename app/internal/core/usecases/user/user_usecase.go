@@ -7,6 +7,7 @@ import (
 	"userservice/internal/pkg/commons/logger"
 	"userservice/internal/pkg/commons/time"
 	"userservice/internal/pkg/errors"
+	"userservice/internal/pkg/persistence"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
@@ -69,6 +70,10 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 			WithMessage("Invalid input to create user. Please review your input fields and try again.")
 	}
 
+	useCase.logger.Info(ctx).Attributes("trying to create new user", map[string]any{
+		"userId": input.ID,
+	})
+
 	// Nicknames are unique alongside IDs and Emails, in order to avoid coupling this check to the plugged db, the business logic needs to implement this checks
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
 		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
@@ -110,6 +115,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	if err != nil {
 		useCase.logger.Error(ctx).Attributes("error encrypting and setting user's password", map[string]any{
 			"userId": input.ID,
+			"info":   err.Error(),
 		})
 		return nil, errors.NewInternalError("error encrypting and setting user's password").FromError(err)
 	}
@@ -140,8 +146,47 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 }
 
 func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, *errors.ServiceError) {
-	//TODO implement me
-	panic("implement me")
+	_, err := govalidator.ValidateStruct(input)
+	if err != nil {
+		useCase.logger.Debug(ctx).Message(err.Error())
+		return nil, errors.NewInvalidArgumentError("invalid input to list users").FromError(err).
+			WithMessage("Invalid input to list users. Please review your input fields and try again.")
+	}
+
+	filters := useCase.storage.ProvideFilters()
+	direction := defaultOrderDirection
+	if len(input.OrderDirection) > 0 {
+		direction, err = entities.ToOrderDirection(input.OrderDirection)
+		if err != nil {
+			useCase.logger.Debug(ctx).Message("unsupported direction [%s] to order", input.OrderDirection)
+			return nil, errors.NewInvalidArgumentError("unsupported direction [%s] to order", input.OrderDirection).
+				WithMessage("unsupported direction [%s] to order", input.OrderDirection)
+		}
+	}
+
+	// The way filtering works is that, if the attribute is defined in the input struct, that means we must query it
+	if len(input.Country) > 0 {
+		filters.FilterByCountry(input.Country)
+	}
+
+	filters.OrderByCreatedAt(persistence.OrderDirection(direction))
+	if input.OrderBy == string(entities.OrderByUpdatedAt) {
+		filters.OrderByUpdatedAt(persistence.OrderDirection(direction))
+	}
+
+	if input.PageLimit > 0 {
+		filters.Paged(input.PageLimit, input.PageOffset)
+	}
+
+	userList, listErr := useCase.storage.List(ctx, filters)
+	if listErr != nil {
+		useCase.logger.Error(ctx).ServiceError(listErr)
+		return nil, errors.NewInternalError("failed to list users").FromError(listErr)
+	}
+
+	return &ListUsersOutput{
+		UsersList: *userList,
+	}, nil
 }
 
 func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError) {
@@ -175,6 +220,10 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 			WithMessage("Invalid input to edit user. Please review your input fields and try again.")
 	}
 
+	useCase.logger.Info(ctx).Attributes("trying to update user information", map[string]any{
+		"userId": input.ID,
+	})
+
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
 		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
 		return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
@@ -203,8 +252,12 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 	userToBeUpdated.FirstName = input.FirstName
 	userToBeUpdated.LastName = input.LastName
 	userToBeUpdated.Country = input.Country
-	err = userToBeUpdated.SetPassword(input.Password)
+	err = userToBeUpdated.EncryptAndSetPassword(input.Password)
 	if err != nil {
+		useCase.logger.Error(ctx).Attributes("error encrypting and setting user's password", map[string]any{
+			"userId": input.ID,
+			"info":   err.Error(),
+		})
 		return nil, errors.NewInternalError("failed to set user's password").FromError(err)
 	}
 
@@ -217,6 +270,10 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 		}
 		return nil, errors.NewInternalError("failed to edit user").FromError(editErr)
 	}
+
+	useCase.logger.Info(ctx).Attributes("successfully updated user information", map[string]any{
+		"userId": input.ID,
+	})
 
 	return &EditUserOutput{
 		User: *storageUser,
@@ -232,6 +289,10 @@ func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserIn
 			WithMessage("Invalid input to delete user. Please review your input fields and try again.")
 	}
 
+	useCase.logger.Info(ctx).Attributes("deleting user", map[string]any{
+		"userId": input.ID,
+	})
+
 	removedUser, removeErr := useCase.storage.Remove(ctx, input.ResourceID)
 	if removeErr != nil {
 		useCase.logger.Error(ctx).UserServiceError(removeErr, input.ID)
@@ -241,6 +302,10 @@ func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserIn
 		}
 		return nil, errors.NewInternalError("failed to delete user").FromError(err)
 	}
+
+	useCase.logger.Info(ctx).Attributes("successfully deleted user", map[string]any{
+		"userId": input.ID,
+	})
 
 	return &DeleteUserOutput{
 		User: *removedUser,

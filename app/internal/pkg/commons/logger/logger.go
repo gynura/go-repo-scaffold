@@ -3,6 +3,7 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"userservice/internal/pkg/errors"
@@ -101,6 +102,6 @@ func (l *LoggerEntry) Attributes(message string, attrs map[string]any) {
 // Message logs the message at the previously indicated log level
 // i.e:
 // logger.Info(ctx).Message("foo") will log "foo" at the INFO level
-func (l *LoggerEntry) Message(message string) {
-	l.logger.Log(l.context, l.level, message)
+func (l *LoggerEntry) Message(format string, args ...interface{}) {
+	l.logger.Log(l.context, l.level, fmt.Sprintf(format, args...))
 }

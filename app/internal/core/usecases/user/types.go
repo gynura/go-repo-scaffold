@@ -72,6 +72,7 @@ type ListUsersInput struct {
 	PageOffset     int    `valid:"optional,natural"`
 	OrderBy        string `valid:"optional"`
 	OrderDirection string `valid:"optional"`
+	Country        string `valid:"optional"`
 }
 
 // ListUsersOutput represents the response structure containing a paginated list of Users.

@@ -199,3 +199,11 @@ func (adapter StorageAdapter) GetByNickname(ctx context.Context, nickname string
 
 	return storedUser, nil
 }
+
+func (adapter StorageAdapter) ProvideFilters() user.StorageFilters {
+	return &storageFilter{
+		UserDBFilter: &userstorageinfra.UserDBFilter{
+			UserDB: userstorageinfra.UserDB{},
+		},
+	}
+}
