@@ -28,42 +28,42 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// UsersvcHealthLive invokes usersvc.health.live operation.
+	// ServiceHealthLive invokes service.health.live operation.
 	//
 	// Service status.
 	//
 	// GET /health
-	UsersvcHealthLive(ctx context.Context) (UsersvcHealthLiveRes, error)
-	// UsersvcUsersCreate invokes usersvc.users.create operation.
+	ServiceHealthLive(ctx context.Context) (ServiceHealthLiveRes, error)
+	// ServiceUsersCreate invokes service.users.create operation.
 	//
 	// Creates a new user.
 	//
 	// POST /users
-	UsersvcUsersCreate(ctx context.Context, request OptCreateUser) (UsersvcUsersCreateRes, error)
-	// UsersvcUsersDescribe invokes usersvc.users.describe operation.
+	ServiceUsersCreate(ctx context.Context, request OptCreateUser) (ServiceUsersCreateRes, error)
+	// ServiceUsersDescribe invokes service.users.describe operation.
 	//
 	// Describes the specified user in the path.
 	//
 	// GET /users/{userId}
-	UsersvcUsersDescribe(ctx context.Context, params UsersvcUsersDescribeParams) (UsersvcUsersDescribeRes, error)
-	// UsersvcUsersEdit invokes usersvc.users.edit operation.
+	ServiceUsersDescribe(ctx context.Context, params ServiceUsersDescribeParams) (ServiceUsersDescribeRes, error)
+	// ServiceUsersEdit invokes service.users.edit operation.
 	//
 	// Updates the specified user in the path.
 	//
 	// PUT /users/{userId}
-	UsersvcUsersEdit(ctx context.Context, request OptUpdateUser, params UsersvcUsersEditParams) (UsersvcUsersEditRes, error)
-	// UsersvcUsersList invokes usersvc.users.list operation.
+	ServiceUsersEdit(ctx context.Context, request OptUpdateUser, params ServiceUsersEditParams) (ServiceUsersEditRes, error)
+	// ServiceUsersList invokes service.users.list operation.
 	//
 	// Lists all the users.
 	//
 	// GET /users
-	UsersvcUsersList(ctx context.Context, params UsersvcUsersListParams) (UsersvcUsersListRes, error)
-	// UsersvcUsersRemove invokes usersvc.users.remove operation.
+	ServiceUsersList(ctx context.Context, params ServiceUsersListParams) (ServiceUsersListRes, error)
+	// ServiceUsersRemove invokes service.users.remove operation.
 	//
 	// Deletes the specified user in the path.
 	//
 	// DELETE /users/{userId}
-	UsersvcUsersRemove(ctx context.Context, params UsersvcUsersRemoveParams) (UsersvcUsersRemoveRes, error)
+	ServiceUsersRemove(ctx context.Context, params ServiceUsersRemoveParams) (ServiceUsersRemoveRes, error)
 }
 
 // Client implements OAS client.
@@ -109,19 +109,19 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// UsersvcHealthLive invokes usersvc.health.live operation.
+// ServiceHealthLive invokes service.health.live operation.
 //
 // Service status.
 //
 // GET /health
-func (c *Client) UsersvcHealthLive(ctx context.Context) (UsersvcHealthLiveRes, error) {
-	res, err := c.sendUsersvcHealthLive(ctx)
+func (c *Client) ServiceHealthLive(ctx context.Context) (ServiceHealthLiveRes, error) {
+	res, err := c.sendServiceHealthLive(ctx)
 	return res, err
 }
 
-func (c *Client) sendUsersvcHealthLive(ctx context.Context) (res UsersvcHealthLiveRes, err error) {
+func (c *Client) sendServiceHealthLive(ctx context.Context) (res ServiceHealthLiveRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.health.live"),
+		otelogen.OperationID("service.health.live"),
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/health"),
 	}
@@ -138,7 +138,7 @@ func (c *Client) sendUsersvcHealthLive(ctx context.Context) (res UsersvcHealthLi
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcHealthLiveOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceHealthLiveOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -173,7 +173,7 @@ func (c *Client) sendUsersvcHealthLive(ctx context.Context) (res UsersvcHealthLi
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcHealthLiveResponse(resp)
+	result, err := decodeServiceHealthLiveResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -181,19 +181,19 @@ func (c *Client) sendUsersvcHealthLive(ctx context.Context) (res UsersvcHealthLi
 	return result, nil
 }
 
-// UsersvcUsersCreate invokes usersvc.users.create operation.
+// ServiceUsersCreate invokes service.users.create operation.
 //
 // Creates a new user.
 //
 // POST /users
-func (c *Client) UsersvcUsersCreate(ctx context.Context, request OptCreateUser) (UsersvcUsersCreateRes, error) {
-	res, err := c.sendUsersvcUsersCreate(ctx, request)
+func (c *Client) ServiceUsersCreate(ctx context.Context, request OptCreateUser) (ServiceUsersCreateRes, error) {
+	res, err := c.sendServiceUsersCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendUsersvcUsersCreate(ctx context.Context, request OptCreateUser) (res UsersvcUsersCreateRes, err error) {
+func (c *Client) sendServiceUsersCreate(ctx context.Context, request OptCreateUser) (res ServiceUsersCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.users.create"),
+		otelogen.OperationID("service.users.create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/users"),
 	}
@@ -210,7 +210,7 @@ func (c *Client) sendUsersvcUsersCreate(ctx context.Context, request OptCreateUs
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcUsersCreateOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceUsersCreateOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -236,7 +236,7 @@ func (c *Client) sendUsersvcUsersCreate(ctx context.Context, request OptCreateUs
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeUsersvcUsersCreateRequest(request, r); err != nil {
+	if err := encodeServiceUsersCreateRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -248,7 +248,7 @@ func (c *Client) sendUsersvcUsersCreate(ctx context.Context, request OptCreateUs
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcUsersCreateResponse(resp)
+	result, err := decodeServiceUsersCreateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -256,19 +256,19 @@ func (c *Client) sendUsersvcUsersCreate(ctx context.Context, request OptCreateUs
 	return result, nil
 }
 
-// UsersvcUsersDescribe invokes usersvc.users.describe operation.
+// ServiceUsersDescribe invokes service.users.describe operation.
 //
 // Describes the specified user in the path.
 //
 // GET /users/{userId}
-func (c *Client) UsersvcUsersDescribe(ctx context.Context, params UsersvcUsersDescribeParams) (UsersvcUsersDescribeRes, error) {
-	res, err := c.sendUsersvcUsersDescribe(ctx, params)
+func (c *Client) ServiceUsersDescribe(ctx context.Context, params ServiceUsersDescribeParams) (ServiceUsersDescribeRes, error) {
+	res, err := c.sendServiceUsersDescribe(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendUsersvcUsersDescribe(ctx context.Context, params UsersvcUsersDescribeParams) (res UsersvcUsersDescribeRes, err error) {
+func (c *Client) sendServiceUsersDescribe(ctx context.Context, params ServiceUsersDescribeParams) (res ServiceUsersDescribeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.users.describe"),
+		otelogen.OperationID("service.users.describe"),
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
@@ -285,7 +285,7 @@ func (c *Client) sendUsersvcUsersDescribe(ctx context.Context, params UsersvcUse
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcUsersDescribeOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceUsersDescribeOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -338,7 +338,7 @@ func (c *Client) sendUsersvcUsersDescribe(ctx context.Context, params UsersvcUse
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcUsersDescribeResponse(resp)
+	result, err := decodeServiceUsersDescribeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -346,19 +346,19 @@ func (c *Client) sendUsersvcUsersDescribe(ctx context.Context, params UsersvcUse
 	return result, nil
 }
 
-// UsersvcUsersEdit invokes usersvc.users.edit operation.
+// ServiceUsersEdit invokes service.users.edit operation.
 //
 // Updates the specified user in the path.
 //
 // PUT /users/{userId}
-func (c *Client) UsersvcUsersEdit(ctx context.Context, request OptUpdateUser, params UsersvcUsersEditParams) (UsersvcUsersEditRes, error) {
-	res, err := c.sendUsersvcUsersEdit(ctx, request, params)
+func (c *Client) ServiceUsersEdit(ctx context.Context, request OptUpdateUser, params ServiceUsersEditParams) (ServiceUsersEditRes, error) {
+	res, err := c.sendServiceUsersEdit(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUsersvcUsersEdit(ctx context.Context, request OptUpdateUser, params UsersvcUsersEditParams) (res UsersvcUsersEditRes, err error) {
+func (c *Client) sendServiceUsersEdit(ctx context.Context, request OptUpdateUser, params ServiceUsersEditParams) (res ServiceUsersEditRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.users.edit"),
+		otelogen.OperationID("service.users.edit"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
@@ -375,7 +375,7 @@ func (c *Client) sendUsersvcUsersEdit(ctx context.Context, request OptUpdateUser
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcUsersEditOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceUsersEditOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -419,7 +419,7 @@ func (c *Client) sendUsersvcUsersEdit(ctx context.Context, request OptUpdateUser
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeUsersvcUsersEditRequest(request, r); err != nil {
+	if err := encodeServiceUsersEditRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -431,7 +431,7 @@ func (c *Client) sendUsersvcUsersEdit(ctx context.Context, request OptUpdateUser
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcUsersEditResponse(resp)
+	result, err := decodeServiceUsersEditResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -439,19 +439,19 @@ func (c *Client) sendUsersvcUsersEdit(ctx context.Context, request OptUpdateUser
 	return result, nil
 }
 
-// UsersvcUsersList invokes usersvc.users.list operation.
+// ServiceUsersList invokes service.users.list operation.
 //
 // Lists all the users.
 //
 // GET /users
-func (c *Client) UsersvcUsersList(ctx context.Context, params UsersvcUsersListParams) (UsersvcUsersListRes, error) {
-	res, err := c.sendUsersvcUsersList(ctx, params)
+func (c *Client) ServiceUsersList(ctx context.Context, params ServiceUsersListParams) (ServiceUsersListRes, error) {
+	res, err := c.sendServiceUsersList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendUsersvcUsersList(ctx context.Context, params UsersvcUsersListParams) (res UsersvcUsersListRes, err error) {
+func (c *Client) sendServiceUsersList(ctx context.Context, params ServiceUsersListParams) (res ServiceUsersListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.users.list"),
+		otelogen.OperationID("service.users.list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/users"),
 	}
@@ -468,7 +468,7 @@ func (c *Client) sendUsersvcUsersList(ctx context.Context, params UsersvcUsersLi
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcUsersListOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceUsersListOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -592,7 +592,7 @@ func (c *Client) sendUsersvcUsersList(ctx context.Context, params UsersvcUsersLi
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcUsersListResponse(resp)
+	result, err := decodeServiceUsersListResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -600,19 +600,19 @@ func (c *Client) sendUsersvcUsersList(ctx context.Context, params UsersvcUsersLi
 	return result, nil
 }
 
-// UsersvcUsersRemove invokes usersvc.users.remove operation.
+// ServiceUsersRemove invokes service.users.remove operation.
 //
 // Deletes the specified user in the path.
 //
 // DELETE /users/{userId}
-func (c *Client) UsersvcUsersRemove(ctx context.Context, params UsersvcUsersRemoveParams) (UsersvcUsersRemoveRes, error) {
-	res, err := c.sendUsersvcUsersRemove(ctx, params)
+func (c *Client) ServiceUsersRemove(ctx context.Context, params ServiceUsersRemoveParams) (ServiceUsersRemoveRes, error) {
+	res, err := c.sendServiceUsersRemove(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendUsersvcUsersRemove(ctx context.Context, params UsersvcUsersRemoveParams) (res UsersvcUsersRemoveRes, err error) {
+func (c *Client) sendServiceUsersRemove(ctx context.Context, params ServiceUsersRemoveParams) (res ServiceUsersRemoveRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("usersvc.users.remove"),
+		otelogen.OperationID("service.users.remove"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/users/{userId}"),
 	}
@@ -629,7 +629,7 @@ func (c *Client) sendUsersvcUsersRemove(ctx context.Context, params UsersvcUsers
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UsersvcUsersRemoveOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, ServiceUsersRemoveOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -682,7 +682,7 @@ func (c *Client) sendUsersvcUsersRemove(ctx context.Context, params UsersvcUsers
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeUsersvcUsersRemoveResponse(resp)
+	result, err := decodeServiceUsersRemoveResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

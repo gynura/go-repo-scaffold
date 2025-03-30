@@ -8,42 +8,42 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// UsersvcHealthLive implements usersvc.health.live operation.
+	// ServiceHealthLive implements service.health.live operation.
 	//
 	// Service status.
 	//
 	// GET /health
-	UsersvcHealthLive(ctx context.Context) (UsersvcHealthLiveRes, error)
-	// UsersvcUsersCreate implements usersvc.users.create operation.
+	ServiceHealthLive(ctx context.Context) (ServiceHealthLiveRes, error)
+	// ServiceUsersCreate implements service.users.create operation.
 	//
 	// Creates a new user.
 	//
 	// POST /users
-	UsersvcUsersCreate(ctx context.Context, req OptCreateUser) (UsersvcUsersCreateRes, error)
-	// UsersvcUsersDescribe implements usersvc.users.describe operation.
+	ServiceUsersCreate(ctx context.Context, req OptCreateUser) (ServiceUsersCreateRes, error)
+	// ServiceUsersDescribe implements service.users.describe operation.
 	//
 	// Describes the specified user in the path.
 	//
 	// GET /users/{userId}
-	UsersvcUsersDescribe(ctx context.Context, params UsersvcUsersDescribeParams) (UsersvcUsersDescribeRes, error)
-	// UsersvcUsersEdit implements usersvc.users.edit operation.
+	ServiceUsersDescribe(ctx context.Context, params ServiceUsersDescribeParams) (ServiceUsersDescribeRes, error)
+	// ServiceUsersEdit implements service.users.edit operation.
 	//
 	// Updates the specified user in the path.
 	//
 	// PUT /users/{userId}
-	UsersvcUsersEdit(ctx context.Context, req OptUpdateUser, params UsersvcUsersEditParams) (UsersvcUsersEditRes, error)
-	// UsersvcUsersList implements usersvc.users.list operation.
+	ServiceUsersEdit(ctx context.Context, req OptUpdateUser, params ServiceUsersEditParams) (ServiceUsersEditRes, error)
+	// ServiceUsersList implements service.users.list operation.
 	//
 	// Lists all the users.
 	//
 	// GET /users
-	UsersvcUsersList(ctx context.Context, params UsersvcUsersListParams) (UsersvcUsersListRes, error)
-	// UsersvcUsersRemove implements usersvc.users.remove operation.
+	ServiceUsersList(ctx context.Context, params ServiceUsersListParams) (ServiceUsersListRes, error)
+	// ServiceUsersRemove implements service.users.remove operation.
 	//
 	// Deletes the specified user in the path.
 	//
 	// DELETE /users/{userId}
-	UsersvcUsersRemove(ctx context.Context, params UsersvcUsersRemoveParams) (UsersvcUsersRemoveRes, error)
+	ServiceUsersRemove(ctx context.Context, params ServiceUsersRemoveParams) (ServiceUsersRemoveRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

@@ -2,8 +2,6 @@
 package time
 
 import (
-	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -15,6 +13,7 @@ type ServiceTime struct {
 }
 
 // Now creates a new ServiceTime with the current UTC time
+
 func Now() ServiceTime {
 	return ServiceTime{Time: time.Now().UTC()}
 }
@@ -24,21 +23,17 @@ func (ct ServiceTime) String() string {
 	return ct.Time.Format(CustomTimeLayout)
 }
 
-// MarshalJSON defines the custom JSON serializer
-func (ct ServiceTime) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ct.String())
-}
-
-// FromString creates a ServiceTime from a string or an error if the format of the string is invalid
-func FromString(newTime string) (*ServiceTime, error) {
-	t, err := time.Parse(CustomTimeLayout, newTime)
-	if err != nil {
-		return nil, fmt.Errorf("invalid time format %s, expected YYYY-MM-DDTHH:MM:SS.SSZ", newTime)
-	}
-	return &ServiceTime{Time: t}, nil
-}
-
 // FromTime creates a ServiceTime from a time.Time one
 func FromTime(t time.Time) (*ServiceTime, error) {
 	return &ServiceTime{Time: t.UTC()}, nil
+}
+
+// Seconds returns the number of seconds since the ServiceTime instance was created
+func (ct ServiceTime) Seconds() int64 {
+	return int64(time.Since(ct.Time).Seconds())
+}
+
+// TimeSince returns the duration since the ServiceTime instance
+func (ct ServiceTime) TimeSince() time.Duration {
+	return time.Since(ct.Time)
 }

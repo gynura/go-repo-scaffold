@@ -6,10 +6,10 @@ package generatedhttpinfra
 type OperationName = string
 
 const (
-	UsersvcHealthLiveOperation    OperationName = "UsersvcHealthLive"
-	UsersvcUsersCreateOperation   OperationName = "UsersvcUsersCreate"
-	UsersvcUsersDescribeOperation OperationName = "UsersvcUsersDescribe"
-	UsersvcUsersEditOperation     OperationName = "UsersvcUsersEdit"
-	UsersvcUsersListOperation     OperationName = "UsersvcUsersList"
-	UsersvcUsersRemoveOperation   OperationName = "UsersvcUsersRemove"
+	ServiceHealthLiveOperation    OperationName = "ServiceHealthLive"
+	ServiceUsersCreateOperation   OperationName = "ServiceUsersCreate"
+	ServiceUsersDescribeOperation OperationName = "ServiceUsersDescribe"
+	ServiceUsersEditOperation     OperationName = "ServiceUsersEdit"
+	ServiceUsersListOperation     OperationName = "ServiceUsersList"
+	ServiceUsersRemoveOperation   OperationName = "ServiceUsersRemove"
 )

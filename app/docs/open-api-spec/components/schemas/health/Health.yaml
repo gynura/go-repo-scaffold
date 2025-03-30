@@ -6,14 +6,13 @@ properties:
     enum: [UP, DOWN]
     description: |
       Overall health status of the service
-  uptime:
-    type: number
+  startedAt:
+    type: string
+    format: date-time
     description: |
-      The uptime of the service in seconds
+      The date at which the server started
   checks:
     type: object
-    additionalProperties:
-      type: string
     properties:
       queue:
         type: string
@@ -25,13 +24,16 @@ properties:
         enum: [UP, DOWN]
         description: |
           Status of the plugged database service.
+    required:
+      - queue
+      - database
 required:
   - status
-  - uptime
+  - startedAt
   - checks
 example:
   status: "UP"
-  uptime: 74
+  startedAt: "2024-07-15T07:25:55.32Z"
   checks:
     queue: "UP"
     database: "UP"

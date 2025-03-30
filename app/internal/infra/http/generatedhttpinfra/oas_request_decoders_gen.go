@@ -15,7 +15,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeUsersvcUsersCreateRequest(r *http.Request) (
+func (s *Server) decodeServiceUsersCreateRequest(r *http.Request) (
 	req OptCreateUser,
 	close func() error,
 	rerr error,
@@ -97,7 +97,7 @@ func (s *Server) decodeUsersvcUsersCreateRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeUsersvcUsersEditRequest(r *http.Request) (
+func (s *Server) decodeServiceUsersEditRequest(r *http.Request) (
 	req OptUpdateUser,
 	close func() error,
 	rerr error,

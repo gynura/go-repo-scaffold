@@ -14,7 +14,7 @@ tags:
 paths:
   /users:
     post:
-      operationId: usersvc.users.create
+      operationId: service.users.create
       tags:
         - User
       summary: Creates a user
@@ -37,7 +37,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     get:
-      operationId: usersvc.users.list
+      operationId: service.users.list
       tags:
         - User
       summary: Lists users
@@ -61,7 +61,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
   '/users/{userId}':
     get:
-      operationId: usersvc.users.describe
+      operationId: service.users.describe
       tags:
         - User
       summary: Describes a user
@@ -82,7 +82,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     put:
-      operationId: usersvc.users.edit
+      operationId: service.users.edit
       tags:
         - User
       summary: Updates a user
@@ -109,7 +109,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
     delete:
-      operationId: usersvc.users.remove
+      operationId: service.users.remove
       tags:
         - User
       summary: Removes a user resource
@@ -131,14 +131,14 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
   /health:
     get:
-      operationId: usersvc.health.live
+      operationId: service.health.live
       tags:
         - Health
       summary: Information to check if the service is healthy or not
       description: Service status
       responses:
         '200':
-          description: null
+          description: Health status of the service
           content:
             application/json:
               schema:
@@ -272,14 +272,13 @@ components:
             - DOWN
           description: |
             Overall health status of the service
-        uptime:
-          type: number
+        startedAt:
+          type: string
+          format: date-time
           description: |
-            The uptime of the service in seconds
+            The date at which the server started
         checks:
           type: object
-          additionalProperties:
-            type: string
           properties:
             queue:
               type: string
@@ -295,13 +294,16 @@ components:
                 - DOWN
               description: |
                 Status of the plugged database service.
+          required:
+            - queue
+            - database
       required:
         - status
-        - uptime
+        - startedAt
         - checks
       example:
         status: UP
-        uptime: 74
+        startedAt: '2024-07-15T07:25:55.32Z'
         checks:
           queue: UP
           database: UP

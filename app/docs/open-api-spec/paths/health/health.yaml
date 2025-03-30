@@ -1,12 +1,12 @@
 get:
-  operationId: usersvc.health.live
+  operationId: service.health.live
   tags:
     - Health
   summary: Information to check if the service is healthy or not
   description: Service status
   responses:
     '200':
-      description:
+      description: Health status of the service
       content:
         application/json:
           schema:

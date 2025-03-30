@@ -13,56 +13,56 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// UsersvcHealthLive implements usersvc.health.live operation.
+// ServiceHealthLive implements service.health.live operation.
 //
 // Service status.
 //
 // GET /health
-func (UnimplementedHandler) UsersvcHealthLive(ctx context.Context) (r UsersvcHealthLiveRes, _ error) {
+func (UnimplementedHandler) ServiceHealthLive(ctx context.Context) (r ServiceHealthLiveRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UsersvcUsersCreate implements usersvc.users.create operation.
+// ServiceUsersCreate implements service.users.create operation.
 //
 // Creates a new user.
 //
 // POST /users
-func (UnimplementedHandler) UsersvcUsersCreate(ctx context.Context, req OptCreateUser) (r UsersvcUsersCreateRes, _ error) {
+func (UnimplementedHandler) ServiceUsersCreate(ctx context.Context, req OptCreateUser) (r ServiceUsersCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UsersvcUsersDescribe implements usersvc.users.describe operation.
+// ServiceUsersDescribe implements service.users.describe operation.
 //
 // Describes the specified user in the path.
 //
 // GET /users/{userId}
-func (UnimplementedHandler) UsersvcUsersDescribe(ctx context.Context, params UsersvcUsersDescribeParams) (r UsersvcUsersDescribeRes, _ error) {
+func (UnimplementedHandler) ServiceUsersDescribe(ctx context.Context, params ServiceUsersDescribeParams) (r ServiceUsersDescribeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UsersvcUsersEdit implements usersvc.users.edit operation.
+// ServiceUsersEdit implements service.users.edit operation.
 //
 // Updates the specified user in the path.
 //
 // PUT /users/{userId}
-func (UnimplementedHandler) UsersvcUsersEdit(ctx context.Context, req OptUpdateUser, params UsersvcUsersEditParams) (r UsersvcUsersEditRes, _ error) {
+func (UnimplementedHandler) ServiceUsersEdit(ctx context.Context, req OptUpdateUser, params ServiceUsersEditParams) (r ServiceUsersEditRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UsersvcUsersList implements usersvc.users.list operation.
+// ServiceUsersList implements service.users.list operation.
 //
 // Lists all the users.
 //
 // GET /users
-func (UnimplementedHandler) UsersvcUsersList(ctx context.Context, params UsersvcUsersListParams) (r UsersvcUsersListRes, _ error) {
+func (UnimplementedHandler) ServiceUsersList(ctx context.Context, params ServiceUsersListParams) (r ServiceUsersListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UsersvcUsersRemove implements usersvc.users.remove operation.
+// ServiceUsersRemove implements service.users.remove operation.
 //
 // Deletes the specified user in the path.
 //
 // DELETE /users/{userId}
-func (UnimplementedHandler) UsersvcUsersRemove(ctx context.Context, params UsersvcUsersRemoveParams) (r UsersvcUsersRemoveRes, _ error) {
+func (UnimplementedHandler) ServiceUsersRemove(ctx context.Context, params ServiceUsersRemoveParams) (r ServiceUsersRemoveRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

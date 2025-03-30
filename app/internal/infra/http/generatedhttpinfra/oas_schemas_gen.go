@@ -62,10 +62,10 @@ func (s *DescribeUser) SetSpecificData(val UserSpecificData) {
 	s.SpecificData = val
 }
 
-func (*DescribeUser) usersvcUsersCreateRes()   {}
-func (*DescribeUser) usersvcUsersDescribeRes() {}
-func (*DescribeUser) usersvcUsersEditRes()     {}
-func (*DescribeUser) usersvcUsersRemoveRes()   {}
+func (*DescribeUser) serviceUsersCreateRes()   {}
+func (*DescribeUser) serviceUsersDescribeRes() {}
+func (*DescribeUser) serviceUsersEditRes()     {}
+func (*DescribeUser) serviceUsersRemoveRes()   {}
 
 // Ref: #/components/schemas/Error
 type Error struct {
@@ -82,7 +82,7 @@ func (s *Error) SetError(val ErrorError) {
 	s.Error = val
 }
 
-func (*Error) usersvcHealthLiveRes() {}
+func (*Error) serviceHealthLiveRes() {}
 
 type ErrorError struct {
 	// HTTP response code.
@@ -209,9 +209,9 @@ func (s *ErrorErrorStatus) UnmarshalText(data []byte) error {
 type Health struct {
 	// Overall health status of the service.
 	Status HealthStatus `json:"status"`
-	// The uptime of the service in seconds.
-	Uptime float64      `json:"uptime"`
-	Checks HealthChecks `json:"checks"`
+	// The date at which the server started.
+	StartedAt time.Time    `json:"startedAt"`
+	Checks    HealthChecks `json:"checks"`
 }
 
 // GetStatus returns the value of Status.
@@ -219,9 +219,9 @@ func (s *Health) GetStatus() HealthStatus {
 	return s.Status
 }
 
-// GetUptime returns the value of Uptime.
-func (s *Health) GetUptime() float64 {
-	return s.Uptime
+// GetStartedAt returns the value of StartedAt.
+func (s *Health) GetStartedAt() time.Time {
+	return s.StartedAt
 }
 
 // GetChecks returns the value of Checks.
@@ -234,9 +234,9 @@ func (s *Health) SetStatus(val HealthStatus) {
 	s.Status = val
 }
 
-// SetUptime sets the value of Uptime.
-func (s *Health) SetUptime(val float64) {
-	s.Uptime = val
+// SetStartedAt sets the value of StartedAt.
+func (s *Health) SetStartedAt(val time.Time) {
+	s.StartedAt = val
 }
 
 // SetChecks sets the value of Checks.
@@ -244,55 +244,33 @@ func (s *Health) SetChecks(val HealthChecks) {
 	s.Checks = val
 }
 
-func (*Health) usersvcHealthLiveRes() {}
+func (*Health) serviceHealthLiveRes() {}
 
 type HealthChecks struct {
 	// Status of the plugged queue service.
-	Queue OptHealthChecksQueue `json:"queue"`
+	Queue HealthChecksQueue `json:"queue"`
 	// Status of the plugged database service.
-	Database        OptHealthChecksDatabase `json:"database"`
-	AdditionalProps HealthChecksAdditional
+	Database HealthChecksDatabase `json:"database"`
 }
 
 // GetQueue returns the value of Queue.
-func (s *HealthChecks) GetQueue() OptHealthChecksQueue {
+func (s *HealthChecks) GetQueue() HealthChecksQueue {
 	return s.Queue
 }
 
 // GetDatabase returns the value of Database.
-func (s *HealthChecks) GetDatabase() OptHealthChecksDatabase {
+func (s *HealthChecks) GetDatabase() HealthChecksDatabase {
 	return s.Database
 }
 
-// GetAdditionalProps returns the value of AdditionalProps.
-func (s *HealthChecks) GetAdditionalProps() HealthChecksAdditional {
-	return s.AdditionalProps
-}
-
 // SetQueue sets the value of Queue.
-func (s *HealthChecks) SetQueue(val OptHealthChecksQueue) {
+func (s *HealthChecks) SetQueue(val HealthChecksQueue) {
 	s.Queue = val
 }
 
 // SetDatabase sets the value of Database.
-func (s *HealthChecks) SetDatabase(val OptHealthChecksDatabase) {
+func (s *HealthChecks) SetDatabase(val HealthChecksDatabase) {
 	s.Database = val
-}
-
-// SetAdditionalProps sets the value of AdditionalProps.
-func (s *HealthChecks) SetAdditionalProps(val HealthChecksAdditional) {
-	s.AdditionalProps = val
-}
-
-type HealthChecksAdditional map[string]string
-
-func (s *HealthChecksAdditional) init() HealthChecksAdditional {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
 }
 
 // Status of the plugged database service.
@@ -503,98 +481,6 @@ func (o OptCreateUser) Get() (v CreateUser, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptCreateUser) Or(d CreateUser) CreateUser {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptHealthChecksDatabase returns new OptHealthChecksDatabase with value set to v.
-func NewOptHealthChecksDatabase(v HealthChecksDatabase) OptHealthChecksDatabase {
-	return OptHealthChecksDatabase{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptHealthChecksDatabase is optional HealthChecksDatabase.
-type OptHealthChecksDatabase struct {
-	Value HealthChecksDatabase
-	Set   bool
-}
-
-// IsSet returns true if OptHealthChecksDatabase was set.
-func (o OptHealthChecksDatabase) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptHealthChecksDatabase) Reset() {
-	var v HealthChecksDatabase
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptHealthChecksDatabase) SetTo(v HealthChecksDatabase) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptHealthChecksDatabase) Get() (v HealthChecksDatabase, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptHealthChecksDatabase) Or(d HealthChecksDatabase) HealthChecksDatabase {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptHealthChecksQueue returns new OptHealthChecksQueue with value set to v.
-func NewOptHealthChecksQueue(v HealthChecksQueue) OptHealthChecksQueue {
-	return OptHealthChecksQueue{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptHealthChecksQueue is optional HealthChecksQueue.
-type OptHealthChecksQueue struct {
-	Value HealthChecksQueue
-	Set   bool
-}
-
-// IsSet returns true if OptHealthChecksQueue was set.
-func (o OptHealthChecksQueue) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptHealthChecksQueue) Reset() {
-	var v HealthChecksQueue
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptHealthChecksQueue) SetTo(v HealthChecksQueue) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptHealthChecksQueue) Get() (v HealthChecksQueue, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptHealthChecksQueue) Or(d HealthChecksQueue) HealthChecksQueue {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -976,6 +862,58 @@ func (s *OrderDirection) UnmarshalText(data []byte) error {
 	}
 }
 
+type ServiceUsersCreateBadRequest Error
+
+func (*ServiceUsersCreateBadRequest) serviceUsersCreateRes() {}
+
+type ServiceUsersCreateInternalServerError Error
+
+func (*ServiceUsersCreateInternalServerError) serviceUsersCreateRes() {}
+
+type ServiceUsersDescribeBadRequest Error
+
+func (*ServiceUsersDescribeBadRequest) serviceUsersDescribeRes() {}
+
+type ServiceUsersDescribeInternalServerError Error
+
+func (*ServiceUsersDescribeInternalServerError) serviceUsersDescribeRes() {}
+
+type ServiceUsersDescribeNotFound Error
+
+func (*ServiceUsersDescribeNotFound) serviceUsersDescribeRes() {}
+
+type ServiceUsersEditBadRequest Error
+
+func (*ServiceUsersEditBadRequest) serviceUsersEditRes() {}
+
+type ServiceUsersEditInternalServerError Error
+
+func (*ServiceUsersEditInternalServerError) serviceUsersEditRes() {}
+
+type ServiceUsersEditNotFound Error
+
+func (*ServiceUsersEditNotFound) serviceUsersEditRes() {}
+
+type ServiceUsersListBadRequest Error
+
+func (*ServiceUsersListBadRequest) serviceUsersListRes() {}
+
+type ServiceUsersListInternalServerError Error
+
+func (*ServiceUsersListInternalServerError) serviceUsersListRes() {}
+
+type ServiceUsersRemoveBadRequest Error
+
+func (*ServiceUsersRemoveBadRequest) serviceUsersRemoveRes() {}
+
+type ServiceUsersRemoveInternalServerError Error
+
+func (*ServiceUsersRemoveInternalServerError) serviceUsersRemoveRes() {}
+
+type ServiceUsersRemoveNotFound Error
+
+func (*ServiceUsersRemoveNotFound) serviceUsersRemoveRes() {}
+
 // Ref: #/components/schemas/UpdateUser
 type UpdateUser struct {
 	SpecificData UserSpecificData `json:"specificData"`
@@ -1044,7 +982,7 @@ func (s *UserList) SetHasMoreItems(val bool) {
 	s.HasMoreItems = val
 }
 
-func (*UserList) usersvcUsersListRes() {}
+func (*UserList) serviceUsersListRes() {}
 
 // Ref: #/components/schemas/UserSpecificData
 type UserSpecificData struct {
@@ -1121,55 +1059,3 @@ func (s *UserSpecificData) SetEmail(val string) {
 func (s *UserSpecificData) SetCountry(val string) {
 	s.Country = val
 }
-
-type UsersvcUsersCreateBadRequest Error
-
-func (*UsersvcUsersCreateBadRequest) usersvcUsersCreateRes() {}
-
-type UsersvcUsersCreateInternalServerError Error
-
-func (*UsersvcUsersCreateInternalServerError) usersvcUsersCreateRes() {}
-
-type UsersvcUsersDescribeBadRequest Error
-
-func (*UsersvcUsersDescribeBadRequest) usersvcUsersDescribeRes() {}
-
-type UsersvcUsersDescribeInternalServerError Error
-
-func (*UsersvcUsersDescribeInternalServerError) usersvcUsersDescribeRes() {}
-
-type UsersvcUsersDescribeNotFound Error
-
-func (*UsersvcUsersDescribeNotFound) usersvcUsersDescribeRes() {}
-
-type UsersvcUsersEditBadRequest Error
-
-func (*UsersvcUsersEditBadRequest) usersvcUsersEditRes() {}
-
-type UsersvcUsersEditInternalServerError Error
-
-func (*UsersvcUsersEditInternalServerError) usersvcUsersEditRes() {}
-
-type UsersvcUsersEditNotFound Error
-
-func (*UsersvcUsersEditNotFound) usersvcUsersEditRes() {}
-
-type UsersvcUsersListBadRequest Error
-
-func (*UsersvcUsersListBadRequest) usersvcUsersListRes() {}
-
-type UsersvcUsersListInternalServerError Error
-
-func (*UsersvcUsersListInternalServerError) usersvcUsersListRes() {}
-
-type UsersvcUsersRemoveBadRequest Error
-
-func (*UsersvcUsersRemoveBadRequest) usersvcUsersRemoveRes() {}
-
-type UsersvcUsersRemoveInternalServerError Error
-
-func (*UsersvcUsersRemoveInternalServerError) usersvcUsersRemoveRes() {}
-
-type UsersvcUsersRemoveNotFound Error
-
-func (*UsersvcUsersRemoveNotFound) usersvcUsersRemoveRes() {}

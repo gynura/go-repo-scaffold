@@ -39,13 +39,13 @@ type DefaultUseCase struct {
 	queue   Queue
 }
 
-// ProvideUseCaseOptions defines the options to configure a UserUseCase implementation
+// ProvideUseCaseOptions defines the options to configure a UseCase implementation
 type ProvideUseCaseOptions struct {
 	Storage Storage
 	Queue   Queue
 }
 
-// ProvideDefaultUseCase provides the default implementation of the User use case logic
+// ProvideDefaultUseCase provides the default implementation of the UseCase logic
 func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
 	if options.Storage == nil {
 		return nil, errors.NewInvalidArgumentError("no storage provided")

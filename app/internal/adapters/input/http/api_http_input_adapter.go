@@ -4,18 +4,21 @@ import (
 	"context"
 	"errors"
 	"userservice/internal/core/entities"
+	"userservice/internal/core/usecases/health"
 	"userservice/internal/core/usecases/user"
 	"userservice/internal/infra/http/generatedhttpinfra"
 )
 
 // DefaultAPIAdapter implements the API Handler interface used by the server
 type DefaultAPIAdapter struct {
-	userUseCase user.UseCase
+	userUseCase   user.UseCase
+	healthUseCase health.UseCase
 }
 
 // DefaultAPIAdapterOptions defines the options to implement the DefaultAPIAdapter
 type DefaultAPIAdapterOptions struct {
-	UserUseCase user.UseCase
+	UserUseCase   user.UseCase
+	HealthUseCase health.UseCase
 }
 
 // ProvideDefaultAPIAdapter provides the default implementation of the REST API Handler
@@ -23,15 +26,19 @@ func ProvideDefaultAPIAdapter(options DefaultAPIAdapterOptions) (*DefaultAPIAdap
 	if options.UserUseCase == nil {
 		return nil, errors.New("userUseCase is required")
 	}
+	if options.HealthUseCase == nil {
+		return nil, errors.New("healthUseCase is required")
+	}
 
 	return &DefaultAPIAdapter{
-		userUseCase: options.UserUseCase,
+		userUseCase:   options.UserUseCase,
+		healthUseCase: options.HealthUseCase,
 	}, nil
 }
 
 var _ generatedhttpinfra.Handler = new(DefaultAPIAdapter)
 
-func (d DefaultAPIAdapter) UserUsersCreate(ctx context.Context, req generatedhttpinfra.OptCreateUser) (generatedhttpinfra.UserUsersCreateRes, error) {
+func (d DefaultAPIAdapter) ServiceUsersCreate(ctx context.Context, req generatedhttpinfra.OptCreateUser) (generatedhttpinfra.ServiceUsersCreateRes, error) {
 	input := user.CreateUserInput{
 		ResourceID: entities.ResourceID{
 			ID: req.Value.ID.Value,
@@ -46,14 +53,14 @@ func (d DefaultAPIAdapter) UserUsersCreate(ctx context.Context, req generatedhtt
 	createdUser, err := d.userUseCase.CreateUser(ctx, input)
 	if err != nil {
 		if err.IsInvalidArgumentError() {
-			response := generatedhttpinfra.UserUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
 		if err.IsAlreadyExistsError() {
-			response := generatedhttpinfra.UserUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersCreateBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersCreateInternalServerError(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.ServiceUsersCreateInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -74,7 +81,7 @@ func (d DefaultAPIAdapter) UserUsersCreate(ctx context.Context, req generatedhtt
 	}, nil
 }
 
-func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generatedhttpinfra.UserUsersDescribeParams) (generatedhttpinfra.UserUsersDescribeRes, error) {
+func (d DefaultAPIAdapter) ServiceUsersDescribe(ctx context.Context, params generatedhttpinfra.ServiceUsersDescribeParams) (generatedhttpinfra.ServiceUsersDescribeRes, error) {
 	input := user.GetUserInput{
 		ResourceID: entities.ResourceID{
 			ID: params.UserId,
@@ -83,14 +90,14 @@ func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generat
 	describedUser, err := d.userUseCase.GetUser(ctx, input)
 	if err != nil {
 		if err.IsInvalidArgumentError() {
-			response := generatedhttpinfra.UserUsersDescribeBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersDescribeBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
 		if err.IsNotFoundError() {
-			response := generatedhttpinfra.UserUsersDescribeNotFound(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersDescribeNotFound(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersDescribeInternalServerError(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.ServiceUsersDescribeInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -111,7 +118,7 @@ func (d DefaultAPIAdapter) UserUsersDescribe(ctx context.Context, params generat
 	}, nil
 }
 
-func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpinfra.OptUpdateUser, params generatedhttpinfra.UserUsersEditParams) (generatedhttpinfra.UserUsersEditRes, error) {
+func (d DefaultAPIAdapter) ServiceUsersEdit(ctx context.Context, req generatedhttpinfra.OptUpdateUser, params generatedhttpinfra.ServiceUsersEditParams) (generatedhttpinfra.ServiceUsersEditRes, error) {
 	input := user.EditUserInput{
 		ResourceID: entities.ResourceID{ID: params.UserId},
 		FirstName:  req.Value.SpecificData.FirstName,
@@ -125,14 +132,14 @@ func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpi
 	editedUser, err := d.userUseCase.EditUser(ctx, input)
 	if err != nil {
 		if err.IsInvalidArgumentError() {
-			response := generatedhttpinfra.UserUsersEditBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersEditBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
 		if err.IsNotFoundError() {
-			response := generatedhttpinfra.UserUsersEditNotFound(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersEditNotFound(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersEditInternalServerError(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.ServiceUsersEditInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -153,7 +160,7 @@ func (d DefaultAPIAdapter) UserUsersEdit(ctx context.Context, req generatedhttpi
 	}, nil
 }
 
-func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedhttpinfra.UserUsersListParams) (generatedhttpinfra.UserUsersListRes, error) {
+func (d DefaultAPIAdapter) ServiceUsersList(ctx context.Context, params generatedhttpinfra.ServiceUsersListParams) (generatedhttpinfra.ServiceUsersListRes, error) {
 	input := user.ListUsersInput{
 		PageLimit:      params.Limit.Value,
 		PageOffset:     params.Offset.Value,
@@ -165,10 +172,10 @@ func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedht
 	usersList, err := d.userUseCase.ListUsers(ctx, input)
 	if err != nil {
 		if err.IsInvalidArgumentError() {
-			response := generatedhttpinfra.UserUsersListBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersListBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersListInternalServerError(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.ServiceUsersListInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -180,7 +187,7 @@ func (d DefaultAPIAdapter) UserUsersList(ctx context.Context, params generatedht
 	}, nil
 }
 
-func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generatedhttpinfra.UserUsersRemoveParams) (generatedhttpinfra.UserUsersRemoveRes, error) {
+func (d DefaultAPIAdapter) ServiceUsersRemove(ctx context.Context, params generatedhttpinfra.ServiceUsersRemoveParams) (generatedhttpinfra.ServiceUsersRemoveRes, error) {
 	input := user.DeleteUserInput{
 		ResourceID: entities.ResourceID{ID: params.UserId},
 	}
@@ -188,14 +195,14 @@ func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generated
 	deletedUser, err := d.userUseCase.DeleteUser(ctx, input)
 	if err != nil {
 		if err.IsNotFoundError() {
-			response := generatedhttpinfra.UserUsersRemoveNotFound(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersRemoveNotFound(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
 		if err.IsInvalidArgumentError() {
-			response := generatedhttpinfra.UserUsersRemoveBadRequest(mapServiceErrorToHTTPError(*err))
+			response := generatedhttpinfra.ServiceUsersRemoveBadRequest(mapServiceErrorToHTTPError(*err))
 			return &response, nil
 		}
-		response := generatedhttpinfra.UserUsersRemoveInternalServerError(mapServiceErrorToHTTPError(*err))
+		response := generatedhttpinfra.ServiceUsersRemoveInternalServerError(mapServiceErrorToHTTPError(*err))
 		return &response, nil
 	}
 
@@ -214,7 +221,44 @@ func (d DefaultAPIAdapter) UserUsersRemove(ctx context.Context, params generated
 			Country:   deletedUser.Country,
 		},
 	}, nil
+}
 
+func (d DefaultAPIAdapter) ServiceHealthLive(ctx context.Context) (generatedhttpinfra.ServiceHealthLiveRes, error) {
+	output, err := d.healthUseCase.Check(ctx)
+	if err != nil {
+		response := mapServiceErrorToHTTPError(*err)
+		return &response, nil
+	}
+
+	return &generatedhttpinfra.Health{
+		Status:    adaptStatus(output.Status),
+		StartedAt: output.StartedAt.Time,
+		Checks: generatedhttpinfra.HealthChecks{
+			Queue:    adaptQueueStatus(output.Checks.Queue),
+			Database: adaptDatabaseStatus(output.Checks.Database),
+		},
+	}, nil
+}
+
+func adaptStatus(status health.Status) generatedhttpinfra.HealthStatus {
+	if status == health.StatusUp {
+		return generatedhttpinfra.HealthStatusUP
+	}
+	return generatedhttpinfra.HealthStatusDOWN
+}
+
+func adaptQueueStatus(status health.Status) generatedhttpinfra.HealthChecksQueue {
+	if status == health.StatusUp {
+		return generatedhttpinfra.HealthChecksQueueUP
+	}
+	return generatedhttpinfra.HealthChecksQueueDOWN
+}
+
+func adaptDatabaseStatus(status health.Status) generatedhttpinfra.HealthChecksDatabase {
+	if status == health.StatusUp {
+		return generatedhttpinfra.HealthChecksDatabaseUP
+	}
+	return generatedhttpinfra.HealthChecksDatabaseDOWN
 }
 
 func adaptUserList(items []entities.User) []generatedhttpinfra.DescribeUser {

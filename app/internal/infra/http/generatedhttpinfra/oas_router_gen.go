@@ -73,7 +73,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Leaf node.
 					switch r.Method {
 					case "GET":
-						s.handleUsersvcHealthLiveRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleServiceHealthLiveRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "GET")
 					}
@@ -92,9 +92,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if len(elem) == 0 {
 					switch r.Method {
 					case "GET":
-						s.handleUsersvcUsersListRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleServiceUsersListRequest([0]string{}, elemIsEscaped, w, r)
 					case "POST":
-						s.handleUsersvcUsersCreateRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleServiceUsersCreateRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "GET,POST")
 					}
@@ -123,15 +123,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "DELETE":
-							s.handleUsersvcUsersRemoveRequest([1]string{
+							s.handleServiceUsersRemoveRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						case "GET":
-							s.handleUsersvcUsersDescribeRequest([1]string{
+							s.handleServiceUsersDescribeRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						case "PUT":
-							s.handleUsersvcUsersEditRequest([1]string{
+							s.handleServiceUsersEditRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -249,9 +249,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					// Leaf node.
 					switch method {
 					case "GET":
-						r.name = UsersvcHealthLiveOperation
+						r.name = ServiceHealthLiveOperation
 						r.summary = "Information to check if the service is healthy or not"
-						r.operationID = "usersvc.health.live"
+						r.operationID = "service.health.live"
 						r.pathPattern = "/health"
 						r.args = args
 						r.count = 0
@@ -272,17 +272,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						r.name = UsersvcUsersListOperation
+						r.name = ServiceUsersListOperation
 						r.summary = "Lists users"
-						r.operationID = "usersvc.users.list"
+						r.operationID = "service.users.list"
 						r.pathPattern = "/users"
 						r.args = args
 						r.count = 0
 						return r, true
 					case "POST":
-						r.name = UsersvcUsersCreateOperation
+						r.name = ServiceUsersCreateOperation
 						r.summary = "Creates a user"
-						r.operationID = "usersvc.users.create"
+						r.operationID = "service.users.create"
 						r.pathPattern = "/users"
 						r.args = args
 						r.count = 0
@@ -313,25 +313,25 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "DELETE":
-							r.name = UsersvcUsersRemoveOperation
+							r.name = ServiceUsersRemoveOperation
 							r.summary = "Removes a user resource"
-							r.operationID = "usersvc.users.remove"
+							r.operationID = "service.users.remove"
 							r.pathPattern = "/users/{userId}"
 							r.args = args
 							r.count = 1
 							return r, true
 						case "GET":
-							r.name = UsersvcUsersDescribeOperation
+							r.name = ServiceUsersDescribeOperation
 							r.summary = "Describes a user"
-							r.operationID = "usersvc.users.describe"
+							r.operationID = "service.users.describe"
 							r.pathPattern = "/users/{userId}"
 							r.args = args
 							r.count = 1
 							return r, true
 						case "PUT":
-							r.name = UsersvcUsersEditOperation
+							r.name = ServiceUsersEditOperation
 							r.summary = "Updates a user"
-							r.operationID = "usersvc.users.edit"
+							r.operationID = "service.users.edit"
 							r.pathPattern = "/users/{userId}"
 							r.args = args
 							r.count = 1
