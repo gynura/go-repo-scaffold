@@ -1,5 +1,7 @@
 package graph
 
+import "fmt"
+
 // Config of the application
 type Config struct {
 	// Libraries configuration
@@ -67,4 +69,14 @@ type PostgresSQLClientConfig struct {
 	MaxOpenConnections *int `valid:"optional"`
 	// MaxConnectionLifetime max connection lifetime for the database/sql handle
 	MaxConnectionLifetime *int `valid:"optional"`
+}
+
+func (c *Config) GetPostgresqlConnectionString() string {
+	if c.Libraries.PersistenceFw.PostgreSQL == nil {
+		return ""
+	}
+	pg := c.Libraries.PersistenceFw.PostgreSQL
+
+	return fmt.Sprintf("host=%s dbname=%s user=%s sslmode=disable", pg.Host, pg.Database, pg.Username)
+
 }

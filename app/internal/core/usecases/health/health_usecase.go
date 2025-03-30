@@ -17,32 +17,48 @@ type UseCase interface {
 
 // DefaultUseCase defines the default implementation of the health.UseCase interface
 type DefaultUseCase struct {
+	queue     Queue
+	storage   Storage
 	logger    *logger.Logger
 	startedAt time.ServiceTime
 }
 
 // ProvideUseCaseOptions defines the options to configure a UseCase implementation
 type ProvideUseCaseOptions struct {
+	Queue   Queue
+	Storage Storage
 }
 
 // ProvideDefaultUseCase provides the default implementation of the UseCase logic
 func ProvideDefaultUseCase(options ProvideUseCaseOptions) (*DefaultUseCase, error) {
+	if options.Queue == nil {
+		return nil, errors.NewInternalError("queue is required")
+	}
+
 	return &DefaultUseCase{
-		logger: logger.NewLogger(),
+		logger:  logger.NewLogger(),
+		queue:   options.Queue,
+		storage: options.Storage,
 	}, nil
 }
 
 var _ UseCase = new(DefaultUseCase)
 
 func (d *DefaultUseCase) Check(_ context.Context) (*CheckOutput, *errors.ServiceError) {
-	return &CheckOutput{
+	output := &CheckOutput{
 		Status:    StatusUp,
 		StartedAt: d.startedAt,
 		Checks: ServiceChecks{
-			Queue:    StatusUp,
-			Database: StatusDown,
+			Queue:    d.queue.GetQueueStatus(),
+			Database: d.storage.GetStorageStatus(),
 		},
-	}, nil
+	}
+
+	if output.Checks.Database == StatusDown || output.Checks.Queue == StatusDown {
+		output.Status = StatusDown
+	}
+
+	return output, nil
 }
 
 func (d *DefaultUseCase) SetStartedAt(_ context.Context) {

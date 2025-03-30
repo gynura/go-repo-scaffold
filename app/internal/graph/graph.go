@@ -60,7 +60,7 @@ func (graph *ServiceGraph) Build() {
 	}
 
 	// Storage layer
-	graph.storageGraph, err = initializeStorage(graph.librariesGraph.persistenceFramework)
+	graph.storageGraph, err = initializeStorage(graph.librariesGraph.persistenceFramework, graph.config.GetPostgresqlConnectionString())
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +114,7 @@ func (graph *ServiceGraph) StartServer(options StartServerOptions) error {
 
 	serviceLogger := logger.NewLogger()
 
-	// Before starting the server we need to set the startAt time for the health use case
+	// Before starting the server we need to set the startAt time for the healthqueue use case
 	graph.useCasesGraph.HealthUseCase.SetStartedAt(ctx)
 
 	go func() {

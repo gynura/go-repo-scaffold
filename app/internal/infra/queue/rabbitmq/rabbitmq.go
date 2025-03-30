@@ -73,3 +73,12 @@ func (r *Publisher) Publish(event events.ServiceEvent) error {
 		},
 	)
 }
+
+func (r *Publisher) IsAlive() bool {
+	// TODO: very dumbed down liveness
+	if r.channel.IsClosed() {
+		return false
+	}
+
+	return true
+}

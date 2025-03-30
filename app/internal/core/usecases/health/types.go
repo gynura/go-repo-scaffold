@@ -9,7 +9,7 @@ const (
 
 type Status string
 
-// CheckOutput contains the health information of the service
+// CheckOutput contains the healthqueue information of the service
 type CheckOutput struct {
 	Status    Status
 	StartedAt time.ServiceTime

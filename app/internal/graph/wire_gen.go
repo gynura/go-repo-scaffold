@@ -12,7 +12,9 @@ import (
 	"strconv"
 	"userservice/internal"
 	"userservice/internal/adapters/input/http"
+	"userservice/internal/adapters/output/queue/healthqueue"
 	"userservice/internal/adapters/output/queue/userqueue"
+	"userservice/internal/adapters/output/storage/postgresql/healthstorage"
 	"userservice/internal/adapters/output/storage/postgresql/userstorage"
 	"userservice/internal/core/usecases/health"
 	"userservice/internal/core/usecases/user"
@@ -88,7 +90,7 @@ func initializeLibraries(config Config) (*librariesGraph, error) {
 
 // Injectors from storage_injector.go:
 
-func initializeStorage(persistenceFramework persistence.Storage) (*storageGraph, error) {
+func initializeStorage(persistenceFramework persistence.Storage, postgresqlConnectionString string) (*storageGraph, error) {
 	storageInfraOptions := userstorageinfra.StorageInfraOptions{
 		GenericStorage: persistenceFramework,
 	}
@@ -103,8 +105,16 @@ func initializeStorage(persistenceFramework persistence.Storage) (*storageGraph,
 	if err != nil {
 		return nil, err
 	}
+	healthstorageStorageAdapterOptions := healthstorage.StorageAdapterOptions{
+		PostgresqlConnectionString: postgresqlConnectionString,
+	}
+	healthstorageStorageAdapter, err := healthstorage.ProvideStorageAdapter(healthstorageStorageAdapterOptions)
+	if err != nil {
+		return nil, err
+	}
 	graphStorageGraph := &storageGraph{
-		userStorage: storageAdapter,
+		userStorage:   storageAdapter,
+		healthStorage: healthstorageStorageAdapter,
 	}
 	return graphStorageGraph, nil
 }
@@ -129,7 +139,18 @@ func initializeUseCases(repositories *storageGraph, infra *infraGraph) (*useCase
 	if err != nil {
 		return nil, err
 	}
-	healthProvideUseCaseOptions := health.ProvideUseCaseOptions{}
+	healthqueueProvideQueueAdapterOptions := healthqueue.ProvideQueueAdapterOptions{
+		Publisher: publisher,
+	}
+	healthqueueQueueAdapter, err := healthqueue.ProvideQueueAdapter(healthqueueProvideQueueAdapterOptions)
+	if err != nil {
+		return nil, err
+	}
+	healthStorage := repositories.healthStorage
+	healthProvideUseCaseOptions := health.ProvideUseCaseOptions{
+		Queue:   healthqueueQueueAdapter,
+		Storage: healthStorage,
+	}
 	healthDefaultUseCase, err := health.ProvideDefaultUseCase(healthProvideUseCaseOptions)
 	if err != nil {
 		return nil, err
@@ -263,10 +284,11 @@ func providePersistenceFwConfig(conn sql.Connection, options persistenceFwConfig
 // storage_injector.go:
 
 type storageGraph struct {
-	userStorage user.Storage
+	userStorage   user.Storage
+	healthStorage health.Storage
 }
 
-var storageSet = wire.NewSet(wire.Struct(new(storageGraph), "*"), userstorageinfra.ProvideStorageInfra, wire.Struct(new(userstorageinfra.StorageInfraOptions), "*"), userstorage.ProvideStorageAdapter, wire.Bind(new(user.Storage), new(*userstorage.StorageAdapter)), wire.Struct(new(userstorage.StorageAdapterOptions), "*"))
+var storageSet = wire.NewSet(wire.Struct(new(storageGraph), "*"), userstorageinfra.ProvideStorageInfra, wire.Struct(new(userstorageinfra.StorageInfraOptions), "*"), userstorage.ProvideStorageAdapter, wire.Bind(new(user.Storage), new(*userstorage.StorageAdapter)), wire.Struct(new(userstorage.StorageAdapterOptions), "*"), healthstorage.ProvideStorageAdapter, wire.Bind(new(health.Storage), new(*healthstorage.StorageAdapter)), wire.Struct(new(healthstorage.StorageAdapterOptions), "*"))
 
 // usecases_injector.go:
 
@@ -275,4 +297,4 @@ type useCasesGraph struct {
 	HealthUseCase health.UseCase
 }
 
-var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"), userqueue.ProvideQueueAdapter, wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)), wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"), health.ProvideDefaultUseCase, wire.Bind(new(health.UseCase), new(*health.DefaultUseCase)), wire.Struct(new(health.ProvideUseCaseOptions), "*"))
+var useCasesSet = wire.NewSet(wire.Struct(new(useCasesGraph), "*"), user.ProvideDefaultUseCase, wire.Bind(new(user.UseCase), new(*user.DefaultUseCase)), wire.Struct(new(user.ProvideUseCaseOptions), "*"), userqueue.ProvideQueueAdapter, wire.Bind(new(user.Queue), new(*userqueue.QueueAdapter)), wire.Struct(new(userqueue.ProvideQueueAdapterOptions), "*"), health.ProvideDefaultUseCase, wire.Bind(new(health.UseCase), new(*health.DefaultUseCase)), wire.Struct(new(health.ProvideUseCaseOptions), "*"), healthqueue.ProvideQueueAdapter, wire.Bind(new(health.Queue), new(*healthqueue.QueueAdapter)), wire.Struct(new(healthqueue.ProvideQueueAdapterOptions), "*"))
