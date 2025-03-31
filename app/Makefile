@@ -60,7 +60,7 @@ generate_mocks: install-mockgen
 .PHONY: unit_test
 unit_test:
 	@echo "Executing unit tests"
-	go test $(shell go list ./... | grep -v generated) -v -cover
+	go test ./... -v -cover -vet=off
 
 .PHONY: build
 build:

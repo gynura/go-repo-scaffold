@@ -2,21 +2,26 @@
 package rabbitmq
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"userservice/internal/core/events"
 	"userservice/internal/infra/queue"
+	"userservice/internal/pkg/commons/logger"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // userServiceExchangeName defines the only exchange in the user microservice domain
 // A consumer must declare the queue and bind it to the exchange to receive messages
+// TODO: make this configurable
 const userServiceExchangeName = "user_service"
 
 type Publisher struct {
+	conn    *amqp.Connection
 	channel *amqp.Channel
+	closeCh chan *amqp.Error
 }
 
 // NewPublisherOptions contain the attributes needed to construct a RabbitMQ connection
@@ -51,9 +56,41 @@ func ProvidePublisher(options NewPublisherOptions) (*Publisher, error) {
 
 	ch, err := conn.Channel()
 	if err != nil {
+		conn.Close()
 		return nil, err
 	}
-	return &Publisher{channel: ch}, nil
+
+	err = ch.ExchangeDeclare(
+		userServiceExchangeName,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		ch.Close()
+		conn.Close()
+		return nil, fmt.Errorf("failed to declare exchange: %w", err)
+	}
+
+	publisher := &Publisher{
+		conn:    conn,
+		channel: ch,
+		closeCh: make(chan *amqp.Error),
+	}
+
+	// We need to listen for uncontrolled channel closure notifications
+	ch.NotifyClose(publisher.closeCh)
+	go func() {
+		err := <-publisher.closeCh
+		if err != nil {
+			logger.NewLogger().Error(context.Background()).Message(err.Error())
+		}
+	}()
+
+	return publisher, nil
 }
 
 func (r *Publisher) Publish(event events.ServiceEvent) error {
@@ -81,4 +118,14 @@ func (r *Publisher) IsAlive() bool {
 	}
 
 	return true
+}
+
+// TODO: gracefully close this when the whole server closes
+func (r *Publisher) Close() {
+	if r.channel != nil {
+		r.channel.Close()
+	}
+	if r.conn != nil {
+		r.conn.Close()
+	}
 }

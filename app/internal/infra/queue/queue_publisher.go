@@ -8,4 +8,6 @@ type Publisher interface {
 	Publish(event events.ServiceEvent) error
 	// IsAlive returns true if the connection is alive or false if it's not
 	IsAlive() bool
+	// Close closes the publisher's connections and channels
+	Close()
 }
