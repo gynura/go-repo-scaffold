@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -20,25 +21,26 @@ type User struct {
 	SpecificData map[string]interface{} `json:"specificData"`
 }
 
-type Event struct {
-	EventType string          `json:"eventType"`
-	Payload   json.RawMessage `json:"payload"`
+// ExpectedMessagePayload represents the actual payload we receive which is just {"id": "user-id"}
+type ExpectedMessagePayload struct {
+	ID string `json:"id"`
 }
 
-// TODO: should refactor this e2e approach, for now its coupled to the local deploy
+// TODO: should refactor this e2e approach, for now its coupled to the local default deploy
 const (
 	userServiceExchangeName = "user_service"
 	rabbitMQURL             = "amqp://guest:guest@localhost:5672/"
 	createUserURL           = "http://localhost:8080/users"
 	queueName               = "e2e_tests_queue"
+	expectedRoutingKey      = "user.created"
 )
 
 func main() {
-	eventChan := make(chan Event, 1)
+	payloadChan := make(chan ExpectedMessagePayload, 1)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	go subscribeToEvents(eventChan, ctx)
+	go subscribeToEvents(payloadChan, ctx)
 
 	user := User{
 		ID: uuid.New().String(),
@@ -58,14 +60,17 @@ func main() {
 	}
 
 	select {
-	case event := <-eventChan:
-		fmt.Println("Received event:", event)
+	case payload := <-payloadChan:
+		fmt.Printf("Received user.created event with payload: %+v\n", payload)
+
 		// Check if event contains the expected user ID
-		if !bytes.Contains(event.Payload, []byte(user.ID)) {
-			fmt.Println("Test failed: Expected user ID not found in event payload")
+		if payload.ID != user.ID {
+			fmt.Printf("Test failed: Expected user ID %s but got %s\n", user.ID, payload.ID)
 			os.Exit(1)
 		}
-		fmt.Println("Test passed: User creation event received successfully")
+
+		fmt.Println("Test passed: User creation event received successfully with correct ID")
+
 	case <-ctx.Done():
 		fmt.Println("Test failed: No event received within timeout")
 		os.Exit(1)
@@ -73,7 +78,7 @@ func main() {
 }
 
 // subscribeToEvents connects to RabbitMQ and listens for events
-func subscribeToEvents(eventChan chan<- Event, ctx context.Context) {
+func subscribeToEvents(payloadChan chan<- ExpectedMessagePayload, ctx context.Context) {
 	conn, err := amqp.Dial(rabbitMQURL)
 	if err != nil {
 		fmt.Println("Error connecting to RabbitMQ:", err)
@@ -94,13 +99,13 @@ func subscribeToEvents(eventChan chan<- Event, ctx context.Context) {
 		return
 	}
 
-	err = ch.QueueBind(q.Name, "#", userServiceExchangeName, false, nil)
+	// Bind only to the user.created routing key
+	err = ch.QueueBind(queueName, expectedRoutingKey, userServiceExchangeName, false, nil)
 	if err != nil {
-		fmt.Println("Error binding RabbitMQ queue:", err)
-		return
+		log.Fatalf("Failed to bind queue: %v", err)
 	}
 
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	retrievedMessages, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
 		fmt.Println("Failed to consume messages:", err)
 		return
@@ -108,21 +113,30 @@ func subscribeToEvents(eventChan chan<- Event, ctx context.Context) {
 
 	for {
 		select {
-		case msg := <-msgs:
-			var event Event
-			if err := json.Unmarshal(msg.Body, &event); err != nil {
-				fmt.Println("Failed to unmarshal event:", err)
-				continue
+		case msg := <-retrievedMessages:
+			fmt.Printf("Received message with routing key: %s\n", msg.RoutingKey)
+			fmt.Printf("Raw message body: %s\n", string(msg.Body))
+
+			// We check if this is the expected event based on the routing key
+			if msg.RoutingKey == expectedRoutingKey {
+				var payload ExpectedMessagePayload
+				if err := json.Unmarshal(msg.Body, &payload); err != nil {
+					fmt.Printf("Failed to unmarshal payload: %v\n", err)
+					continue
+				}
+
+				payloadChan <- payload
+				return // Stop listening after getting the expected event
+			} else {
+				fmt.Printf("Ignoring message with unexpected routing key: %s\n", msg.RoutingKey)
 			}
-			eventChan <- event
-			return
+
 		case <-ctx.Done():
 			return
 		}
 	}
 }
 
-// createUser sends an HTTP request to create a user
 func createUser(user User) error {
 	data, err := json.Marshal(user)
 	if err != nil {

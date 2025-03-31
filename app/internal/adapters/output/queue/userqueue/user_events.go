@@ -1,6 +1,7 @@
 package userqueue
 
 import (
+	"encoding/json"
 	"userservice/internal/core/entities"
 	"userservice/internal/core/events"
 )
@@ -23,6 +24,10 @@ func (event userEvent) EventType() events.EventType {
 	return event.eventType
 }
 
-func (event userEvent) Payload() interface{} {
-	return event.userID
+func (event userEvent) Payload() ([]byte, error) {
+	payload, err := json.Marshal(event.userID)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
 }

@@ -64,7 +64,10 @@ unit_test:
 
 .PHONY: build
 build:
-	@echo "🔧 Building binary"
+	@echo "Building binary"
 	go build -o bin/$(APP_NAME) ./cmd
 
-
+.PHONY: e2e
+e2e:
+	@echo "Running e2e test"
+	go run internal/test/e2e/e2e_consumer.go

@@ -8,7 +8,7 @@ type ServiceEvent interface {
 	// EventType returns the catalogue category of the event
 	EventType() EventType
 	// Payload returns the event's data
-	Payload() interface{}
+	Payload() ([]byte, error)
 }
 
 // EventType wraps string to enforce the definition of a catalogue of events and avoid passing random strings

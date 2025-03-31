@@ -3,7 +3,6 @@ package rabbitmq
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"userservice/internal/core/events"
@@ -62,7 +61,7 @@ func ProvidePublisher(options NewPublisherOptions) (*Publisher, error) {
 
 	err = ch.ExchangeDeclare(
 		userServiceExchangeName,
-		"direct",
+		"topic",
 		true,
 		false,
 		false,
@@ -94,7 +93,7 @@ func ProvidePublisher(options NewPublisherOptions) (*Publisher, error) {
 }
 
 func (r *Publisher) Publish(event events.ServiceEvent) error {
-	body, err := json.Marshal(event.Payload())
+	body, err := event.Payload()
 	if err != nil {
 		return err
 	}
