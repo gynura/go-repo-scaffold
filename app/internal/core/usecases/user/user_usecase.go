@@ -227,16 +227,6 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 		"userId": input.ID,
 	})
 
-	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
-		return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
-	}
-
-	if useCase.emailAlreadyExists(ctx, input.Email) {
-		useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
-		return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
-	}
-
 	// When editing a resource we must first fetch the state on the storage of that resource prior to the editing (source of truth)
 	userToBeUpdated, getErr := useCase.storage.Get(ctx, input.ResourceID)
 	if getErr != nil {
@@ -246,6 +236,20 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 				WithMessage("user %s not found", input.ResourceID.ID)
 		}
 		return nil, errors.NewInternalError("failed to get user").FromError(getErr)
+	}
+
+	// A user can still use their last email and last nickname when updating their info
+	if input.Email != userToBeUpdated.Email {
+		if useCase.emailAlreadyExists(ctx, input.Email) {
+			useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
+			return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
+		}
+	}
+	if input.Nickname != userToBeUpdated.Nickname {
+		if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
+			useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
+			return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
+		}
 	}
 
 	// Then we will edit that user with the editable fields

@@ -26,7 +26,7 @@ type ExpectedMessagePayload struct {
 	ID string `json:"id"`
 }
 
-// EventType defines the different types of user events, decoupled from the ones defined inside the service code
+// EventType defines the different types of user events
 type EventType string
 
 const (
@@ -62,10 +62,8 @@ func createUserAndVerifyEvent() User {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
-	// Start listening for the user.created event
 	go subscribeToEvents(payloadChan, ctx, EventUserCreated)
 
-	// Create a new user
 	user := User{
 		ID: uuid.New().String(),
 		SpecificData: map[string]interface{}{
@@ -77,6 +75,9 @@ func createUserAndVerifyEvent() User {
 			"country":   "LeafVillage",
 		},
 	}
+
+	// Small delay to ensure subscriber is ready
+	time.Sleep(500 * time.Millisecond)
 
 	if err := createUser(user); err != nil {
 		fmt.Println("Failed to create user:", err)
@@ -125,6 +126,9 @@ func editUserAndVerifyEvent(user User) {
 		},
 	}
 
+	// Small delay to ensure subscriber is ready
+	time.Sleep(500 * time.Millisecond)
+
 	if err := editUser(updatedUser); err != nil {
 		fmt.Println("Failed to edit user:", err)
 		os.Exit(1)
@@ -156,6 +160,9 @@ func deleteUserAndVerifyEvent(user User) {
 
 	// Start listening for the user.removed event
 	go subscribeToEvents(payloadChan, ctx, EventUserRemoved)
+
+	// Small delay to ensure subscriber is ready
+	time.Sleep(500 * time.Millisecond)
 
 	if err := deleteUser(user.ID); err != nil {
 		fmt.Println("Failed to delete user:", err)
