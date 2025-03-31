@@ -169,6 +169,14 @@ To install the service follow this steps:
    make e2e
    ```
 
+### Docker image
+
+You can build the service's docker image from ``/app``:
+
+   ```bash
+   make docker_build
+   ```
+
 ### Manual testing
 
 Inside ``test/examples`` there's a postman collection that covers all the API endpoints.
