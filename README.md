@@ -1,6 +1,6 @@
 # usersvc
 
-Small microservice that manages Users written in Go (v1.24.1). 
+Small microservice that manages Users written in Go (v1.24.1).
 
 ## Contents
 - [Project folders architecture](#project-folders-architecture)
@@ -210,7 +210,7 @@ Ideally I think that only libraries, entities and use cases need unit testing si
 integration tests. 
 
 If we talk about e2e testing, then I feel like the best approach is to write code separated from the app being tested, I want to avoid any coupling in order
-to better simulate a real usage.
+to better simulate a real usage. The e2e I wrote for this project are just an http client of the API with a RabbitMQ consumer for the notify messages. (Lot of room to improve them obv!)
 
 ### How did you manage Dependency Injection? 
 
@@ -225,7 +225,6 @@ There are a lot of things that I was not able to do as well as things I left "in
 
 Meanwhile, here's a list that I wrote of possible improvements while writing this service: 
 
-* Improve the e2e testing approach, right now it's just an http client of the API with a RabbitMQ consumer for the notify messages.
 * Create integration tests.
 * Make the users' password encryption pluggable through an interface making the service more flexible to changes to the encryption approach.
 * Extend the binary functionality to be able to migrate the db itself since right now the database migration is tied to a script. 
