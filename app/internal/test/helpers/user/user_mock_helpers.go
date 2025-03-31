@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/golang/mock/gomock"
 	"testing"
+	"userservice/internal/core/usecases/user"
 	"userservice/internal/test/generatedmocks"
 )
 
@@ -24,4 +25,11 @@ func NewUserMocks(t *testing.T) *UserMocks {
 	}
 
 	return &mocks
+}
+
+func ProvideTestingUseCase(mocks UserMocks) (user.UseCase, error) {
+	return user.ProvideDefaultUseCase(user.ProvideUseCaseOptions{
+		Storage: mocks.MockStorage,
+		Queue:   mocks.MockQueue,
+	})
 }
