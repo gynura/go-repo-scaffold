@@ -210,14 +210,33 @@ Ideally I think that only libraries, entities and use cases need unit testing si
 integration tests. 
 
 If we talk about e2e testing, then I feel like the best approach is to write code separated from the app being tested, I want to avoid any coupling in order
-to better simulate a real usage. 
+to better simulate a real usage.
 
 ### How did you manage Dependency Injection? 
 
-Through Wire! That DI framework is like _magic_, love it! You can take a look at it in **/app/internal/graph** folder. 
+Through Wire! That DI framework is like _magic_, love it! You can take a look at it in **/app/internal/graph** folder.
 
+
+**TL;DR:** The core principle of my design approach is to stay as decoupled as possible
 
 ## Improvements
+
+There are a lot of things that I was not able to do as well as things I left "incomplete", feel free to take a look at the TODOs I left! (I promise they are not as many)
+
+Meanwhile, here's a list that I wrote of possible improvements while writing this service: 
+
+* Improve the e2e testing approach, right now it's just an http client of the API with a RabbitMQ consumer for the notify messages.
+* Create integration tests.
+* Make the users' password encryption pluggable through an interface making the service more flexible to changes to the encryption approach.
+* Extend the binary functionality to be able to migrate the db itself since right now the database migration is tied to a script. 
+* Right now the whole dependency injection graph is coupled to the RabbitMQ and Postgres implementations of the adapters/infra even though the app code is decoupled from them, a great improvement would be to decouple the dependency injection too
+* Stacktrace for the custom errors' library.
+* Extend the health check in the kubernetes way, separating liveness and readiness.
+* Add an error translator in the RabbitMQ infra layer.
+* Configurable min log level.
+* Write more unit tests, the whole health use case was left without tests.
+
+Obviously way more things left to do, but I hope this gives a nice overview, thanks! 
 
 
 
