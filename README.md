@@ -22,7 +22,7 @@ The service is written following hexagonal architecture:
 │   │   └── flags                                    # Command flags definitions
 │   ├── docs                                         # Service documentation
 │   │   ├── config                                   # Configuration to lint the docs
-│   │   └── open-api-spec                            # Open API Spec definition of the service's REST API
+│   │   └── open-api-spec               # Open API Spec definition of the service's REST API
 │   │       ├── components
 │   │       │   ├── parameters
 │   │       │   │   ├── path
@@ -47,7 +47,7 @@ The service is written following hexagonal architecture:
 │       │           └── postgresql
 │       │               ├── healthstorage
 │       │               └── userstorage
-│       ├── config                                    # Config files for the system, in this case the db queries and migrations
+│       ├── config                         # Config files for the system, in this case the db queries and migrations
 │       │   ├── mappers
 │       │   │   └── postgresql
 │       │   └── migrations
@@ -85,7 +85,7 @@ The service is written following hexagonal architecture:
 └── test                                              # Testing folder with entry point to locally start the app
     ├── deploy
     │       └── postgresql      
-    └── examples                                      # Example config file and postman collection
+    └── examples                              # Example config file and postman collection
 
 ```
 
@@ -165,7 +165,7 @@ To install the service follow this steps:
    make e2e
    ```
 
-### Manually testing
+### Manual testing
 
 Inside ``test/examples`` there's a postman collection that covers all the API endpoints.
 
@@ -199,8 +199,10 @@ Who doesn't love querying logs through traceable attributes? Tho I agree they ar
 
 ### Why did you rely on code generation? Are you really that lazy?
 
-Well relying on code generators is something that I personally enjoy since it saves me from writing boilerplate code and test it. 
-2x1, I can develop way faster and I save myself from that oblivious task (HTTP Handlers I am looking at you!)
+Well relying on code generators is something that I personally enjoy since it saves me from writing boilerplate code and test it.
+
+An example of how convenient they are is that I was able to do changes in the API Spec during development (even if you do API first, you know sometimes you need to make adjustments),
+and just by running a command I had the http infra aligned with the new changes. Sweet!
 
 ### What is your testing approach? 
 
