@@ -69,8 +69,8 @@ type DeleteUserOutput struct {
 
 // ListUsersInput represents the input parameters to retrieve a paginated list of Users.
 type ListUsersInput struct {
-	PageLimit      int    `valid:"optional,natural"`
-	PageOffset     int    `valid:"optional,natural"`
+	PageLimit      int    `valid:"optional"`
+	PageOffset     int    `valid:"optional"`
 	OrderBy        string `valid:"optional"`
 	OrderDirection string `valid:"optional"`
 	Country        string `valid:"optional"`

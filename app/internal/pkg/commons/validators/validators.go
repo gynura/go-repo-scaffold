@@ -2,6 +2,5 @@
 package validators
 
 func SetValidators() {
-	setNaturalValidator()
 	setEmailValidator()
 }
