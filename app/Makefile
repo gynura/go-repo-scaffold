@@ -57,8 +57,8 @@ generate_mocks: install-mockgen
 	@go run github.com/golang/mock/mockgen -source=internal/core/usecases/user/user_queue.go -destination=${GENERATED_MOCKS_OUTPUT}/user_queue_mock.go -package=generatedmocks
 	@echo "✅ Mocks generated successfully inside ${GENERATED_MOCKS_OUTPUT}"
 
-.PHONY: unit_test
-unit_test:
+.PHONY: unit_tests
+unit_tests:
 	@echo "Executing unit tests"
 	go test ./... -v -cover -vet=off
 

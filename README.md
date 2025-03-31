@@ -4,6 +4,7 @@ Small microservice that manages Users written in Go (v1.24.1).
 
 ## Contents
 - [Project folders architecture](#project-folders-architecture)
+- [API Spec](#api-spec)
 - [How to run the service](#how-to-run-the-service)
 - [How to test](#how-to-test)
 - [Design choices](#design-choices)
@@ -34,8 +35,8 @@ The service is written following hexagonal architecture:
 │   │       └── paths
 │   │           ├── health
 │   │           └── user
-│   └── internal                                    # Private service code 
-│       ├── adapters                                # Adapter layer, here we have both input and output adapters
+│   └── internal                       # Private service code 
+│       ├── adapters                   # Adapter layer, here we have both input and output adapters
 │       │   ├── input
 │       │   │   └── http
 │       │   └── output
@@ -77,14 +78,25 @@ The service is written following hexagonal architecture:
 │       │       └── sql
 │       │           ├── init
 │       │           └── postgres
-│       └── test                                      # Testing related mocks/helpers
+│       └── test                                  # Testing related mocks/helpers
+│           └── e2e                                # Code of the consumer client for e2e testing
+│           ├── helpers                           # Unit testing helpers that use mocks to easy testing
 │           └── generatedmocks
 └── test                                              # Testing folder with entry point to locally start the app
     ├── deploy
-    │   └── postgresql
-    └── examples
+    │       └── postgresql      
+    └── examples                                      # Example config file and postman collection
 
 ```
+
+## API Spec
+
+You can serve the API Spec from ``/app/docs`` by executing:
+
+```bash
+make serve_api
+```
+
 
 ## How to run the service
 
@@ -139,14 +151,54 @@ To install the service follow this steps:
 
 ## How to test
 
-You can serve the API Spec from ``/app/docs`` running:
-```bash
-make serve_api
-```
+1. Navigate to the ``app`` directory. 
+
+2. Execute the unit test with: 
+
+   ```bash
+   make unit_tests
+   ```
+   
+3. To execute e2e tests while your service is running execute: 
+
+   ```bash
+   make e2e
+   ```
+
+### Manually testing
+
 Inside ``test/examples`` there's a postman collection that covers all the API endpoints.
 
 
 ## Design choices
 
+I will structure this part with questions that I think one might ask themselves when looking at my code: 
+
+### Why hexagonal architecture? This is just a small microservice!
+
+Well you are right but hexagonal architecture once you get the grasp of it is not that slow to bootstrap and helps keep the code detached from implementation details. 
+The main benefits that I love as a dev are:
+
+1. **Testability**: Very easy to test, plug and play (literally!) which also highly impacts its maintenance. 
+2. **Adaptability**: Right now I only support Postgres and RabbitMQ but just by writing new adapters and infra and extending a bit the static configuration I could support
+any database/broker I needed. This can help keep the microservice fresh if new technologies drop!
+3. **Separation of concerns**: Don't you hate when a piece of code does 29309302930 things? Well I do!
+
+### Postgres can generate UUIDs for you! Didn't you read the docs?
+
+I did! But don't you think that coupling business logic to your database technology can damage the future of your app? All business logic in my opinion has to be written inside the 
+defined use cases! What if you use another database that doesn't generate UUIDs?
+
+### Why didn't you use an ORM as your database framework?
+
+I just like to be in control of my mappers :P (Tho nothing bad with ORM, in fact way easier to maintain!)
+
+### Why JSON logging? Are you a robot? 
+
+Who doesn't love querying logs through traceable attributes? Tho I agree they are uglier to look at, it just feels worse to debug without them am I right?
+
+
+
 
 ## Improvements
+
