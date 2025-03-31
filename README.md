@@ -180,7 +180,7 @@ Well you are right but hexagonal architecture once you get the grasp of it is no
 The main benefits that I love as a dev are:
 
 1. **Testability**: Very easy to test, plug and play (literally!) which also highly impacts its maintenance. 
-2. **Adaptability**: Right now I only support Postgres and RabbitMQ but just by writing new adapters and infra and extending a bit the static configuration I could support
+2. **Adaptability and future of the app**: Right now I only support Postgres and RabbitMQ but just by writing new adapters and infra and extending a bit the static configuration I could support
 any database/broker I needed. This can help keep the microservice fresh if new technologies drop!
 3. **Separation of concerns**: Don't you hate when a piece of code does 29309302930 things? Well I do!
 
@@ -197,8 +197,25 @@ I just like to be in control of my mappers :P (Tho nothing bad with ORM, in fact
 
 Who doesn't love querying logs through traceable attributes? Tho I agree they are uglier to look at, it just feels worse to debug without them am I right?
 
+### Why did you rely on code generation? Are you really that lazy?
 
+Well relying on code generators is something that I personally enjoy since it saves me from writing boilerplate code and test it. 
+2x1, I can develop way faster and I save myself from that oblivious task (HTTP Handlers I am looking at you!)
+
+### What is your testing approach? 
+
+Ideally I think that only libraries, entities and use cases need unit testing since they are more logic oriented. Adapters and infra are truly tested with 
+integration tests. 
+
+If we talk about e2e testing, then I feel like the best approach is to write code separated from the app being tested, I want to avoid any coupling in order
+to better simulate a real usage. 
+
+### How did you manage Dependency Injection? 
+
+Through Wire! That DI framework is like _magic_, love it! You can take a look at it in **/app/internal/graph** folder. 
 
 
 ## Improvements
+
+
 
