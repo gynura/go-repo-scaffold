@@ -7,6 +7,9 @@ API_SPEC_ROOT ?= "${GIT_ROOT_DIR}/app/docs/open-api-spec"
 GENERATED_HTTP_INFRA_OUTPUT ?= "$(GIT_ROOT_DIR)/app/internal/infra/http/generatedhttpinfra"
 GENERATED_MOCKS_OUTPUT ?= "internal/test/generatedmocks"
 APP_NAME ?= usersvc
+VERSION ?= latest
+DOCKERFILE_PATH := $(GIT_ROOT_DIR)/Dockerfile
+DOCKER_IMAGE := $(APP_NAME):$(VERSION)
 
 .PHONY: default
 default: generate_http_infra
@@ -71,3 +74,9 @@ build:
 e2e:
 	@echo "Running e2e test"
 	go run internal/test/e2e/e2e_consumer.go
+
+.PHONY: docker_build
+docker_build:
+	@echo "Building Docker image $(DOCKER_IMAGE)"
+	docker build -t $(DOCKER_IMAGE) -f $(DOCKERFILE_PATH) ..
+

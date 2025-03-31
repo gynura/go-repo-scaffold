@@ -1,10 +1,9 @@
-
 .PHONY: default
 default: provision start
 
 .PHONY: provision
 provision:
-	docker-compose -f postgresql/docker-compose.yaml up -d
+	docker compose -f postgresql/docker-compose.yaml up -d
 
 .PHONY: start
 start:
@@ -12,4 +11,4 @@ start:
 
 .PHONY: deprovision
 deprovision:
-	docker-compose -f postgresql/docker-compose.yaml down
+	docker compose -f postgresql/docker-compose.yaml down

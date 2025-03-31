@@ -91,12 +91,16 @@ The service is written following hexagonal architecture:
 
 ## API Spec
 
+### Requirements
+
+- [swagger-cli](https://www.npmjs.com/package/swagger-cli)
+- [swagger-ui-watcher](https://www.npmjs.com/package/swagger-ui-watcher)
+
 You can serve the API Spec from ``/app/docs`` by executing:
 
 ```bash
 make serve_api
 ```
-
 
 ## How to run the service
 
@@ -142,7 +146,7 @@ To install the service follow this steps:
    cd bin  
    ```
    
-4. You can execute the binary from there pointing to the test configuration with: 
+4. You can execute the binary from there pointing to the test configuration(``test/examples/service-config.yaml``) with: 
 
    ```bash
    ./usersvc
