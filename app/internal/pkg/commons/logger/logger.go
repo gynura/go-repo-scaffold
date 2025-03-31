@@ -105,3 +105,8 @@ func (l *LoggerEntry) Attributes(message string, attrs map[string]any) {
 func (l *LoggerEntry) Message(format string, args ...interface{}) {
 	l.logger.Log(l.context, l.level, fmt.Sprintf(format, args...))
 }
+
+// NativeErr logs a native go error at the previously indicated log level
+func (l *LoggerEntry) NativeErr(nativeErr error) {
+	l.logger.Log(l.context, l.level, nativeErr.Error())
+}

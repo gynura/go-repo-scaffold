@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"userservice/internal/core/entities"
 	"userservice/internal/pkg/commons/logger"
 	"userservice/internal/pkg/commons/time"
@@ -66,7 +65,7 @@ var _ UseCase = new(DefaultUseCase)
 func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserInput) (*CreateUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
-		useCase.logger.Debug(ctx).Message(err.Error())
+		useCase.logger.Debug(ctx).NativeErr(err)
 		return nil, errors.NewInvalidArgumentError("invalid input to create user").FromError(err).
 			WithMessage("Invalid input to create user. Please review your input fields and try again.")
 	}
@@ -77,14 +76,14 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 
 	// Nicknames are unique alongside IDs and Emails, in order to avoid coupling this check to the plugged db, the business logic needs to implement this checks
 	if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-		useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
+		useCase.logger.Debug(ctx).Message(nicknameAlreadyExistsMessage, input.Nickname)
 		return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
 	}
 
 	// Emails are also unique in our model so before creating a user we need to check if there's one
 	// This way we can differentiate between an invalid argument and an already exists error
 	if useCase.emailAlreadyExists(ctx, input.Email) {
-		useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
+		useCase.logger.Debug(ctx).Message(emailAlreadyExistsMessage, input.Email)
 		return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
 	}
 
@@ -138,7 +137,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 	queueErr := useCase.queue.NotifyCreatedUser(ctx, storedUser.ResourceID)
 	if queueErr != nil {
 		useCase.logger.Error(ctx).UserServiceError(queueErr, user.ID)
-		return nil, errors.NewInternalError("error notifying created user with id: ", user.ID).FromError(queueErr)
+		return nil, errors.NewInternalError("error notifying created user with id: %s", user.ID).FromError(queueErr)
 	}
 
 	return &CreateUserOutput{
@@ -149,7 +148,7 @@ func (useCase DefaultUseCase) CreateUser(ctx context.Context, input CreateUserIn
 func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInput) (*ListUsersOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
-		useCase.logger.Debug(ctx).Message(err.Error())
+		useCase.logger.Debug(ctx).NativeErr(err)
 		return nil, errors.NewInvalidArgumentError("invalid input to list users").FromError(err).
 			WithMessage("Invalid input to list users. Please review your input fields and try again.")
 	}
@@ -195,7 +194,7 @@ func (useCase DefaultUseCase) ListUsers(ctx context.Context, input ListUsersInpu
 func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
-		useCase.logger.Debug(ctx).Message(err.Error())
+		useCase.logger.Debug(ctx).NativeErr(err)
 		return nil, errors.NewInvalidArgumentError("invalid input to describe user").FromError(err).
 			WithMessage("Invalid input to describe user. Please review your input fields and try again.")
 	}
@@ -218,7 +217,7 @@ func (useCase DefaultUseCase) GetUser(ctx context.Context, input GetUserInput) (
 func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput) (*EditUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
-		useCase.logger.Debug(ctx).Message(err.Error())
+		useCase.logger.Debug(ctx).NativeErr(err)
 		return nil, errors.NewInvalidArgumentError("invalid input to edit user").FromError(err).
 			WithMessage("Invalid input to edit user. Please review your input fields and try again.")
 	}
@@ -241,13 +240,13 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 	// A user can still use their last email and last nickname when updating their info
 	if input.Email != userToBeUpdated.Email {
 		if useCase.emailAlreadyExists(ctx, input.Email) {
-			useCase.logger.Debug(ctx).Message(fmt.Sprintf(emailAlreadyExistsMessage, input.Email))
+			useCase.logger.Debug(ctx).Message(emailAlreadyExistsMessage, input.Email)
 			return nil, errors.NewInvalidArgumentError(emailAlreadyExistsMessage, input.Email).WithMessage(emailAlreadyExistsMessage, input.Email)
 		}
 	}
 	if input.Nickname != userToBeUpdated.Nickname {
 		if useCase.nicknameAlreadyExists(ctx, input.Nickname) {
-			useCase.logger.Debug(ctx).Message(fmt.Sprintf(nicknameAlreadyExistsMessage, input.Nickname))
+			useCase.logger.Debug(ctx).Message(nicknameAlreadyExistsMessage, input.Nickname)
 			return nil, errors.NewInvalidArgumentError(nicknameAlreadyExistsMessage, input.Nickname).WithMessage(nicknameAlreadyExistsMessage, input.Nickname)
 		}
 	}
@@ -285,7 +284,7 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 	queueErr := useCase.queue.NotifyEditUser(ctx, storedUser.ResourceID)
 	if queueErr != nil {
 		useCase.logger.Error(ctx).UserServiceError(queueErr, storedUser.ID)
-		return nil, errors.NewInternalError("error notifying edited user with id: ", storedUser.ID).FromError(queueErr)
+		return nil, errors.NewInternalError("error notifying edited user with id: %s", storedUser.ID).FromError(queueErr)
 	}
 
 	return &EditUserOutput{
@@ -297,7 +296,7 @@ func (useCase DefaultUseCase) EditUser(ctx context.Context, input EditUserInput)
 func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserInput) (*DeleteUserOutput, *errors.ServiceError) {
 	_, err := govalidator.ValidateStruct(input)
 	if err != nil {
-		useCase.logger.Debug(ctx).Message(err.Error())
+		useCase.logger.Debug(ctx).NativeErr(err)
 		return nil, errors.NewInvalidArgumentError("invalid input to delete user").FromError(err).
 			WithMessage("Invalid input to delete user. Please review your input fields and try again.")
 	}
@@ -323,7 +322,7 @@ func (useCase DefaultUseCase) DeleteUser(ctx context.Context, input DeleteUserIn
 	queueErr := useCase.queue.NotifyRemoveUser(ctx, removedUser.ResourceID)
 	if queueErr != nil {
 		useCase.logger.Error(ctx).UserServiceError(queueErr, removedUser.ID)
-		return nil, errors.NewInternalError("error notifying removed user with id: ", removedUser.ID).FromError(queueErr)
+		return nil, errors.NewInternalError("error notifying removed user with id: %s", removedUser.ID).FromError(queueErr)
 	}
 
 	return &DeleteUserOutput{
